@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Core dark theme ─────────────────────────────────── */
+  --color-dl-black:        #0A0A0A;
+  --color-dl-surface:      #111111;
+  --color-dl-elevated:     #1A1A1A;
+  --color-dl-border:       #262626;
+  --color-dl-off-white:    #F8F8F8;
+
+  /* ── Orange — Deconstruction identity ────────────────── */
+  --color-dl-orange:       #F97316;
+  --color-dl-orange-light: #FB923C;
+  --color-dl-orange-dark:  #EA580C;
+
+  /* ── Supporting palette ──────────────────────────────── */
+  --color-dl-green:        #22C55E;
+  --color-dl-red:          #EF4444;
+  --color-dl-yellow:       #FFE500;
+  --color-dl-blue:         #60A5FA;
+
+  /* ── Text ────────────────────────────────────────────── */
+  --color-dl-text:         #F9FAFB;
+  --color-dl-muted:        #6B7280;
+
+  /* ── Font ────────────────────────────────────────────── */
+  --font-sans: var(--font-inter), "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-dl-black);
+  color: var(--color-dl-text);
+}

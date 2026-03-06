@@ -1,0 +1,48 @@
+{
+  "name": "deconstruction-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deconstruction Lab (Decon Lab) — AI-powered R&D platform for reverse engineering residential building assemblies. Analyzes material separation techniques for dried adhesives, polyurethane foams, composite fasteners, and layered building envelopes. Integrates computer vision and LLM reasoning to generate deconstruction sequences, material recovery plans, and reuse viability scores. The science of taking buildings apart — so the next one costs less to build.",
+  "keywords": [
+    "deconstruction",
+    "reverse-engineering",
+    "material-recovery",
+    "building-science",
+    "adhesive-separation",
+    "design-for-disassembly",
+    "AI-R&D",
+    "urban-mining",
+    "circular-construction",
+    "ML-Systems"
+  ],
+  "author": {
+    "name": "ML Systems LLC",
+    "url": "https://mlsystemsri.com"
+  },
+  "scripts": {
+    "dev": "next dev --port 3003",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "sync": "bash sync-to-monorepo.sh"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "next": "15.5.12",
+    "openai": "^6.25.0",
+    "postgres": "^3.4.5",
+    "drizzle-orm": "^0.36.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^20.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.3"
+  }
+}

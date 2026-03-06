@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/analysis/route.ts": { "maxDuration": 120 },
+    "src/app/api/analysis/identify/route.ts": { "maxDuration": 60 },
+    "src/app/api/analysis/sequence/route.ts": { "maxDuration": 120 },
+    "src/app/api/stripe/checkout/route.ts": { "maxDuration": 10 },
+    "src/app/api/stripe/webhook/route.ts": { "maxDuration": 10 },
+    "src/app/api/stripe/portal/route.ts": { "maxDuration": 10 }
+  }
+}
