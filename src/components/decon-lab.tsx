@@ -251,6 +251,61 @@ export function DeconLab() {
             )}
           </div>
         </div>
+        {/* Technology & Licensing */}
+        <div className="mt-16 rounded-xl border border-dl-orange/15 bg-dl-surface p-8">
+          <div className="flex items-center gap-2 mb-6">
+            <p className="text-dl-orange text-xs font-bold tracking-[0.15em] uppercase">Technology</p>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-dl-orange border border-dl-orange/30 rounded-full px-1.5 py-0.5">Patents Pending</span>
+          </div>
+          <h2 className="text-xl font-bold text-dl-text mb-3">
+            From R&amp;D to Revenue
+          </h2>
+          <p className="text-dl-muted text-sm leading-relaxed mb-8 max-w-3xl">
+            Decon Lab isn&apos;t just a tool — it&apos;s the research layer behind two licensable technology platforms.
+            Every analysis trains the system. Every recovery sequence refines the data. The intelligence compounds.
+          </p>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            {/* Humanoid Ontology */}
+            <div className="rounded-lg border border-dl-border bg-dl-elevated p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#22C55E]/15 text-[#22C55E] text-sm">&#x1f9ec;</span>
+                <div>
+                  <p className="text-sm font-semibold text-dl-text">Humanoid Ontology</p>
+                  <p className="text-[10px] text-dl-muted uppercase tracking-wider">Construction Sequence Data</p>
+                </div>
+              </div>
+              <p className="text-xs text-dl-muted leading-relaxed mb-3">
+                81 task codes. 1,480 executions. 32 atomic robot actions. The only construction robotics dataset
+                built from real field work — not simulated. Licensed via the Data API to robotics companies
+                building humanoid and autonomous construction systems.
+              </p>
+              <a href="https://api.mlsystemsri.com" target="_blank" rel="noopener noreferrer"
+                className="text-[11px] font-semibold text-[#22C55E] hover:text-[#22C55E]/80 transition-colors">
+                Data API &rarr;
+              </a>
+            </div>
+
+            {/* Automated Concrete Breaker */}
+            <div className="rounded-lg border border-dl-border bg-dl-elevated p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-dl-orange/15 text-dl-orange text-sm">&#x2692;</span>
+                <div>
+                  <p className="text-sm font-semibold text-dl-text">Track Breaker</p>
+                  <p className="text-[10px] text-dl-muted uppercase tracking-wider">Automated Concrete Separation</p>
+                </div>
+              </div>
+              <p className="text-xs text-dl-muted leading-relaxed mb-3">
+                A tracked robotic platform for autonomous concrete breaking and material separation.
+                Eliminates manual demolition labor for foundation recovery. Designed for the 80–90%
+                recovery target where conventional methods fail at the foundation layer.
+              </p>
+              <span className="text-[11px] font-semibold text-dl-orange/60">
+                In Development
+              </span>
+            </div>
+          </div>
+        </div>
       </main>
       {/* Ecosystem Footer */}
       <footer className="border-t border-dl-border py-8 px-6">
