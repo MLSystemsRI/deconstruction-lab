@@ -255,7 +255,7 @@ export function DeconLab() {
         <div className="mt-16 rounded-xl border border-dl-orange/15 bg-dl-surface p-8">
           <div className="flex items-center gap-2 mb-6">
             <p className="text-dl-orange text-xs font-bold tracking-[0.15em] uppercase">Technology</p>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-dl-orange border border-dl-orange/30 rounded-full px-1.5 py-0.5">Patents Pending</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-dl-orange border border-dl-orange/30 rounded-full px-1.5 py-0.5">Coming Soon</span>
           </div>
           <h2 className="text-xl font-bold text-dl-text mb-3">
             From R&amp;D to Revenue
