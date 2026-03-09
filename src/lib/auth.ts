@@ -24,10 +24,9 @@ export async function getUser(): Promise<AuthUser | null> {
   if (AUTH_MODE === "demo") return DEMO_USER;
 
   try {
-    const { auth } = await import(
-      /* webpackIgnore: true */ "@clerk/nextjs/server"
-    );
-    const { userId } = await auth();
+    // @ts-expect-error — Clerk types only available when @clerk/nextjs is installed (production mode)
+    const clerkModule: { auth: () => Promise<{ userId: string | null }> } = await import(/* webpackIgnore: true */ "@clerk/nextjs/server");
+    const { userId } = await clerkModule.auth();
     if (!userId) return null;
 
     const { db } = await import("@/lib/db");
