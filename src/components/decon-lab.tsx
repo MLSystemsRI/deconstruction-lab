@@ -39,7 +39,7 @@ export function DeconLab() {
   }
 
   return (
-    <div className="min-h-screen bg-dl-black">
+    <div className="min-h-screen bg-dl-black flex flex-col">
       {/* Header */}
       <header className="border-b border-dl-border px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
@@ -67,6 +67,10 @@ export function DeconLab() {
                 Reverse Engineering Building Assemblies
               </p>
             </div>
+            <span className="hidden sm:block text-dl-muted/20 ml-1">|</span>
+            <a href="https://mlsystemsri.com" target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[11px] text-dl-muted/40 hover:text-dl-orange transition-colors ml-1">
+              ML Systems ↗
+            </a>
           </div>
           <span className="rounded-full bg-dl-orange/10 px-3 py-1 text-xs font-medium text-dl-orange">
             Decon Lab
@@ -75,7 +79,7 @@ export function DeconLab() {
       </header>
 
       {/* Main */}
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10 flex-1">
         {/* Intro */}
         <div className="mb-10 rounded-xl border border-dl-orange/20 bg-dl-surface p-8">
           <h2 className="mb-3 text-2xl font-bold text-dl-orange">
@@ -248,6 +252,18 @@ export function DeconLab() {
           </div>
         </div>
       </main>
+      {/* Ecosystem Footer */}
+      <footer className="border-t border-dl-border py-8 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-dl-muted/40 text-xs">Decon Lab — a product of ML Systems LLC</p>
+          <div className="flex flex-wrap items-center gap-4 text-xs">
+            <a href="https://mlsystemsri.com" target="_blank" rel="noopener noreferrer" className="text-dl-muted/50 hover:text-[#22C55E] transition-colors">ML Systems ↗</a>
+            <a href="https://design.mlsystemsri.com" target="_blank" rel="noopener noreferrer" className="text-dl-muted/50 hover:text-[#60A5FA] transition-colors">Design Studio ↗</a>
+            <a href="https://mlsystemsri.store" target="_blank" rel="noopener noreferrer" className="text-dl-muted/50 hover:text-[#14B8A6] transition-colors">Builder&apos;s Open House ↗</a>
+            <a href="https://mlsystemsri.com/the-process" target="_blank" rel="noopener noreferrer" className="text-dl-orange/60 hover:text-dl-orange font-semibold transition-colors">The Process →</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

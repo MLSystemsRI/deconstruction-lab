@@ -7,14 +7,20 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: "Deconstruction Lab | ML Systems",
   description:
-    "AI-powered R&D platform for reverse engineering residential building assemblies. " +
-    "Analyze material separation techniques for dried adhesives, polyurethane foams, " +
-    "composite fasteners, and layered building envelopes. The science of taking " +
-    "buildings apart — so the next one costs less to build.",
+    "There is no secondary lumber market — yet. 80–90% of building materials are recoverable. " +
+    "51% can be resold. Decon Lab is the AI-powered R&D platform making people aware of the " +
+    "resale value locked inside every standing structure — before building the marketplace " +
+    "to capture it. Reverse engineering residential building assemblies, from dried adhesives " +
+    "to composite fasteners. The science of taking buildings apart — so the next one costs less to build.",
   keywords: [
+    "lucent lens",
+    "secondary lumber market",
+    "material recovery 80-90 percent",
+    "51 percent resale value",
+    "human-first deconstruction",
+    "local community",
     "deconstruction",
     "reverse engineering",
-    "material recovery",
     "building science",
     "adhesive separation",
     "design for disassembly",
@@ -23,11 +29,12 @@ export const metadata: Metadata = {
     "circular construction",
   ],
   openGraph: {
-    title: "Decon Lab — Reverse Engineering Buildings with AI",
+    title: "Decon Lab — 80–90% Recovery. 51% Resale. No Market Exists Yet.",
     description:
-      "R&D platform that uses AI to analyze building assemblies, generate deconstruction " +
-      "sequences, and score material recovery viability. From dried polyurethane to " +
-      "composite fasteners — we reverse engineer the process of building a home.",
+      "There is no formal secondary lumber market. Decon Lab is the R&D platform that " +
+      "makes people aware of the resale potential in recovered building materials — " +
+      "then builds the infrastructure to capture it. AI-powered reverse engineering " +
+      "of residential building assemblies.",
     siteName: "ML Systems",
     type: "website",
   },
