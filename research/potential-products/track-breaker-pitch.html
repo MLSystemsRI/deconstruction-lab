@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Breaker — ML Systems LLC</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0A0A0A;
+  --surface: #141414;
+  --surface2: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #E5E5E5;
+  --text-dim: #999;
+  --orange: #F97316;
+  --orange-dim: rgba(249,115,22,0.15);
+  --orange-glow: rgba(249,115,22,0.4);
+  --green: #22C55E;
+  --red: #EF4444;
+  --blue: #60A5FA;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+nav .logo { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+nav .logo span { color: var(--orange); }
+nav .nav-links { display: flex; gap: 1.5rem; }
+nav .nav-links a {
+  color: var(--text-dim); text-decoration: none; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;
+}
+nav .nav-links a:hover { color: var(--orange); }
+
+/* ── SECTIONS ── */
+section {
+  min-height: 100vh; padding: 7rem 2rem 4rem;
+  max-width: 1100px; margin: 0 auto;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+section.visible { opacity: 1; transform: translateY(0); }
+
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--orange); }
+h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+p { max-width: 680px; margin-bottom: 1rem; color: var(--text-dim); }
+.accent { color: var(--orange); }
+
+/* ── TABLES ── */
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+th, td { padding: 0.65rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text-dim); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+td { color: var(--text); }
+tr.highlight td { color: var(--orange); font-weight: 600; }
+tr:hover td { background: var(--orange-dim); }
+
+/* ── HERO ── */
+#hero { display: flex; flex-direction: column; justify-content: center; }
+#hero h1 span { display: block; color: var(--orange); }
+.subtitle { font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2rem; max-width: 600px; }
+.badge {
+  display: inline-block; background: var(--orange-dim); color: var(--orange);
+  padding: 0.3rem 0.9rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  margin-bottom: 1.5rem; border: 1px solid rgba(249,115,22,0.3);
+}
+.gap-label {
+  display: inline-block; padding: 0.6rem 1.5rem; margin: 2rem 0;
+  font-size: 1.8rem; font-weight: 800; letter-spacing: 2px;
+  color: var(--orange); border: 2px solid var(--orange);
+  border-radius: 8px; text-transform: uppercase;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%, 100% { border-color: var(--orange); box-shadow: 0 0 0 0 var(--orange-glow); }
+  50% { border-color: var(--orange-glow); box-shadow: 0 0 20px 0 var(--orange-glow); }
+}
+
+/* ── 3D WALL ── */
+#diagram { perspective: 900px; }
+.wall-scene {
+  width: 100%; max-width: 600px; height: 500px; margin: 2rem auto;
+  position: relative; perspective: 900px;
+}
+.wall-container {
+  width: 100%; height: 100%; position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.wall-container.front { transform: rotateY(0deg) rotateX(5deg); }
+.wall-container.side { transform: rotateY(-55deg) rotateX(5deg); }
+.wall-container.cross { transform: rotateY(-90deg) rotateX(10deg); }
+
+/* Wall slab */
+.wall-face {
+  position: absolute; width: 380px; height: 420px;
+  left: 50%; top: 50%; transform: translate(-50%,-50%);
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+  border: 1px solid #555; border-radius: 4px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.wall-face::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 40px),
+              repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 40px);
+}
+.wall-label {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px;
+  white-space: nowrap;
+}
+
+/* Wall thickness (side) */
+.wall-side {
+  position: absolute; width: 60px; height: 420px;
+  left: calc(50% + 190px); top: 50%;
+  transform: translate(0,-50%) rotateY(90deg);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #333, #222);
+  border: 1px solid #444;
+}
+.wall-side .rebar-line {
+  position: absolute; left: 50%; width: 2px; height: 100%;
+  background: repeating-linear-gradient(180deg, #8B4513, #8B4513 30px, transparent 30px, transparent 34px);
+  transform: translateX(-50%); opacity: 0.6;
+}
+
+/* Track frame */
+.track-frame {
+  position: absolute; width: 24px; height: 340px;
+  left: calc(50% - 12px); top: calc(50% - 170px);
+  border: 2px solid var(--orange); border-radius: 3px;
+  background: rgba(249,115,22,0.08);
+}
+.track-frame::before, .track-frame::after {
+  content: ''; position: absolute; width: 60px; height: 3px;
+  background: var(--orange); left: 50%; transform: translateX(-50%);
+}
+.track-frame::before { top: 10px; }
+.track-frame::after { bottom: 10px; }
+
+/* Anchors */
+.anchor {
+  position: absolute; width: 10px; height: 10px;
+  background: var(--orange); border-radius: 50%;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 6px var(--orange-glow);
+}
+.anchor-tl { left: calc(50% - 30px); top: calc(50% - 155px); }
+.anchor-tr { left: calc(50% + 30px); top: calc(50% - 155px); }
+.anchor-bl { left: calc(50% - 30px); top: calc(50% + 155px); }
+.anchor-br { left: calc(50% + 30px); top: calc(50% + 155px); }
+
+/* Carriage */
+.carriage {
+  position: absolute; width: 70px; height: 55px;
+  left: calc(50% - 35px); top: calc(50% - 130px);
+  background: var(--surface2); border: 2px solid var(--orange);
+  border-radius: 4px; z-index: 5;
+  animation: carriage-move 6s ease-in-out infinite;
+}
+.carriage-label {
+  position: absolute; font-size: 0.6rem; color: var(--orange);
+  font-weight: 700; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  text-align: center; line-height: 1.2; white-space: nowrap;
+}
+.chisel {
+  position: absolute; right: -22px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 4px; background: #ccc;
+  clip-path: polygon(0 0, 100% 35%, 100% 65%, 0 100%);
+}
+
+@keyframes carriage-move {
+  0%, 10% { top: calc(50% - 130px); }
+  80%, 90% { top: calc(50% + 115px); }
+  100% { top: calc(50% - 130px); }
+}
+
+/* Debris particles */
+.debris-zone {
+  position: absolute; bottom: 0; left: calc(50% - 60px); width: 120px; height: 60px;
+  overflow: hidden; pointer-events: none;
+}
+.debris {
+  position: absolute; width: 8px; height: 8px; background: #555; border-radius: 2px;
+  animation: fall 2s ease-in infinite;
+  opacity: 0;
+}
+.debris:nth-child(1) { left: 15%; animation-delay: 0.3s; width: 10px; height: 6px; }
+.debris:nth-child(2) { left: 40%; animation-delay: 0.8s; width: 6px; height: 8px; }
+.debris:nth-child(3) { left: 65%; animation-delay: 1.3s; width: 12px; height: 5px; }
+.debris:nth-child(4) { left: 30%; animation-delay: 1.8s; width: 7px; height: 7px; }
+.debris:nth-child(5) { left: 75%; animation-delay: 0.5s; width: 9px; height: 6px; }
+.debris:nth-child(6) { left: 50%; animation-delay: 1.0s; width: 5px; height: 9px; }
+
+@keyframes fall {
+  0% { top: -10px; opacity: 0; transform: rotate(0); }
+  15% { opacity: 0.8; }
+  100% { top: 55px; opacity: 0; transform: rotate(120deg); }
+}
+
+/* Fracture line */
+.fracture-line {
+  position: absolute; left: calc(50% + 42px); top: calc(50% - 160px);
+  width: 2px; height: 0;
+  background: repeating-linear-gradient(180deg, var(--orange), var(--orange) 4px, transparent 4px, transparent 8px);
+  animation: fracture-grow 6s ease-in-out infinite;
+  opacity: 0.7;
+}
+@keyframes fracture-grow {
+  0%, 10% { height: 0; }
+  80%, 90% { height: 310px; }
+  100% { height: 0; }
+}
+
+/* View buttons */
+.view-controls {
+  display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap;
+}
+.view-btn {
+  padding: 0.5rem 1.2rem; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-dim); border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.view-btn:hover, .view-btn.active {
+  border-color: var(--orange); color: var(--orange); background: var(--orange-dim);
+}
+
+/* Hover labels */
+.hover-label {
+  position: absolute; background: rgba(10,10,10,0.9); color: var(--orange);
+  padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600;
+  pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  border: 1px solid var(--orange); white-space: nowrap; z-index: 10;
+}
+.wall-scene:hover .hover-label { opacity: 1; }
+.lbl-track { left: calc(50% + 20px); top: calc(50% - 30px); }
+.lbl-anchor { left: calc(50% + 45px); top: calc(50% - 155px); }
+.lbl-chisel { left: calc(50% + 50px); top: calc(50% - 75px); }
+.lbl-fracture { left: calc(50% + 55px); top: calc(50% + 30px); }
+.lbl-debris { left: calc(50% - 10px); bottom: 10px; }
+
+/* Cross section view */
+.cross-section {
+  display: none; width: 100%; max-width: 550px; margin: 1rem auto;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 2rem; position: relative; min-height: 300px;
+}
+.cross-section.show { display: block; }
+
+.cs-wall {
+  width: 120px; height: 220px; background: #3a3a3a;
+  position: absolute; right: 80px; top: 50%; transform: translateY(-50%);
+  border: 1px solid #555; border-radius: 3px;
+}
+.cs-wall-label {
+  position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%);
+  font-size: 0.65rem; color: var(--text-dim); white-space: nowrap;
+}
+.cs-dim {
+  position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+  font-size: 0.7rem; color: var(--orange); font-weight: 600;
+}
+.cs-rebar {
+  position: absolute; width: 6px; height: 6px; background: #8B4513;
+  border-radius: 50%; border: 1px solid #A0522D;
+}
+.cs-rebar-1 { left: 30%; top: 30%; }
+.cs-rebar-2 { left: 30%; top: 60%; }
+.cs-rebar-3 { left: 65%; top: 45%; }
+
+.cs-frame {
+  position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+  width: 140px; height: 80px; border: 2px solid var(--orange);
+  border-radius: 4px; background: var(--orange-dim);
+}
+.cs-frame-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 0.65rem; color: var(--orange); font-weight: 700; text-align: center;
+}
+.cs-chisel-line {
+  position: absolute; top: 50%; right: -40px; width: 40px; height: 3px;
+  background: #ccc; transform: translateY(-50%);
+}
+.cs-chisel-line::after {
+  content: ''; position: absolute; right: -6px; top: -4px;
+  border-left: 10px solid #ccc; border-top: 5.5px solid transparent;
+  border-bottom: 5.5px solid transparent;
+}
+
+.cs-force-impact {
+  position: absolute; top: 50%; right: -100px; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 4px;
+}
+.cs-force-label { font-size: 0.65rem; font-weight: 600; }
+.cs-force-arrow {
+  width: 50px; height: 2px; position: relative;
+}
+.cs-force-arrow::after {
+  content: ''; position: absolute; top: -4px;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+}
+
+.cs-impact-arrow { color: var(--orange); }
+.cs-impact-arrow .cs-force-arrow { background: var(--orange); animation: arrow-pulse 1.5s ease infinite; }
+.cs-impact-arrow .cs-force-arrow::after { right: -8px; border-left: 8px solid var(--orange); }
+
+.cs-reaction-arrow { color: var(--green); margin-top: 20px; }
+.cs-reaction-arrow .cs-force-arrow { background: var(--green); animation: arrow-pulse 1.5s ease infinite 0.5s; }
+.cs-reaction-arrow .cs-force-arrow::after { left: -8px; border-right: 8px solid var(--green); }
+
+@keyframes arrow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.cs-sides {
+  display: flex; justify-content: space-between; padding: 0 1rem;
+  font-size: 0.7rem; color: var(--text-dim); margin-top: 0.5rem;
+}
+
+.cs-callout {
+  position: absolute; bottom: 15px; left: 15px; right: 15px;
+  text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--orange);
+  padding: 0.5rem; border-top: 1px solid var(--border);
+}
+
+/* ── HOW IT WORKS ── */
+.steps-container { position: relative; }
+.step-nav {
+  display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;
+}
+.step-btn {
+  width: 42px; height: 42px; border-radius: 50%; background: var(--surface);
+  border: 2px solid var(--border); color: var(--text-dim); font-weight: 700;
+  cursor: pointer; transition: all 0.3s; font-size: 0.9rem;
+}
+.step-btn.active { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+.step-btn.done { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.1); }
+
+.step-card {
+  display: none; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 2rem; position: relative;
+  animation: fadeSlide 0.4s ease;
+}
+.step-card.active { display: block; }
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.step-card h3 { color: var(--orange); margin-top: 0; font-size: 1.3rem; }
+.step-card .step-detail { color: var(--text-dim); font-size: 0.95rem; margin-top: 0.5rem; }
+.step-card .step-time {
+  display: inline-block; margin-top: 1rem; padding: 0.3rem 0.8rem;
+  background: var(--orange-dim); color: var(--orange); border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600;
+}
+
+.step-vis {
+  margin-top: 1.5rem; background: var(--bg); border-radius: 8px;
+  padding: 1.5rem; font-family: 'Courier New', monospace; font-size: 0.75rem;
+  color: var(--text-dim); line-height: 1.4; overflow-x: auto; white-space: pre;
+  border: 1px solid var(--border);
+}
+
+.auto-play-bar {
+  height: 3px; background: var(--orange); border-radius: 2px;
+  margin-top: 1rem; width: 0; transition: width linear;
+}
+.auto-play-bar.running { width: 100%; }
+
+/* ── SHOPPING LISTS ── */
+.tab-bar {
+  display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid var(--border);
+}
+.tab-btn {
+  padding: 0.7rem 1.5rem; background: transparent; border: none;
+  color: var(--text-dim); font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+.tab-content { display: none; padding: 1.5rem 0; animation: fadeSlide 0.3s ease; }
+.tab-content.active { display: block; }
+
+.total-row {
+  margin-top: 1rem; padding: 1rem; background: var(--orange-dim);
+  border: 1px solid rgba(249,115,22,0.3); border-radius: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: 700; font-size: 1.1rem;
+}
+.total-row .price { color: var(--orange); font-size: 1.3rem; }
+
+/* ── PERFORMANCE ── */
+.force-diagram {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 2rem; margin: 2rem 0; text-align: center; position: relative;
+  overflow: hidden;
+}
+.force-title { font-size: 1.1rem; font-weight: 700; color: var(--orange); margin-bottom: 1.5rem; }
+
+.force-wall {
+  width: 100px; height: 200px; background: #3a3a3a;
+  border: 2px solid #555; margin: 0 auto; position: relative; border-radius: 3px;
+}
+.force-wall-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 0.7rem; color: var(--text-dim); text-align: center;
+}
+
+.force-arrow-left, .force-arrow-right {
+  position: absolute; top: 50%; height: 3px; width: 80px;
+}
+.force-arrow-left {
+  right: calc(50% + 52px); background: var(--orange);
+  transform: translateY(-50%);
+  animation: push-right 1.5s ease-in-out infinite;
+}
+.force-arrow-left::after {
+  content: ''; position: absolute; right: -8px; top: -5px;
+  border-left: 10px solid var(--orange); border-top: 6.5px solid transparent;
+  border-bottom: 6.5px solid transparent;
+}
+.force-arrow-right {
+  left: calc(50% + 52px); background: var(--green);
+  transform: translateY(-50%);
+  animation: push-left 1.5s ease-in-out infinite 0.3s;
+}
+.force-arrow-right::after {
+  content: ''; position: absolute; left: -8px; top: -5px;
+  border-right: 10px solid var(--green); border-top: 6.5px solid transparent;
+  border-bottom: 6.5px solid transparent;
+}
+
+.force-label-left {
+  position: absolute; top: calc(50% - 25px); right: calc(50% + 52px);
+  font-size: 0.7rem; color: var(--orange); font-weight: 700; text-align: right; width: 100px;
+}
+.force-label-right {
+  position: absolute; top: calc(50% - 25px); left: calc(50% + 52px);
+  font-size: 0.7rem; color: var(--green); font-weight: 700; width: 120px;
+}
+
+@keyframes push-right {
+  0%, 100% { width: 60px; opacity: 0.5; }
+  50% { width: 90px; opacity: 1; }
+}
+@keyframes push-left {
+  0%, 100% { width: 60px; opacity: 0.5; }
+  50% { width: 90px; opacity: 1; }
+}
+
+.force-bottom-label {
+  margin-top: 1.5rem; font-size: 1rem; font-weight: 700; color: var(--text);
+}
+.force-bottom-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+/* ── PATENT ── */
+.patent-list { list-style: none; padding: 0; }
+.patent-list li {
+  padding: 0.75rem 1rem; margin-bottom: 0.5rem; background: var(--surface);
+  border-left: 3px solid var(--orange); border-radius: 0 8px 8px 0;
+  font-size: 0.95rem; transition: background 0.2s;
+}
+.patent-list li:hover { background: var(--orange-dim); }
+.patent-list li .num {
+  display: inline-block; width: 24px; height: 24px; line-height: 24px;
+  text-align: center; background: var(--orange); color: var(--bg);
+  border-radius: 50%; font-size: 0.75rem; font-weight: 700; margin-right: 0.75rem;
+}
+
+.no-prior-art {
+  margin: 2rem 0; padding: 1.5rem; background: var(--orange-dim);
+  border: 2px solid var(--orange); border-radius: 12px;
+  text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--orange);
+}
+
+/* ── 4 RETURNS ── */
+.returns-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem; margin-top: 1.5rem;
+}
+.return-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.return-card:hover {
+  border-color: var(--orange); transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.15);
+}
+.return-card .return-num {
+  font-size: 2.5rem; font-weight: 800; color: var(--orange); opacity: 0.15;
+  position: absolute; top: 8px; right: 16px;
+}
+.return-card h3 { color: var(--text); margin-top: 0; font-size: 1.05rem; }
+.return-card p { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--border);
+  color: var(--text-dim); font-size: 0.8rem;
+}
+footer .footer-brand { color: var(--orange); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  section { padding: 5rem 1.25rem 3rem; }
+  nav .nav-links { display: none; }
+  .wall-scene { height: 400px; }
+  .wall-face { width: 280px; height: 320px; }
+  .track-frame { height: 250px; }
+  .carriage { width: 55px; height: 45px; }
+  @keyframes carriage-move {
+    0%, 10% { top: calc(50% - 100px); }
+    80%, 90% { top: calc(50% + 80px); }
+    100% { top: calc(50% - 100px); }
+  }
+  .anchor-tl { top: calc(50% - 120px); }
+  .anchor-tr { top: calc(50% - 120px); }
+  .anchor-bl { top: calc(50% + 120px); }
+  .anchor-br { top: calc(50% + 120px); }
+  .fracture-line { top: calc(50% - 120px); }
+  @keyframes fracture-grow {
+    0%, 10% { height: 0; }
+    80%, 90% { height: 230px; }
+    100% { height: 0; }
+  }
+  .cross-section { padding: 1.25rem; }
+  .cs-frame { left: 20px; width: 110px; height: 65px; }
+  .cs-wall { right: 40px; width: 90px; height: 180px; }
+  table { font-size: 0.8rem; }
+  th, td { padding: 0.5rem 0.5rem; }
+  .step-vis { font-size: 0.6rem; padding: 1rem; }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.4rem; }
+  .wall-scene { height: 350px; }
+  .view-controls { gap: 0.35rem; }
+  .view-btn { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+  .tab-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+}
+
+/* ── V0a PIVOT RAIL ANIMATION ── */
+.v0a-scene {
+  width: 100%; max-width: 700px; height: 500px; margin: 2rem auto;
+  position: relative; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.v0a-scene-label {
+  position: absolute; top: 10px; left: 14px;
+  font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Wall — tall vertical strip on right edge */
+.v0a-wall {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 70px;
+  background: linear-gradient(90deg, #444 0%, #333 30%, #2a2a2a 100%);
+  border-left: 2px solid #555;
+  box-shadow: inset 4px 0 20px rgba(0,0,0,0.5);
+}
+.v0a-wall-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-90deg);
+  font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;
+  white-space: nowrap; font-weight: 600;
+}
+/* Subtle concrete texture lines on wall */
+.v0a-wall::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 40px);
+}
+
+/* Pivot anchor — offset a few inches from wall face */
+.v0a-pivot {
+  position: absolute; right: 100px; top: 70px;
+  width: 18px; height: 18px; background: var(--orange);
+  border-radius: 50%; z-index: 20;
+  box-shadow: 0 0 14px var(--orange-glow), 0 0 28px rgba(249,115,22,0.2);
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.v0a-pivot-label {
+  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+  font-size: 0.6rem; color: var(--orange); font-weight: 700; white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+/* Anchor rod — from pivot INTO the wall (bridges the gap + embeds 8-10") */
+.v0a-anchor-rod {
+  position: absolute; right: 10px; top: 77px;
+  width: 90px; height: 4px;
+  background: linear-gradient(90deg, var(--orange) 0%, rgba(249,115,22,0.7) 40%, rgba(249,115,22,0.35) 100%);
+  border-radius: 0 2px 2px 0;
+  z-index: 16;
+}
+/* Dimension label for anchor depth */
+.v0a-anchor-dim {
+  position: absolute; right: 6px; top: 88px;
+  font-size: 0.55rem; color: var(--orange); font-weight: 600;
+  white-space: nowrap; z-index: 16;
+}
+/* Small mounting plate behind pivot */
+.v0a-pivot-plate {
+  position: absolute; right: 92px; top: 60px;
+  width: 34px; height: 38px; border: 1px solid rgba(249,115,22,0.4);
+  border-radius: 3px; background: rgba(249,115,22,0.05); z-index: 15;
+}
+
+/* ── Rail group — pivots at anchor, offset from wall, rail extends down ── */
+.v0a-rail-group {
+  position: absolute; right: 109px; top: 79px;
+  transform-origin: 0 0;
+  animation: v0a-swing 10s ease-in-out infinite;
+  z-index: 10;
+}
+
+/* Steel rail — single piece from pivot downward, bolted to wall */
+.v0a-rail {
+  position: absolute; top: 0; left: -3px;
+  width: 8px; height: 380px;
+  background: linear-gradient(180deg, var(--orange) 0%, rgba(249,115,22,0.8) 100%);
+  border-radius: 3px;
+  box-shadow: 2px 0 10px rgba(249,115,22,0.2), -2px 0 10px rgba(249,115,22,0.2);
+}
+
+/* Bolt holes along rail (showing it's bolted to concrete) */
+.v0a-bolt {
+  position: absolute; left: -2px; width: 12px; height: 4px;
+  background: rgba(255,255,255,0.25); border-radius: 2px;
+}
+.v0a-bolt-1 { top: 6px; }
+.v0a-bolt-2 { top: 126px; }
+.v0a-bolt-3 { top: 246px; }
+.v0a-bolt-4 { top: 366px; }
+
+/* ── Carriage — slides up/down on rail ── */
+.v0a-carriage {
+  position: absolute; left: -32px; top: 30px;
+  width: 70px; height: 52px;
+  background: var(--surface2); border: 2px solid var(--orange);
+  border-radius: 5px; z-index: 12;
+  animation: v0a-carriage-feed 10s ease-in-out infinite;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+.v0a-carriage-label {
+  position: absolute; top: 50%; left: 42%; transform: translate(-50%,-50%);
+  font-size: 0.6rem; color: var(--orange); font-weight: 700; text-align: center;
+  line-height: 1.2; white-space: nowrap;
+}
+
+/* Chisel — extends RIGHT from carriage toward wall, bridges the gap */
+.v0a-chisel {
+  position: absolute; right: -60px; top: 50%; transform: translateY(-50%);
+  width: 60px; height: 5px; background: linear-gradient(90deg, #999, #bbb 70%, #ddd);
+  clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
+}
+
+/* Impact flash — at chisel tip (against wall face) */
+.v0a-impact {
+  position: absolute; right: -72px; top: 50%; transform: translateY(-50%);
+  width: 10px; height: 10px; background: var(--orange);
+  border-radius: 50%; opacity: 0;
+  animation: v0a-impact-flash 0.18s ease infinite;
+  box-shadow: 0 0 14px var(--orange), 0 0 30px var(--orange-glow);
+}
+
+/* Impact sparks */
+.v0a-spark {
+  position: absolute; right: -76px; top: 50%;
+  width: 3px; height: 3px; background: var(--orange); border-radius: 50%;
+  opacity: 0;
+}
+.v0a-spark:nth-child(1) { animation: v0a-spark-fly 0.4s ease-out infinite 0.05s; }
+.v0a-spark:nth-child(2) { animation: v0a-spark-fly 0.4s ease-out infinite 0.15s; transform: translateY(-4px); }
+.v0a-spark:nth-child(3) { animation: v0a-spark-fly 0.4s ease-out infinite 0.25s; transform: translateY(4px); }
+
+@keyframes v0a-spark-fly {
+  0% { opacity: 0.8; transform: translateX(0) translateY(0); }
+  100% { opacity: 0; transform: translateX(-20px) translateY(-10px); }
+}
+
+/* ── T-handle — at bottom of rail, operator grips to swing ── */
+.v0a-t-handle {
+  position: absolute; left: -35px; top: 382px;
+  width: 78px; height: 6px;
+  background: var(--orange);
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(249,115,22,0.2);
+}
+.v0a-t-label {
+  position: absolute; left: -40px; top: 396px;
+  font-size: 0.55rem; color: var(--text-dim); white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ── Fracture lines — on the wall face ── */
+.v0a-fracture {
+  position: absolute; right: 50px; width: 2px; z-index: 5;
+  background: repeating-linear-gradient(180deg, var(--orange), var(--orange) 3px, transparent 3px, transparent 6px);
+}
+.v0a-fracture-1 {
+  top: 80px; height: 0;
+  animation: v0a-frac1 10s ease-in-out infinite;
+}
+.v0a-fracture-2 {
+  top: 80px; height: 0; right: 48px;
+  animation: v0a-frac2 10s ease-in-out infinite;
+}
+
+/* ── Debris — falls at base of wall ── */
+.v0a-debris-zone {
+  position: absolute; bottom: 40px; right: 20px; width: 70px; height: 60px;
+  overflow: hidden; pointer-events: none; z-index: 5;
+}
+.v0a-debris {
+  position: absolute; width: 6px; height: 6px; background: #555; border-radius: 1px;
+  animation: fall 2.5s ease-in infinite; opacity: 0;
+}
+.v0a-debris:nth-child(1) { left: 20%; animation-delay: 0.2s; width: 8px; height: 5px; }
+.v0a-debris:nth-child(2) { left: 50%; animation-delay: 0.7s; width: 5px; height: 7px; }
+.v0a-debris:nth-child(3) { left: 75%; animation-delay: 1.2s; width: 9px; height: 4px; }
+.v0a-debris:nth-child(4) { left: 35%; animation-delay: 1.6s; width: 6px; height: 6px; }
+
+/* ── Operator figure — near T-handle at bottom ── */
+.v0a-operator {
+  position: absolute; left: 100px; bottom: 50px;
+  width: 30px; height: 80px;
+}
+.v0a-op-head {
+  width: 16px; height: 16px; border: 2px solid var(--text-dim);
+  border-radius: 50%; margin: 0 auto;
+}
+.v0a-op-body {
+  width: 2px; height: 28px; background: var(--text-dim);
+  margin: 2px auto 0;
+}
+.v0a-op-arms {
+  width: 40px; height: 2px; background: var(--text-dim);
+  position: absolute; top: 24px; left: -5px;
+  transform-origin: center center;
+  transform: rotate(-20deg);
+}
+.v0a-op-legs {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 14px; height: 22px;
+  border-left: 2px solid var(--text-dim);
+  border-right: 2px solid var(--text-dim);
+}
+.v0a-op-label {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 0.6rem; color: var(--text-dim); white-space: nowrap;
+}
+
+/* ── Hover labels ── */
+.v0a-hover-label {
+  position: absolute; background: rgba(10,10,10,0.92); color: var(--orange);
+  padding: 0.2rem 0.55rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600;
+  pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  border: 1px solid var(--orange); white-space: nowrap; z-index: 30;
+}
+.v0a-scene:hover .v0a-hover-label { opacity: 1; }
+.v0a-lbl-anchor { right: 115px; top: 100px; }
+.v0a-lbl-rail { right: 135px; top: 250px; }
+.v0a-lbl-chisel { right: 80px; top: 150px; }
+.v0a-lbl-thandle { right: 150px; bottom: 65px; }
+.v0a-lbl-wall { right: 8px; top: 10px; }
+
+/* ── Info bar ── */
+.v0a-info {
+  position: absolute; bottom: 10px; left: 12px; right: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.7rem; color: var(--text-dim);
+  border-top: 1px solid var(--border); padding-top: 8px;
+}
+.v0a-info .v0a-highlight {
+  color: var(--orange); font-weight: 700;
+}
+
+/* ── Swing animation ── */
+/* Rail group pivots at top-right (anchor point). Positive rotation = clockwise = rail bottom swings right. */
+@keyframes v0a-swing {
+  0%, 8% { transform: rotate(0deg); }
+  12%, 42% { transform: rotate(0deg); }     /* hold position 1 — breaking */
+  47%, 52% { transform: rotate(6deg); }     /* swing to position 2 */
+  57%, 85% { transform: rotate(6deg); }     /* hold position 2 — breaking */
+  90%, 95% { transform: rotate(0deg); }     /* swing back */
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes v0a-carriage-feed {
+  0%, 12% { top: 30px; }
+  38%, 42% { top: 290px; }
+  47%, 57% { top: 30px; }
+  80%, 85% { top: 290px; }
+  90%, 100% { top: 30px; }
+}
+
+@keyframes v0a-impact-flash {
+  0%, 40% { opacity: 0; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes v0a-frac1 {
+  0%, 12% { height: 0; opacity: 0; }
+  38%, 100% { height: 380px; opacity: 0.5; }
+}
+@keyframes v0a-frac2 {
+  0%, 57% { height: 0; opacity: 0; }
+  80%, 100% { height: 380px; opacity: 0.5; }
+}
+
+/* V0a comparison callouts */
+.v0a-compare {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  margin-top: 2rem;
+}
+.v0a-compare-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; text-align: center;
+}
+.v0a-compare-card.highlight-card {
+  border-color: var(--orange); background: var(--orange-dim);
+}
+.v0a-compare-card h4 {
+  font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.v0a-compare-card .big-num {
+  font-size: 2.2rem; font-weight: 800; line-height: 1.1;
+}
+.v0a-compare-card .big-num.dim { color: var(--text-dim); }
+.v0a-compare-card .big-num.bright { color: var(--orange); }
+.v0a-compare-card .compare-sub {
+  font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .v0a-scene { height: 420px; }
+  .v0a-rail { height: 300px; }
+  .v0a-bolt-3 { top: 196px; }
+  .v0a-bolt-4 { top: 286px; }
+  .v0a-t-handle { top: 302px; }
+  .v0a-t-label { top: 316px; }
+  .v0a-operator { left: 40px; }
+  .v0a-compare { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .v0a-scene { height: 380px; }
+  .v0a-rail { height: 260px; }
+  .v0a-bolt-3 { top: 170px; }
+  .v0a-bolt-4 { top: 246px; }
+  .v0a-carriage { width: 56px; height: 44px; }
+  .v0a-t-handle { top: 262px; width: 60px; }
+  .v0a-t-label { top: 276px; }
+  .v0a-operator { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span>ML</span> Systems <span>|</span> Track Breaker</div>
+  <div class="nav-links">
+    <a href="#hero">Problem</a>
+    <a href="#diagram">System</a>
+    <a href="#v0a">V0a</a>
+    <a href="#sequence">How It Works</a>
+    <a href="#shopping">Costs</a>
+    <a href="#performance">Performance</a>
+    <a href="#patent">Patent</a>
+    <a href="#returns">Returns</a>
+  </div>
+</nav>
+
+<!-- SECTION 1: HERO -->
+<section id="hero">
+  <div class="badge">Deconstruction Lab</div>
+  <h1>Track Breaker <span>Filling the $194K gap.</span></h1>
+  <p class="subtitle">Between a guy with a jackhammer and a $200K+ robot, nobody makes anything. The Track Breaker is a crew-portable, wall-mounted, track-guided hydraulic breaking system. Nothing like it exists.</p>
+  <div class="gap-label">The Gap</div>
+
+  <table style="margin-top: 2rem;">
+    <thead>
+      <tr><th>Option</th><th>Weight</th><th>Cost</th><th>Operator</th><th>Precision</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Handheld Breaker</td><td>22-90 lbs</td><td>$1,500-$6,000</td>
+        <td>1 laborer, fatigued in 20 min</td><td>&plusmn;2" (human arm)</td>
+      </tr>
+      <tr>
+        <td>Brokk 60</td><td>1,235 lbs</td><td>$200K+</td>
+        <td>Trained operator + trailer</td><td>Good, but overkill</td>
+      </tr>
+      <tr class="highlight">
+        <td>Track Breaker V0a</td><td>~150 lbs portable</td><td>~$10K-$14K</td>
+        <td>1 operator, swing reposition</td><td>&plusmn;1/4" (track-guided)</td>
+      </tr>
+      <tr>
+        <td>Track Breaker V1</td><td>~200 lbs portable</td><td>~$11K-$16K</td>
+        <td>1 operator, camera-guided</td><td>&plusmn;1/8" (automated)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SECTION 2: 3D WALL DIAGRAM -->
+<section id="diagram">
+  <h2>The System</h2>
+  <p>Bolt the track to the wall. The wall IS the reaction force. Hover to see labels. Rotate the view.</p>
+
+  <div class="view-controls">
+    <button class="view-btn active" data-view="front">Front View</button>
+    <button class="view-btn" data-view="side">3D Angle</button>
+    <button class="view-btn" data-view="cross">Cross Section</button>
+  </div>
+
+  <div class="wall-scene" id="wallScene">
+    <div class="wall-container front" id="wallContainer">
+      <!-- Wall slab -->
+      <div class="wall-face">
+        <div class="wall-label">8" Poured Concrete Foundation Wall</div>
+      </div>
+      <!-- Wall side/thickness -->
+      <div class="wall-side">
+        <div class="rebar-line" style="left: 35%;"></div>
+        <div class="rebar-line" style="left: 65%;"></div>
+      </div>
+
+      <!-- Track frame -->
+      <div class="track-frame"></div>
+
+      <!-- Anchors -->
+      <div class="anchor anchor-tl"></div>
+      <div class="anchor anchor-tr"></div>
+      <div class="anchor anchor-bl"></div>
+      <div class="anchor anchor-br"></div>
+
+      <!-- Carriage -->
+      <div class="carriage">
+        <div class="carriage-label">HH27<br>75J</div>
+        <div class="chisel"></div>
+      </div>
+
+      <!-- Fracture line -->
+      <div class="fracture-line"></div>
+
+      <!-- Debris -->
+      <div class="debris-zone">
+        <div class="debris"></div>
+        <div class="debris"></div>
+        <div class="debris"></div>
+        <div class="debris"></div>
+        <div class="debris"></div>
+        <div class="debris"></div>
+      </div>
+
+      <!-- Hover labels -->
+      <div class="hover-label lbl-track">Track Rail</div>
+      <div class="hover-label lbl-anchor">Adhesive Anchor</div>
+      <div class="hover-label lbl-chisel">Chisel &rarr; Wall</div>
+      <div class="hover-label lbl-fracture">Fracture Zone</div>
+      <div class="hover-label lbl-debris">Gravity Clears</div>
+    </div>
+  </div>
+
+  <!-- Cross section (shown when cross view selected) -->
+  <div class="cross-section" id="crossSection">
+    <div style="font-size:0.75rem; color:var(--text-dim); text-align:center; margin-bottom:1.5rem;">CROSS SECTION &mdash; Slice Through Wall at Breaker Height</div>
+
+    <div class="cs-frame">
+      <div class="cs-frame-label">CARRIAGE<br>+ HH27</div>
+      <div class="cs-chisel-line"></div>
+    </div>
+
+    <div class="cs-wall">
+      <div class="cs-dim">&#9664; 8" &#9654;</div>
+      <div class="cs-wall-label">CONCRETE WALL</div>
+      <div class="cs-rebar cs-rebar-1" title="Rebar"></div>
+      <div class="cs-rebar cs-rebar-2" title="Rebar"></div>
+      <div class="cs-rebar cs-rebar-3" title="Rebar"></div>
+    </div>
+
+    <div style="position:absolute; left:20px; top: calc(50% + 50px);">
+      <div class="cs-force-impact cs-impact-arrow">
+        <span class="cs-force-label">IMPACT 75J &rarr;</span>
+        <div class="cs-force-arrow"></div>
+      </div>
+      <div class="cs-force-impact cs-reaction-arrow" style="margin-top:12px;">
+        <div class="cs-force-arrow"></div>
+        <span class="cs-force-label">&larr; REACTION</span>
+      </div>
+    </div>
+
+    <div class="cs-callout">THE WALL FIGHTS ITSELF. No counterweight needed.</div>
+
+    <div class="cs-sides">
+      <span>OPERATOR SIDE</span>
+      <span>DIRT / BACKFILL</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2.5: V0a PIVOT RAIL -->
+<section id="v0a">
+  <h2>V0a &mdash; Pivot Rail</h2>
+  <p>Same breaker. Same power pack. One steel rail bolted to the wall, pivoting from a single anchor. Operator swings the T-handle to reposition. No separate frame. One person.</p>
+
+  <div class="v0a-scene">
+    <div class="v0a-scene-label">Side View &mdash; Rail + Pivot Operation</div>
+
+    <!-- Wall — right edge -->
+    <div class="v0a-wall">
+      <div class="v0a-wall-label">Concrete Wall</div>
+    </div>
+
+    <!-- Fracture lines on wall face -->
+    <div class="v0a-fracture v0a-fracture-1"></div>
+    <div class="v0a-fracture v0a-fracture-2"></div>
+
+    <!-- Anchor rod embedded in wall -->
+    <div class="v0a-anchor-rod"></div>
+    <div class="v0a-anchor-dim">&larr; 8-10" &rarr;</div>
+
+    <!-- Pivot anchor on wall face -->
+    <div class="v0a-pivot-plate"></div>
+    <div class="v0a-pivot">
+      <div class="v0a-pivot-label">PIVOT ANCHOR</div>
+    </div>
+
+    <!-- Rail group — single steel rail pivots at anchor, extends down -->
+    <div class="v0a-rail-group">
+      <!-- Steel rail — bolted into concrete -->
+      <div class="v0a-rail">
+        <div class="v0a-bolt v0a-bolt-1"></div>
+        <div class="v0a-bolt v0a-bolt-2"></div>
+        <div class="v0a-bolt v0a-bolt-3"></div>
+        <div class="v0a-bolt v0a-bolt-4"></div>
+      </div>
+
+      <!-- T-handle at bottom of rail -->
+      <div class="v0a-t-handle"></div>
+      <div class="v0a-t-label">T-HANDLE</div>
+
+      <!-- Carriage on rail — chisel points RIGHT toward wall -->
+      <div class="v0a-carriage">
+        <div class="v0a-carriage-label">HH27<br>75J</div>
+        <div class="v0a-chisel"></div>
+        <div class="v0a-impact"></div>
+        <div class="v0a-spark"></div>
+        <div class="v0a-spark"></div>
+        <div class="v0a-spark"></div>
+      </div>
+    </div>
+
+    <!-- Debris at base of wall -->
+    <div class="v0a-debris-zone">
+      <div class="v0a-debris"></div>
+      <div class="v0a-debris"></div>
+      <div class="v0a-debris"></div>
+      <div class="v0a-debris"></div>
+    </div>
+
+    <!-- Operator — left side, reaching toward bar -->
+    <div class="v0a-operator">
+      <div class="v0a-op-head"></div>
+      <div class="v0a-op-body"></div>
+      <div class="v0a-op-arms"></div>
+      <div class="v0a-op-legs"></div>
+      <div class="v0a-op-label">OPERATOR</div>
+    </div>
+    <!-- Hover labels -->
+    <div class="v0a-hover-label v0a-lbl-anchor">Anchor Rod (8-10" in concrete)</div>
+    <div class="v0a-hover-label v0a-lbl-rail">Steel Rail (bolted to wall)</div>
+    <div class="v0a-hover-label v0a-lbl-chisel">Chisel &rarr; Wall</div>
+    <div class="v0a-hover-label v0a-lbl-thandle">T-Handle (swing grip)</div>
+    <div class="v0a-hover-label v0a-lbl-wall">8" Concrete</div>
+
+    <!-- Info bar -->
+    <div class="v0a-info">
+      <span>Swing arc: <span class="v0a-highlight">~5 ft coverage</span></span>
+      <span>Reposition: <span class="v0a-highlight">~1 min</span> (vs 10 min V0)</span>
+    </div>
+  </div>
+
+  <!-- Comparison cards -->
+  <div class="v0a-compare">
+    <div class="v0a-compare-card">
+      <h4>V0 Repositioning</h4>
+      <div class="big-num dim">~10 min</div>
+      <div class="compare-sub">Unbolt, walk, re-drill, re-anchor</div>
+    </div>
+    <div class="v0a-compare-card highlight-card">
+      <h4>V0a Repositioning</h4>
+      <div class="big-num bright">~1 min</div>
+      <div class="compare-sub">Swing rail to next line</div>
+    </div>
+    <div class="v0a-compare-card">
+      <h4>V0 per 200 LF</h4>
+      <div class="big-num dim">~8.3 hrs</div>
+      <div class="compare-sub">repositioning time alone</div>
+    </div>
+    <div class="v0a-compare-card highlight-card">
+      <h4>V0a per 200 LF</h4>
+      <div class="big-num bright">~2.5 hrs</div>
+      <div class="compare-sub">swings + pivot moves combined</div>
+    </div>
+  </div>
+
+  <h3>How V0a Works</h3>
+  <ol style="color: var(--text-dim); padding-left: 1.25rem; max-width: 680px; line-height: 2;">
+    <li>Set <strong style="color:var(--orange);">one pivot anchor</strong> (8-10" rod into concrete, top of wall)</li>
+    <li>Bolt steel rail to pivot &mdash; rail hangs against wall face</li>
+    <li>Grab T-handle, swing rail to fracture line position</li>
+    <li>Start breaker &mdash; carriage feeds down rail under operator control</li>
+    <li>Line done &rarr; grab T-handle, <strong style="color:var(--orange);">swing rail</strong> to next position</li>
+    <li>Repeat until swing arc is exhausted (3&ndash;4 lines)</li>
+    <li>Move pivot to next wall section, continue</li>
+  </ol>
+
+  <div style="margin-top: 2rem; padding: 1.25rem; background: var(--orange-dim); border: 1px solid rgba(249,115,22,0.3); border-radius: 8px; max-width: 680px;">
+    <strong style="color: var(--orange);">Key insight:</strong>
+    <span style="color: var(--text-dim);"> One steel rail, one pivot, one T-handle. The operator swings the rail to reposition and leans weight into it during breaking. No automation. Pure mechanical simplicity.</span>
+  </div>
+</section>
+
+<!-- SECTION 3: HOW IT WORKS -->
+<section id="sequence">
+  <h2>How It Works</h2>
+  <p>Five steps. Two workers. No crane, no excavator, no heavy equipment.</p>
+
+  <div class="steps-container">
+    <div class="step-nav">
+      <button class="step-btn active" data-step="0">1</button>
+      <button class="step-btn" data-step="1">2</button>
+      <button class="step-btn" data-step="2">3</button>
+      <button class="step-btn" data-step="3">4</button>
+      <button class="step-btn" data-step="4">5</button>
+    </div>
+
+    <div class="step-card active" data-step="0">
+      <h3>Step 1: Carry</h3>
+      <p class="step-detail">Two workers carry the frame to the wall. The frame splits into two sections at a bolted flange &mdash; 41 lbs per person. No crane, no forklift.</p>
+      <span class="step-time">~2 min</span>
+      <div class="step-vis">   Worker 1          Worker 2
+  ┌──────────┐    ┌──────────┐
+  │ FRAME    │    │ FRAME    │
+  │ Section A│    │ Section B│
+  │  41 lbs  │    │  41 lbs  │
+  └──────────┘    └──────────┘
+        ────────►   To Wall</div>
+      <div class="auto-play-bar" id="autoBar"></div>
+    </div>
+
+    <div class="step-card" data-step="1">
+      <h3>Step 2: Anchor</h3>
+      <p class="step-detail">Drill 4 holes with a hammer drill (~2 min). Set adhesive anchors on top (Hilti HIT-HY 200, seismic-rated). Wedge anchors on bottom. Bolt the frame to the wall face.</p>
+      <span class="step-time">~8 min</span>
+      <div class="step-vis">   ●━━━━━━━━━━━━━━━━━━━━━━●  Adhesive anchors (top)
+   ║   TOP CROSS BRACE    ║
+   ║                      ║
+   ║      ┌─RAIL─┐        ║
+   ║      │      │        ║
+   ║      │      │        ║
+   ║      └──────┘        ║
+   ║  BOTTOM CROSS BRACE  ║
+   ●━━━━━━━━━━━━━━━━━━━━━━●  Wedge anchors (bottom)</div>
+    </div>
+
+    <div class="step-card" data-step="2">
+      <h3>Step 3: Mount</h3>
+      <p class="step-detail">Slide the carriage onto the rail. Pin-lock it in place (30 sec). Connect hydraulic hoses from the power pack via quick-connect fittings (15 sec). Start the power pack.</p>
+      <span class="step-time">~1 min</span>
+      <div class="step-vis">   ║      ┌─RAIL─┐        ║
+   ║      │      │        ║
+   ║    ┌─┤      ├─┐      ║
+   ║    │ ╔══════╗ │      ║
+   ║    │ ║ HH27 ║═╬═══► CHISEL
+   ║    │ ║ 75J  ║ │      ║
+   ║    │ ╚══════╝ │      ║
+   ║    └─┤      ├─┘      ║
+   ║      │      │        ║
+            ▲
+     Carriage slides on,
+     pin locks, hoses connect</div>
+    </div>
+
+    <div class="step-card" data-step="3">
+      <h3>Step 4: Break</h3>
+      <p class="step-detail">Breaker fires at 1,400 BPM. Carriage feeds down the track. 75J impacts fracture a clean vertical line through 8" of concrete. Broken pieces fall away &mdash; gravity clears the debris. No scooping, no cleanup.</p>
+      <span class="step-time">4-16 min per line</span>
+      <div class="step-vis">   ║    ┌─────┐            ║
+   ║    │ HH27│→→→ IMPACT  ║
+   ║    │ 75J │            ║    Fracture propagates
+   ║    └──╥──┘            ║    through 8" wall
+   ║       ▼               ║
+   ║       ▼  feed down    ║         ┃ ← fracture line
+   ║       ▼               ║         ┃
+   ║                       ║         ┃
+   ║                       ║
+              ↓ ↓ ↓
+         pieces fall by gravity</div>
+    </div>
+
+    <div class="step-card" data-step="4">
+      <h3>Step 5: Swing &amp; Repeat</h3>
+      <p class="step-detail"><strong style="color:var(--orange);">V0a:</strong> Grab the T-handle. Swing the rail 4 feet to the next line (~1 min). Break again. 3&ndash;4 lines per pivot position. Move pivot only when arc is exhausted. After all vertical lines are cut, wall sections tip outward or get crane-lifted as panels.</p>
+      <span class="step-time">~1 min swing (vs ~10 min V0 reposition)</span>
+      <div class="step-vis">           ●                        PIVOT
+           ┃        STEEL RAIL       ┃
+   ┌───────╫──┬─────────┬───────╫──┬─────────┐
+   │░░░░░░░┃░░│         │░░░░░░░┃░░│         │
+   │░░ DONE┃  │  PANEL  │░ NEXT ┃  │  PANEL  │
+   │░░░░░░░┃░░│  FREE   │░ LINE ┃  │  STILL  │
+   │░░░░░░░┃░░│  (tips  │░░░░░░░┃░░│  INTACT │
+   │░░░░░░░┃░░│   out)  │░░░░░░░┃░░│         │
+   └───────╨──┘    ╲    └───────╨──┴─────────┘
+    Line 1  ↑       ╲    Line 2  ↑
+         ┃TRACK┃               ┃TRACK┃ ← swing here
+         done                    next</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: SHOPPING LISTS -->
+<section id="shopping">
+  <h2>What It Costs</h2>
+  <p>Three versions: pivot-rail prototype, rigid-frame original, and camera-guided production.</p>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="v0a">V0a &mdash; Pivot Rail</button>
+    <button class="tab-btn" data-tab="v0">V0 &mdash; Rigid Frame</button>
+    <button class="tab-btn" data-tab="v1">V1 &mdash; With Software</button>
+  </div>
+
+  <div class="tab-content active" data-tab="v0a">
+    <h3>Pivot Rail Prototype</h3>
+    <p>Same breaker + power pack as V0. One steel rail bolted to the wall with a pivot anchor. Carriage rides the rail. T-handle at the bottom to swing. Simpler than V0, cheaper to fab.</p>
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th>Example</th><th>Est. Cost</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Hydraulic breaker</td><td>HYCON HH27 (75J, 1,400 BPM)</td><td>$4,000-$5,500</td></tr>
+        <tr><td>2</td><td>Hydraulic power pack</td><td>HYCON HPP09 (gas) or HPP09E</td><td>$3,500-$5,000</td></tr>
+        <tr><td>3</td><td>Hydraulic hoses (30 ft)</td><td>3/8" 4,000 PSI, quick-connect</td><td>$200-$400</td></tr>
+        <tr><td>4</td><td>Steel rail + carriage</td><td>6-8 ft rail, linear bearings, friction brake</td><td>$800-$1,500</td></tr>
+        <tr><td>5</td><td>T-handle</td><td>Steel crossbar welded to rail base</td><td>$50-$100</td></tr>
+        <tr><td>6</td><td>Pivot anchor hardware</td><td>Hilti HIT-HY 200, 8-10" anchor rod, pivot plate</td><td>$150-$300</td></tr>
+        <tr><td>8</td><td>Hammer drill + bits</td><td>Hilti TE 7-C or equiv.</td><td>$300-$500</td></tr>
+        <tr><td>9</td><td>Safety gear</td><td>N95, face shields, hearing, gloves</td><td>$100-$150</td></tr>
+      </tbody>
+    </table>
+    <div class="total-row">
+      <span>V0a Total</span>
+      <span class="price">$9,600 - $14,450</span>
+    </div>
+  </div>
+
+  <div class="tab-content" data-tab="v0">
+    <h3>Rigid Frame &mdash; Prove the Physics</h3>
+    <p>No motor, no camera, no electronics. Pure mechanical. Operator controls descent by hand (gravity + friction clamp). 4-bolt frame, re-anchor every line.</p>
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th>Example</th><th>Est. Cost</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Hydraulic breaker</td><td>HYCON HH27 (75J, 1,400 BPM)</td><td>$4,000-$5,500</td></tr>
+        <tr><td>2</td><td>Hydraulic power pack</td><td>HYCON HPP09 (gas) or HPP09E</td><td>$3,500-$5,000</td></tr>
+        <tr><td>3</td><td>Hydraulic hoses (30 ft)</td><td>3/8" 4,000 PSI, quick-connect</td><td>$200-$400</td></tr>
+        <tr><td>4</td><td>Steel frame fabrication</td><td>8' vertical rail, 2 sections, bolted flange</td><td>$1,500-$2,500</td></tr>
+        <tr><td>5</td><td>Linear bearings + carriage</td><td>igus drylin or THK + breaker mount</td><td>$500-$1,000</td></tr>
+        <tr><td>6</td><td>Adhesive anchors (top)</td><td>Hilti HIT-HY 200 + 5/8" rod</td><td>$150-$250</td></tr>
+        <tr><td>7</td><td>Wedge anchors (bottom)</td><td>Hilti Kwik Bolt TZ 5/8"</td><td>$50-$80</td></tr>
+        <tr><td>8</td><td>Hammer drill + bits</td><td>Hilti TE 7-C or equiv.</td><td>$300-$500</td></tr>
+        <tr><td>9</td><td>Safety gear</td><td>N95, face shields, hearing, gloves</td><td>$100-$150</td></tr>
+      </tbody>
+    </table>
+    <div class="total-row">
+      <span>V0 Total</span>
+      <span class="price">$10,300 - $15,380</span>
+    </div>
+  </div>
+
+  <div class="tab-content" data-tab="v1">
+    <h3>Camera-Guided Automation</h3>
+    <p>Everything in V0a, plus motor-controlled feed, camera on tablet, fracture detection, rebar detection, e-stop, and full data logging. Software already written. Mounts on the same rail.</p>
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th>Example</th><th>Est. Cost</th></tr></thead>
+      <tbody>
+        <tr style="color:var(--text-dim);"><td colspan="4" style="font-size:0.8rem; padding:0.5rem; background:var(--surface);">+ All V0a items ($9,600-$14,450)</td></tr>
+        <tr><td>10</td><td>Stepper motor (12 Nm, brake)</td><td>StepperOnline 34E1KBK50-120</td><td>$162</td></tr>
+        <tr><td>11</td><td>Stepper driver</td><td>StepperOnline CL86T V4.1</td><td>$60</td></tr>
+        <tr><td>12</td><td>Acme lead screw (1"-5, 8 ft)</td><td>Roton 59286, self-locking</td><td>$123</td></tr>
+        <tr><td>13</td><td>Bronze nut (5,000 lb rated)</td><td>Roton 90138</td><td>$51</td></tr>
+        <tr><td>14</td><td>Jaw coupling</td><td>Ruland or Lovejoy (14mm to 1")</td><td>$20</td></tr>
+        <tr><td>15</td><td>Thrust bearings</td><td>Angular contact pair</td><td>$30</td></tr>
+        <tr><td>16</td><td>Vibration isolation mounts</td><td>Elastomeric rubber-in-shear (4x)</td><td>$50</td></tr>
+        <tr><td>17</td><td>Power supply</td><td>48V 10A Mean Well</td><td>$40</td></tr>
+        <tr><td>18</td><td>Raspberry Pi 4/5</td><td>4GB Model B</td><td>$55</td></tr>
+        <tr><td>19</td><td>Industrial USB camera</td><td>1280x720, global shutter</td><td>$200-$500</td></tr>
+        <tr><td>20</td><td>Accelerometer</td><td>MPU6050 breakout</td><td>$8</td></tr>
+        <tr><td>21</td><td>Relay module</td><td>5V single-channel</td><td>$5</td></tr>
+        <tr><td>22</td><td>Motor driver board</td><td>L298N or BTS7960</td><td>$15</td></tr>
+        <tr><td>23</td><td>Logic level shifter</td><td>4-channel bidirectional</td><td>$5</td></tr>
+        <tr><td>24</td><td>Limit switches (2x)</td><td>Mechanical end-of-travel</td><td>$10</td></tr>
+        <tr><td>25</td><td>E-stop button</td><td>Mushroom, NC, twist-release</td><td>$15</td></tr>
+        <tr><td>26</td><td>Wiring + connectors</td><td>10 AWG motor, JST, DIN rail</td><td>$30</td></tr>
+        <tr><td>27</td><td>Weatherproof enclosure</td><td>IP65 box</td><td>$25</td></tr>
+        <tr><td>28</td><td>microSD card</td><td>64GB for RPi OS + logging</td><td>$12</td></tr>
+      </tbody>
+    </table>
+    <div class="total-row">
+      <span>V1 Total (V0a + additions)</span>
+      <span class="price">$10,516 - $15,666</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: PERFORMANCE -->
+<section id="performance">
+  <h2>Performance</h2>
+
+  <h3>Speed Comparison &mdash; 200 LF Perimeter, 8" Wall</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Time</th><th>Cost / Project</th><th>Equipment</th></tr></thead>
+    <tbody>
+      <tr><td>Handheld breaker (1 op.)</td><td>3-5 days</td><td>$2,000-$4,000 labor</td><td>Breaker rental</td></tr>
+      <tr><td>Diamond wall saw (sub)</td><td>2-4 hrs + setup</td><td>$3,000-$6,000 sub</td><td>Sub's equipment</td></tr>
+      <tr><td>Brokk 60</td><td>1-2 days</td><td>$2,400-$3,600 rental</td><td>Trailer, rigging</td></tr>
+      <tr class="highlight"><td>Track Breaker V0a (pivot rail)</td><td>~6 hours</td><td>$0 (owned)</td><td>1 operator, swing reposition</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Why Bolted = More Power</h3>
+  <table>
+    <thead><tr><th>Factor</th><th>Handheld</th><th>Wall-Mounted</th></tr></thead>
+    <tbody>
+      <tr><td>Reaction force absorbed by</td><td>Operator's arms/body</td><td style="color:var(--orange);">Wall (through anchors)</td></tr>
+      <tr><td>Energy lost to bounce/recoil</td><td>30-50%</td><td style="color:var(--green);">&lt;10% (stiff frame)</td></tr>
+      <tr><td>Effective energy into concrete</td><td>~40-50 J</td><td style="color:var(--orange); font-weight:700;">~65-70 J</td></tr>
+      <tr><td>Sustained operation</td><td>15-20 min bursts</td><td style="color:var(--green);">Continuous</td></tr>
+    </tbody>
+  </table>
+
+  <div class="force-diagram">
+    <div class="force-title">"The Wall Fights Itself"</div>
+    <div class="force-label-left">IMPACT<br>75J &rarr;</div>
+    <div class="force-arrow-left"></div>
+    <div class="force-wall">
+      <div class="force-wall-label">8"<br>CONCRETE<br>WALL</div>
+    </div>
+    <div class="force-arrow-right"></div>
+    <div class="force-label-right">&larr; REACTION<br>through anchors</div>
+    <div class="force-bottom-label">Impact goes in. Reaction comes back. No counterweight needed.</div>
+    <div class="force-bottom-sub">A 75J breaker bolted to the wall performs like a 100+ J handheld.</div>
+  </div>
+</section>
+
+<!-- SECTION 6: PATENT SCOPE -->
+<section id="patent">
+  <h2>Patent Scope</h2>
+  <p>A crew-portable, wall-anchored, track-guided hydraulic breaking system combining:</p>
+
+  <ol class="patent-list">
+    <li><span class="num">1</span> Crew-portable, wall-anchored track system</li>
+    <li><span class="num">2</span> Hydraulic breaker mounted on linear carriage</li>
+    <li><span class="num">3</span> One-sided concrete anchoring (no back-side access required)</li>
+    <li><span class="num">4</span> Gravity-assisted debris clearing (vertical operation)</li>
+    <li><span class="num">5</span> Self-locking drive mechanism (Acme lead screw)</li>
+    <li><span class="num">6</span> Camera-based fracture monitoring and feed control</li>
+    <li><span class="num">7</span> Modular breaker head (swappable energy levels)</li>
+  </ol>
+
+  <div class="no-prior-art">No prior art found. No commercial product exists in this space.</div>
+
+  <h3>Target Market</h3>
+  <table>
+    <thead><tr><th>Segment</th><th>Use Case</th><th>Why They'd Buy</th></tr></thead>
+    <tbody>
+      <tr><td>Residential demo contractors</td><td>Foundation removal, basement walls</td><td>Replaces handheld labor, no heavy equip.</td></tr>
+      <tr><td>Concrete cutting contractors</td><td>Selective demo, wall openings</td><td>No diamond blades, no water, no sub</td></tr>
+      <tr><td>Deconstruction companies</td><td>Panel-based foundation recovery</td><td>Precision fracture for crane-lift sections</td></tr>
+      <tr><td>Infrastructure / DOT</td><td>Bridge piers, retaining walls</td><td>Confined space, crew-portable</td></tr>
+      <tr><td>Renovation contractors</td><td>Basement egress, wall removal</td><td>Precise, clean cuts without full demo</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SECTION 7: THE 4 RETURNS -->
+<section id="returns">
+  <h2>The 4 Returns (MVE)</h2>
+  <p>Every dollar spent on the Track Breaker produces four returns.</p>
+
+  <div class="returns-grid">
+    <div class="return-card">
+      <div class="return-num">1</div>
+      <h3>Material Value</h3>
+      <p>Foundation panels, recycled concrete aggregate, salvaged rebar &mdash; same recovery as any method, but with precision fracture lines for crane-liftable sections.</p>
+    </div>
+    <div class="return-card">
+      <div class="return-num">2</div>
+      <h3>Ontology Data</h3>
+      <p>Fracture patterns by concrete age, mix design, and reinforcement layout. Builds the knowledge base that no one else has.</p>
+    </div>
+    <div class="return-card">
+      <div class="return-num">3</div>
+      <h3>Robot Training Signal</h3>
+      <p>Every camera frame + fracture measurement = training data for V3 autonomous mode. Every wall broken trains the AI.</p>
+    </div>
+    <div class="return-card">
+      <div class="return-num">4</div>
+      <h3>Market Intelligence</h3>
+      <p>First-mover in an empty product category. Patent. Licensing. Product sales. Data subscription revenue.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:3rem;">
+    <div class="gap-label" style="font-size:1.2rem;">One weekend. One wall. One answer.</div>
+    <p style="margin: 1.5rem auto; max-width: 500px; text-align:center;">V0a cost to prove the physics: <strong style="color:var(--orange);">~$10K-$14K</strong>. One rail. One pivot. One T-handle. If it works, the motor, camera, and software bolt right on.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">ML Systems LLC</div>
+  <div>Deconstruction Lab &middot; Lucent Lens</div>
+  <div style="margin-top:0.5rem; color:#555;">Confidential &mdash; Prepared for patent counsel review</div>
+</footer>
+
+<script>
+// ── Scroll-triggered section reveals ──
+const sections = document.querySelectorAll('section');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+sections.forEach(s => observer.observe(s));
+
+// ── 3D Wall View Toggle ──
+const viewBtns = document.querySelectorAll('.view-btn');
+const wallContainer = document.getElementById('wallContainer');
+const wallScene = document.getElementById('wallScene');
+const crossSection = document.getElementById('crossSection');
+
+viewBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    viewBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+
+    if (view === 'cross') {
+      wallScene.style.display = 'none';
+      crossSection.classList.add('show');
+    } else {
+      wallScene.style.display = 'block';
+      crossSection.classList.remove('show');
+      wallContainer.className = 'wall-container ' + view;
+    }
+  });
+});
+
+// ── Step Sequence ──
+const stepBtns = document.querySelectorAll('.step-btn');
+const stepCards = document.querySelectorAll('.step-card');
+let currentStep = 0;
+let autoTimer = null;
+
+function goToStep(idx) {
+  stepBtns.forEach((b, i) => {
+    b.classList.remove('active');
+    if (i < idx) b.classList.add('done');
+    else b.classList.remove('done');
+  });
+  stepBtns[idx].classList.add('active');
+  stepBtns[idx].classList.remove('done');
+  stepCards.forEach(c => c.classList.remove('active'));
+  stepCards[idx].classList.add('active');
+  currentStep = idx;
+}
+
+stepBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    clearInterval(autoTimer);
+    goToStep(parseInt(btn.dataset.step));
+  });
+});
+
+// Auto-advance
+function startAutoPlay() {
+  autoTimer = setInterval(() => {
+    goToStep((currentStep + 1) % 5);
+  }, 5000);
+}
+startAutoPlay();
+
+// ── Tab Toggle (Shopping Lists) ──
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabBtns.forEach(b => b.classList.remove('active'));
+    tabContents.forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`.tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
+  });
+});
+
+// ── Active nav link on scroll ──
+const navLinks = document.querySelectorAll('nav .nav-links a');
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.style.color = '');
+      const id = e.target.id;
+      const link = document.querySelector(`nav a[href="#${id}"]`);
+      if (link) link.style.color = '#F97316';
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => navObserver.observe(s));
+</script>
+</body>
+</html>

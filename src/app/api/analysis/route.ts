@@ -2,6 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUser, isDemoMode } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
 
+// ── ML Material ID generation (inline for standalone) ──────────────
+const ZONE_MAP: Record<string, string> = {
+  roof: "R", shingle: "R", siding: "R", gutter: "R", fascia: "R", soffit: "R",
+  stud: "W", joist: "W", beam: "W", lumber: "W", rafter: "W", truss: "W", framing: "W",
+  floor: "F", hardwood: "F", tile: "F", carpet: "F", vinyl: "F", laminate: "F",
+  concrete: "N", foundation: "N", block: "N", footing: "N",
+  kitchen: "K", cabinet: "K", counter: "K", appliance: "K",
+  hardware: "H", bolt: "H", nail: "H", hinge: "H", screw: "H", simpson: "H",
+  door: "D", window: "D", trim: "D", casing: "D", baseboard: "D",
+  plywood: "S", osb: "S", drywall: "S", sheathing: "S",
+  wire: "E", outlet: "E", panel: "E", breaker: "E", electrical: "E",
+  pipe: "P", faucet: "P", valve: "P", tub: "P", plumbing: "P", toilet: "P",
+};
+
+function inferZone(name: string): string {
+  const n = name.toLowerCase();
+  for (const [keyword, zone] of Object.entries(ZONE_MAP)) {
+    if (n.includes(keyword)) return zone;
+  }
+  return "X";
+}
+
+function generateMaterialIds(
+  materials: string[],
+  year: number,
+  projectNumber: number,
+): Array<{ name: string; mlMaterialId: string; zone: string }> {
+  const zoneCounts: Record<string, number> = {};
+  return materials.map((name) => {
+    const zone = inferZone(name);
+    zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
+    const seq = String(zoneCounts[zone]).padStart(3, "0");
+    const proj = String(projectNumber).padStart(3, "0");
+    return {
+      name,
+      mlMaterialId: `ML-${year}-${proj}-${zone}${seq}`,
+      zone,
+    };
+  });
+}
+
+// ── Demo project counter (in-memory for demo mode) ──────────────────
+let demoProjectCounter = 0;
+
 export async function POST(req: NextRequest) {
   const user = await getUser();
   if (!user) {
@@ -37,12 +81,20 @@ Based on typical construction practices for this building type and era, provide:
 
 4. **sequence**: An ordered array of deconstruction steps, from first removal to last. Each step should be a concise instruction.
 
+5. **materialDetails**: For each material in the materials array, provide an object with:
+   - "name": the material name (must match materials array)
+   - "category": one of "structural", "electrical", "plumbing", "finish", "roofing", "other"
+   - "suggestedGrade": one of "A", "B", "C", "D", "salvage"
+   - "dimensions": typical dimensions if applicable (e.g., "2x4x92-5/8\\"")
+   - "species": wood species if applicable (e.g., "Douglas Fir", "SPF")
+
 Respond ONLY with valid JSON matching this schema:
 {
   "materials": string[],
   "separationNotes": string,
   "recoveryScore": number,
-  "sequence": string[]
+  "sequence": string[],
+  "materialDetails": { "name": string, "category": string, "suggestedGrade": string, "dimensions": string, "species": string }[]
 }`;
 
   const message = await anthropic.messages.create({
@@ -65,15 +117,48 @@ Respond ONLY with valid JSON matching this schema:
 
   const analysis = JSON.parse(jsonMatch[0]);
 
-  // Deduct tokens in production mode
+  // Generate ML Material IDs
+  const currentYear = new Date().getFullYear();
+  demoProjectCounter++;
+  const projectNumber = demoProjectCounter;
+
+  const materialIds = generateMaterialIds(
+    analysis.materials,
+    currentYear,
+    projectNumber,
+  );
+
+  // Merge ML IDs with material details
+  const materialsWithProvenance = materialIds.map((m) => {
+    const detail = analysis.materialDetails?.find(
+      (d: { name: string }) => d.name === m.name
+    );
+    return {
+      ...m,
+      category: detail?.category || "other",
+      suggestedGrade: detail?.suggestedGrade || "B",
+      dimensions: detail?.dimensions || "",
+      species: detail?.species || "",
+      contaminationStatus: "untested" as const,
+      provenanceEvents: [
+        {
+          eventType: "identified" as const,
+          timestamp: new Date().toISOString(),
+          notes: `Identified during AI analysis of ${buildingType} (${yearBuilt})`,
+        },
+      ],
+    };
+  });
+
+  // Persist in production mode
   if (!isDemoMode()) {
     const { db } = await import("@/lib/db");
-    const { users, tokenTransactions, deconSessions } = await import(
+    const { users, tokenTransactions, deconSessions, materials: materialsTable, materialProvenance } = await import(
       "@/lib/schema"
     );
     const { eq } = await import("drizzle-orm");
 
-    await db.insert(deconSessions).values({
+    const [session] = await db.insert(deconSessions).values({
       userId: user.id,
       buildingType,
       yearBuilt,
@@ -81,7 +166,37 @@ Respond ONLY with valid JSON matching this schema:
       separationPlan: analysis.sequence,
       recoveryScore: analysis.recoveryScore,
       status: "complete",
-    });
+    }).returning();
+
+    // Insert individual materials with ML IDs + provenance events
+    for (const mat of materialsWithProvenance) {
+      const [inserted] = await db.insert(materialsTable).values({
+        projectId: null,
+        name: mat.name,
+        category: mat.category,
+        mlMaterialId: mat.mlMaterialId,
+        grade: mat.suggestedGrade,
+        contaminationStatus: mat.contaminationStatus,
+        dimensions: mat.dimensions,
+        species: mat.species,
+        deconSessionId: session.id,
+        status: "identified",
+        disposition: "resale",
+      }).returning();
+
+      await db.insert(materialProvenance).values({
+        materialId: inserted.id,
+        eventType: "identified",
+        eventData: {
+          buildingType,
+          yearBuilt,
+          analysisSessionId: session.id,
+          mlMaterialId: mat.mlMaterialId,
+        },
+        performedBy: user.id,
+        notes: `Identified during AI analysis of ${buildingType} (${yearBuilt})`,
+      });
+    }
 
     await db
       .update(users)
@@ -96,5 +211,8 @@ Respond ONLY with valid JSON matching this schema:
     });
   }
 
-  return NextResponse.json(analysis);
+  return NextResponse.json({
+    ...analysis,
+    materialsWithProvenance,
+  });
 }

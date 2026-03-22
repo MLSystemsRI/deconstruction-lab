@@ -1,12 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+
+interface MaterialWithProvenance {
+  name: string;
+  mlMaterialId: string;
+  zone: string;
+  category: string;
+  suggestedGrade: string;
+  dimensions: string;
+  species: string;
+  contaminationStatus: string;
+  provenanceEvents: Array<{
+    eventType: string;
+    timestamp: string;
+    notes: string;
+  }>;
+}
 
 interface AnalysisResult {
   materials: string[];
   separationNotes: string;
   recoveryScore: number;
   sequence: string[];
+  materialsWithProvenance?: MaterialWithProvenance[];
 }
 
 export function DeconLab() {
@@ -72,9 +90,22 @@ export function DeconLab() {
               ML Systems ↗
             </a>
           </div>
-          <span className="rounded-full bg-dl-orange/10 px-3 py-1 text-xs font-medium text-dl-orange">
-            Decon Lab
-          </span>
+          <nav className="flex items-center gap-1">
+            {[
+              { href: "/", label: "Lab" },
+              { href: "/ontology", label: "Ontology" },
+              { href: "/research", label: "Research" },
+              { href: "/billing", label: "Billing" },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-dl-muted hover:text-dl-orange hover:bg-dl-orange/10 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
 
@@ -204,21 +235,67 @@ export function DeconLab() {
                   </div>
                 </div>
 
-                {/* Detected Materials */}
+                {/* Detected Materials with ML IDs */}
                 <div>
                   <h4 className="mb-2 text-sm font-medium text-dl-muted">
-                    Detected Materials
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {result.materials.map((m, i) => (
-                      <span
-                        key={i}
-                        className="rounded-full bg-dl-orange/10 px-3 py-1 text-xs text-dl-orange"
-                      >
-                        {m}
+                    Recovered Materials
+                    {result.materialsWithProvenance && (
+                      <span className="ml-2 text-xs text-dl-orange font-normal">
+                        {result.materialsWithProvenance.length} items tracked
                       </span>
-                    ))}
-                  </div>
+                    )}
+                  </h4>
+                  {result.materialsWithProvenance ? (
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {result.materialsWithProvenance.map((m, i) => (
+                        <div
+                          key={i}
+                          className="rounded-lg bg-dl-black/50 border border-dl-border px-3 py-2 flex items-start justify-between gap-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs text-dl-text truncate">{m.name}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <code className="text-[10px] font-mono text-dl-orange bg-dl-orange/10 px-1.5 py-0.5 rounded">
+                                {m.mlMaterialId}
+                              </code>
+                              {m.species && (
+                                <span className="text-[10px] text-dl-muted">{m.species}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                              m.suggestedGrade === "A" ? "bg-green-500/15 text-green-400" :
+                              m.suggestedGrade === "B" ? "bg-blue-500/15 text-blue-400" :
+                              m.suggestedGrade === "C" ? "bg-yellow-500/15 text-yellow-400" :
+                              m.suggestedGrade === "D" ? "bg-red-500/15 text-red-400" :
+                              "bg-gray-500/15 text-gray-400"
+                            }`}>
+                              {m.suggestedGrade}
+                            </span>
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                              m.contaminationStatus === "clean" ? "bg-green-500/10 text-green-400" :
+                              m.contaminationStatus === "untested" ? "bg-gray-500/10 text-gray-400" :
+                              "bg-red-500/10 text-red-400"
+                            }`}>
+                              {m.contaminationStatus}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {result.materials.map((m, i) => (
+                        <span
+                          key={i}
+                          className="rounded-full bg-dl-orange/10 px-3 py-1 text-xs text-dl-orange"
+                        >
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Separation Notes */}

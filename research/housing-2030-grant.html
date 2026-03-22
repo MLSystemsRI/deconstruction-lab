@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Housing 2030 Grant Strategy — ML Systems</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0A0A0A;
+  --surface: #141414;
+  --surface2: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #E5E5E5;
+  --text-dim: #999;
+  --orange: #F97316;
+  --orange-dim: rgba(249,115,22,0.15);
+  --orange-glow: rgba(249,115,22,0.4);
+  --green: #22C55E;
+  --green-dim: rgba(34,197,94,0.15);
+  --blue: #60A5FA;
+  --teal: #14B8A6;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+nav .logo { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+nav .logo span { color: var(--orange); }
+nav .nav-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+nav .nav-links a {
+  color: var(--text-dim); text-decoration: none; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;
+}
+nav .nav-links a:hover { color: var(--orange); }
+
+section {
+  padding: 7rem 2rem 4rem;
+  max-width: 1100px; margin: 0 auto;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+section.visible { opacity: 1; transform: translateY(0); }
+
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--orange); }
+h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+p { max-width: 720px; margin-bottom: 1rem; color: var(--text-dim); }
+
+#hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+#hero h1 span { display: block; color: var(--orange); }
+.subtitle { font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2rem; max-width: 600px; }
+.badge {
+  display: inline-block; background: var(--orange-dim); color: var(--orange);
+  padding: 0.3rem 0.9rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  margin-bottom: 1.5rem; border: 1px solid rgba(249,115,22,0.3);
+}
+
+/* STAT GRID */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem; margin: 2rem 0;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.stat-card:hover { border-color: rgba(249,115,22,0.4); transform: translateY(-2px); }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--orange); }
+.stat-card .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.25rem; }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.blue .stat-value { color: var(--blue); }
+.stat-card.teal .stat-value { color: var(--teal); }
+
+/* TABLES */
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { padding: 0.65rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; background: var(--surface); }
+td { color: var(--text); }
+tr:hover td { background: var(--orange-dim); }
+td.highlight { color: var(--orange); font-weight: 700; }
+td.green { color: var(--green); font-weight: 700; }
+
+/* CALLOUT */
+.callout {
+  background: var(--orange-dim);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-left: 4px solid var(--orange);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+}
+.callout.green {
+  background: var(--green-dim);
+  border-color: rgba(34,197,94,0.3);
+  border-left-color: var(--green);
+}
+.callout p { color: var(--text); margin: 0; max-width: none; }
+.callout strong { color: var(--orange); }
+.callout.green strong { color: var(--green); }
+
+/* FLOW */
+.flow {
+  display: flex; align-items: stretch; gap: 0; margin: 2.5rem 0;
+  flex-wrap: wrap; justify-content: center;
+}
+.flow-step {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.25rem 1.5rem; text-align: center;
+  min-width: 160px; flex: 1; max-width: 220px;
+  transition: transform 0.2s;
+}
+.flow-step:hover { transform: translateY(-3px); }
+.flow-step .flow-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.flow-step .flow-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+.flow-step .flow-sub { font-size: 0.78rem; color: var(--text-dim); }
+.flow-step.orange { border-top: 3px solid var(--orange); }
+.flow-step.green { border-top: 3px solid var(--green); }
+.flow-step.blue { border-top: 3px solid var(--blue); }
+.flow-step.teal { border-top: 3px solid var(--teal); }
+.flow-arrow {
+  display: flex; align-items: center; font-size: 1.3rem; color: var(--text-dim);
+  padding: 0 0.3rem;
+}
+@media (max-width: 768px) {
+  .flow { flex-direction: column; align-items: center; }
+  .flow-arrow { transform: rotate(90deg); padding: 0.3rem 0; }
+}
+
+/* FLOW VERTICAL */
+.flow-vertical {
+  display: flex; flex-direction: column; align-items: center; gap: 0; margin: 2.5rem 0;
+}
+.flow-vertical .flow-step { max-width: 400px; width: 100%; }
+.flow-vertical .flow-arrow { transform: rotate(90deg); padding: 0.5rem 0; }
+
+/* COMPARISON */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0;
+}
+@media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.compare-card h3 { margin-top: 0; }
+.compare-card .cc-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 0.5rem; }
+.compare-card .cc-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 1rem; }
+.compare-card.conventional { border-top: 3px solid var(--text-dim); }
+.compare-card.conventional .cc-title { color: var(--text-dim); }
+.compare-card.ml { border-top: 3px solid var(--orange); }
+.compare-card.ml .cc-title { color: var(--orange); }
+.compare-card.green-top { border-top: 3px solid var(--green); }
+.compare-card.green-top .cc-title { color: var(--green); }
+.compare-card .cc-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.compare-card .cc-row:last-child { border-bottom: none; }
+.compare-card .cc-row .label { color: var(--text-dim); }
+.compare-card .cc-row .value { color: var(--text); font-weight: 600; }
+
+/* PRO FORMA BOX */
+.pro-forma {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+.pro-forma .pf-title { font-weight: 700; color: var(--orange); margin-bottom: 0.5rem; font-family: -apple-system, sans-serif; }
+.pro-forma .pf-line { display: flex; justify-content: space-between; }
+.pro-forma .pf-line.total { border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem; }
+.pro-forma .pf-divider { border-top: 1px dashed var(--border); margin: 0.3rem 0; }
+.pf-green { color: var(--green); font-weight: 700; }
+
+/* CHECKLIST */
+.checklist { list-style: none; margin: 1.5rem 0; }
+.checklist li { padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; display: flex; align-items: flex-start; gap: 0.6rem; }
+.checklist .check { width: 18px; height: 18px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; margin-top: 2px; }
+.checklist .check.done { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.checklist .check.blocked { background: rgba(239,68,68,0.15); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+.checklist .check.pending { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+
+/* QUOTE */
+blockquote {
+  border-left: 3px solid var(--orange);
+  padding: 1rem 1.5rem;
+  margin: 2rem 0;
+  background: var(--surface);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--text);
+}
+
+footer {
+  text-align: center; padding: 3rem 2rem;
+  color: var(--text-dim); font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+  max-width: 1100px; margin: 0 auto;
+}
+footer a { color: var(--orange); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">ML <span>Systems</span> &middot; Deconstruction Lab</div>
+  <div class="nav-links">
+    <a href="#hero">Overview</a>
+    <a href="#state-wants">State Goals</a>
+    <a href="#rubric">Rubric</a>
+    <a href="#tdc">TDC</a>
+    <a href="#leveraging">Leveraging</a>
+    <a href="#qa">Q&amp;A</a>
+    <a href="#profit">Profit</a>
+    <a href="#factory">Factory</a>
+    <a href="#resale">51%</a>
+    <a href="#strategy">Strategy</a>
+    <a href="#critical-path">Path</a>
+    <a href="#captured">Revenue</a>
+    <a href="#shingle">Shingle</a>
+    <a href="#pro-forma">Pro Forma</a>
+    <a href="#nobody">Why Us</a>
+    <a href="#bigger">Scale</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="badge">EOH 2030 &middot; April 10, 2026</div>
+  <h1>Housing 2030<span>Entry-Level Homeownership Grant Strategy</span></h1>
+  <p class="subtitle">"The old house funds the new one."</p>
+  <p>How the RI Housing 2030 grant program accelerates the 51% resale value target and positions ML Systems as the cost-efficiency engine behind affordable homeownership.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value">$20M</div>
+      <div class="stat-label">Total Funding</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">$100K</div>
+      <div class="stat-label">Per-Unit Max</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">5+</div>
+      <div class="stat-label">Units Minimum</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">&lt;$400K</div>
+      <div class="stat-label">Price Cap</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-value">70 pts</div>
+      <div class="stat-label">Scoring System</div>
+    </div>
+    <div class="stat-card teal">
+      <div class="stat-value">Apr 10</div>
+      <div class="stat-label">Round 1 Deadline</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Program</td><td>Housing 2030 Entry-Level Homeownership Program</td></tr>
+        <tr><td>Funding</td><td class="highlight">$20 million ($10M Round 1, $10M Round 2)</td></tr>
+        <tr><td>Source</td><td>$120M state housing bond (voter-approved 2024)</td></tr>
+        <tr><td>Per-unit award</td><td class="highlight">Up to $100,000/unit</td></tr>
+        <tr><td>Per-project cap</td><td>$4 million</td></tr>
+        <tr><td>Unit size</td><td>600 SF minimum, 1,200 SF encouraged (expandable encouraged)</td></tr>
+        <tr><td>Home price cap</td><td class="highlight">Under $400,000 ($399,999 max)</td></tr>
+        <tr><td>Income target</td><td>Buyers at or below 120% AMI</td></tr>
+        <tr><td>Unit minimum</td><td class="highlight">5+ units per development (scattered-site allowed)</td></tr>
+        <tr><td>Scoring</td><td>70-point system</td></tr>
+        <tr><td>Round 1 Deadline</td><td class="highlight">April 10, 2026, 4:00 PM</td></tr>
+        <tr><td>Round 2</td><td>Late spring 2026</td></tr>
+        <tr><td>Contact</td><td>EOH.Production@housing.ri.gov</td></tr>
+        <tr><td>Portal</td><td>eCivis/EUNA at housing.ri.gov</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- WHAT THE STATE WANTS -->
+<section id="state-wants">
+  <h2>What the State Wants</h2>
+  <p>From the Governor's office and Secretary Goddard's statements:</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.1rem;">Cost Efficiency</div>
+      <div class="stat-label">Minimized per-unit subsidy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.1rem;">Innovation</div>
+      <div class="stat-label">Factory-built + small footprint</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.1rem;">Lower Costs</div>
+      <div class="stat-label">Explicit scoring criterion</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.1rem;">Ready-to-Go</div>
+      <div class="stat-label">Meeting developers where they are</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.1rem;">Owner-Occupied</div>
+      <div class="stat-label">Anti-speculation deed restrictions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1.1rem;">Speed</div>
+      <div class="stat-label">Construction within 9 months</div>
+    </div>
+  </div>
+
+  <h3>The 3 Barriers the State Identified (Housing 2030 Plan)</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Barrier</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Restrictive zoning</td><td>Only 20% of RI zoned for two-family; 31 of 39 municipalities below 10% affordable threshold</td></tr>
+        <tr><td>2</td><td class="highlight">Rising construction costs</td><td>Land values up 81% (2012&ndash;2022), materials and labor climbing</td></tr>
+        <tr><td>3</td><td>Gaps in state/federal funding</td><td>Demand exceeds available subsidy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>ML Systems directly attacks barrier #2.</strong> Deconstruction eliminates demo costs and provides recovered materials that reduce new construction hard costs. No other applicant is addressing construction costs from the material supply side.</p>
+  </div>
+</section>
+
+<!-- 70-POINT RUBRIC -->
+<section id="rubric">
+  <h2>The Full 70-Point Rubric</h2>
+  <p>Minimum 32 points required to be considered for funding.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Max Pts</th><th>Tiers</th><th>ML Systems Target</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. Number of units</td><td>10</td>
+          <td>16+ = 10, 11&ndash;15 = 5, 5&ndash;10 = 0</td>
+          <td>0 pts (5-unit minimum)</td>
+        </tr>
+        <tr>
+          <td>2. Bedroom range</td><td>8</td>
+          <td>&ge;50% 2BR+ = 8, &ge;25% 2BR+ = 4</td>
+          <td class="green">8 pts (all 2BR+)</td>
+        </tr>
+        <tr>
+          <td class="highlight">3. TDC per affordable unit</td><td class="highlight">12</td>
+          <td>&lt;$350K = 12, $350&ndash;375K = 10, $375&ndash;400K = 8, $400&ndash;425K = 5, $425&ndash;450K = 3, $450&ndash;475K = 1, $475K+ = 0</td>
+          <td class="green">10&ndash;12 pts (decon + factory)</td>
+        </tr>
+        <tr>
+          <td class="highlight">4. Leveraging (grant ask/unit)</td><td class="highlight">12</td>
+          <td>&lt;$25K = 12, $25&ndash;40K = 9, $40&ndash;55K = 7, $55&ndash;70K = 5, $70&ndash;85K = 3, $85&ndash;100K = 0</td>
+          <td class="green">7&ndash;12 pts (decon savings = lower ask)</td>
+        </tr>
+        <tr>
+          <td>5. Readiness to Proceed</td><td>12</td>
+          <td>Permits + GC schedule = 12, Final plan = 9, In process = up to 4</td>
+          <td>4 pts (realistic Round 1)</td>
+        </tr>
+        <tr>
+          <td>6. Community Support</td><td>4</td>
+          <td>Letter from chief elected/appointed = 4</td>
+          <td class="green">4 pts (get the letter)</td>
+        </tr>
+        <tr>
+          <td>7. Accessibility</td><td>6</td>
+          <td>1 Type A (5&ndash;15 units) = 3, 1 Type B = 1, All Type C = 2</td>
+          <td class="green">5&ndash;6 pts</td>
+        </tr>
+        <tr>
+          <td>8. Deed restriction</td><td>6</td>
+          <td>10-year only = 6, 15-year = 3, &gt;15 year = 0</td>
+          <td class="green">6 pts (minimum 10-year)</td>
+        </tr>
+        <tr style="background: var(--surface2);">
+          <td><strong>TOTAL</strong></td><td><strong>70</strong></td><td></td>
+          <td class="highlight"><strong>44&ndash;52 pts</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>Categories 3 and 4 are where decon wins.</strong> Combined 24 max points &mdash; and ML Systems targets 19&ndash;24 of those. A conventional developer scores 3&ndash;11 on the same categories. That's a 10&ndash;16 point gap in a 70-point system where 32 is the threshold.</p>
+  </div>
+</section>
+
+<!-- CATEGORY 3 DEEP DIVE -->
+<section id="tdc">
+  <h2>Category 3 Deep Dive &mdash; TDC</h2>
+  <p>Total Development Cost per affordable unit. The biggest single scoring category at 12 points. Donated land doesn't count as a cost.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>TDC/Unit</th><th>Points</th><th>How</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Conventional stick-built</td><td>$375K&ndash;$500K</td><td>0&ndash;8 pts</td><td>High material + labor + demo costs</td>
+        </tr>
+        <tr>
+          <td>Factory module + conventional site work</td><td>$250K&ndash;$375K</td><td>8&ndash;12 pts</td><td>Module saves on structure</td>
+        </tr>
+        <tr style="background: var(--orange-dim);">
+          <td class="highlight">Factory module + decon site work (ML Systems)</td><td class="highlight">$186K&ndash;$310K</td><td class="highlight">12 pts</td><td>Module + recovered materials for foundation, site work</td>
+        </tr>
+        <tr style="background: var(--orange-dim);">
+          <td class="highlight">Stick-built + decon materials (ML Systems)</td><td class="highlight">$220K&ndash;$350K</td><td class="highlight">10&ndash;12 pts</td><td>Recovered framing, sheathing, foundation reuse</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>At $186K&ndash;$310K TDC, we're firmly in the &lt;$350K tier = 12 points.</strong> Most conventional applicants land in $375K&ndash;$450K = 3&ndash;8 points. We have a 4&ndash;9 point advantage on this category alone.</p>
+  </div>
+</section>
+
+<!-- CATEGORY 4 DEEP DIVE -->
+<section id="leveraging">
+  <h2>Category 4 Deep Dive &mdash; Leveraging</h2>
+  <p>How little grant money you need per unit. Lower ask = more points.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Grant Ask/Unit</th><th>Points</th><th>What It Means</th></tr></thead>
+      <tbody>
+        <tr><td class="green">&lt;$25K</td><td class="green">12 pts</td><td>Nearly self-funding</td></tr>
+        <tr><td class="green">$25K&ndash;$40K</td><td class="green">9 pts</td><td>Strong leverage</td></tr>
+        <tr><td>$40K&ndash;$55K</td><td>7 pts</td><td>Good leverage</td></tr>
+        <tr><td>$55K&ndash;$70K</td><td>5 pts</td><td>Moderate</td></tr>
+        <tr><td>$70K&ndash;$85K</td><td>3 pts</td><td>Weak leverage</td></tr>
+        <tr><td>$85K&ndash;$100K</td><td>0 pts</td><td>Max ask &mdash; no bonus</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>Our sweet spot: $25K&ndash;$40K/unit = 9&ndash;12 pts.</strong> That's still $125K&ndash;$200K for a 5-unit project. A conventional developer with TDC $425K and sale price $350K has a $75K gap &mdash; they ask for $75K&ndash;$100K/unit = 0&ndash;3 pts. We're 9&ndash;12 points ahead on leveraging.</p>
+  </div>
+
+  <h3>Combined Advantage &mdash; Categories 3 + 4</h3>
+
+  <div class="compare-grid">
+    <div class="compare-card conventional">
+      <div class="cc-label">Standard Approach</div>
+      <div class="cc-title">Conventional Developer</div>
+      <div class="cc-row"><span class="label">Cat. 3 (TDC)</span><span class="value">3&ndash;8 pts</span></div>
+      <div class="cc-row"><span class="label">Cat. 4 (Leveraging)</span><span class="value">0&ndash;3 pts</span></div>
+      <div class="cc-row"><span class="label">Combined</span><span class="value">3&ndash;11 pts</span></div>
+    </div>
+    <div class="compare-card ml">
+      <div class="cc-label">Decon + Factory</div>
+      <div class="cc-title">ML Systems</div>
+      <div class="cc-row"><span class="label">Cat. 3 (TDC)</span><span class="value" style="color:var(--green);">10&ndash;12 pts</span></div>
+      <div class="cc-row"><span class="label">Cat. 4 (Leveraging)</span><span class="value" style="color:var(--green);">9&ndash;12 pts</span></div>
+      <div class="cc-row"><span class="label">Combined</span><span class="value" style="color:var(--orange);">19&ndash;24 pts</span></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>That's a 10&ndash;16 point gap</strong> on two categories &mdash; in a 70-point system where 32 is the threshold.</p>
+  </div>
+</section>
+
+<!-- Q&A FINDINGS -->
+<section id="qa">
+  <h2>Q&amp;A Findings</h2>
+  <p>Critical rules from the official Q&amp;A (Feb 13 + Feb 20, 2026) that directly shape our strategy.</p>
+
+  <h3>Rules That Help Us</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Q&amp;A</th><th>Finding</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="green">Q10</td>
+          <td class="green">No min or max developer profit</td>
+          <td>Recovered material value can be kept as margin. Gap = profit.</td>
+        </tr>
+        <tr>
+          <td class="green">Q12</td>
+          <td class="green">Jan 2026 costs eligible for reimbursement</td>
+          <td>If we start decon/site work now, those costs are reimbursable with award.</td>
+        </tr>
+        <tr>
+          <td class="green">Q13</td>
+          <td class="green">Lower ask advantage &mdash; EOH can reduce over-subsidized awards</td>
+          <td>Our lower ask won't trigger the over-subsidy red flag.</td>
+        </tr>
+        <tr>
+          <td class="green">Q14</td>
+          <td class="green">Leveraging confirmed as scored criterion</td>
+          <td>Lower subsidy ask = higher score. Confirmed, not just a preference.</td>
+        </tr>
+        <tr>
+          <td class="green">Q11</td>
+          <td class="green">Planning costs budgetable</td>
+          <td>Pre-decon hazmat surveys, structural assessments, recompaction tests &mdash; all eligible.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Rules That Constrain Us</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Q&amp;A</th><th>Finding</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Q7</td><td>New construction ONLY</td><td>Can't rehab existing structures. Must demo/decon and build new. This is our model.</td>
+        </tr>
+        <tr>
+          <td>Q3</td><td>5-unit minimum, no exceptions</td><td>Scattered-site across multiple properties is explicitly OK.</td>
+        </tr>
+        <tr>
+          <td>Q2/Q5</td><td>10-year deed restriction preferred</td><td>Anti-speculation aligns with Lucent Lens. Take minimum for 6 pts.</td>
+        </tr>
+        <tr>
+          <td>Q6</td><td>Must engage monitoring agent</td><td>Administrative step &mdash; not a blocker.</td>
+        </tr>
+        <tr>
+          <td>Q8</td><td>Condo budget required (if applicable)</td><td>Not needed for single-family scattered-site.</td>
+        </tr>
+        <tr>
+          <td>Q9</td><td>Must use Freddie Mac PMMS rate</td><td>Standardized &mdash; can't game affordability calc.</td>
+        </tr>
+        <tr>
+          <td>Q4</td><td>Awards June 2026, start by March 2027</td><td>9 months from award to construction. Tight but doable.</td>
+        </tr>
+        <tr>
+          <td>Q13</td><td>$50K/unit cap if &gt;50% market rate + density bonus</td><td>Doesn't apply &mdash; we're 100% affordable.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- DEVELOPER PROFIT -->
+<section id="profit">
+  <h2>Developer Profit &mdash; The Q10 Revelation</h2>
+  <p>The single most important answer: <strong style="color:var(--orange);">"There is no minimum or maximum developer profit."</strong></p>
+  <p>The purchase price cap is $399,999. TDC per unit is separate. The gap between total funding (grant + sales proceeds) and total expenses is developer profit.</p>
+
+  <div class="pro-forma">
+    <div class="pf-title">ML Systems Unit Pro Forma</div>
+    <div class="pf-line"><span>Grant award:</span><span>$70,000</span></div>
+    <div class="pf-line"><span>Sale price (to buyer):</span><span>$350,000</span></div>
+    <div class="pf-divider"></div>
+    <div class="pf-line total"><span><strong>Total funding:</strong></span><span><strong>$420,000</strong></span></div>
+    <br>
+    <div class="pf-line"><span>Land / site acquisition:</span><span>&minus;$60,000</span></div>
+    <div class="pf-line"><span>Decon of existing structure:</span><span>&minus;$15,000</span></div>
+    <div class="pf-line"><span>New construction (hard cost):</span><span>&minus;$250,000</span></div>
+    <div class="pf-line"><span>Soft costs:</span><span>&minus;$30,000</span></div>
+    <div class="pf-divider"></div>
+    <div class="pf-line total"><span><strong>Total expenses:</strong></span><span><strong>&minus;$355,000</strong></span></div>
+    <br>
+    <div class="pf-line total"><span><strong>DEVELOPER PROFIT:</strong></span><span class="pf-green"><strong>$65,000/unit</strong></span></div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Without decon reuse:</strong> Hard costs are $262K instead of $250K. Profit drops to $53K. Or you need $82K in grant instead of $70K.</p>
+  </div>
+
+  <div class="callout green">
+    <p><strong>The decon savings flow to TWO places:</strong> lower subsidy ask (scoring advantage) AND higher developer margin. You decide the split.</p>
+  </div>
+</section>
+
+<!-- FACTORY-BUILT HOUSING -->
+<section id="factory">
+  <h2>Factory-Built Housing</h2>
+  <p>The state's preferred innovation. EOH compiled pricing from 10+ manufacturers.</p>
+
+  <h3>Best Fits for &lt;$400K Final Price</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Company</th><th>Model</th><th>SF</th><th>Factory Cost</th><th>Delivery</th><th>Site Work Est.</th><th>Total Est.</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">Mod-Tech Homes</td><td>Single Module</td><td>600&ndash;900</td><td>$81K&ndash;$122K</td><td>$4,500</td><td>$50K&ndash;$70K</td><td class="green">$136K&ndash;$197K</td></tr>
+        <tr><td class="highlight">Coastal Modular</td><td>RI Tiny Home 2BR</td><td>480</td><td>$93,815</td><td>$4,800</td><td>$40K&ndash;$55K</td><td class="green">$139K&ndash;$154K</td></tr>
+        <tr><td>Preferred Building</td><td>Solo Series 526sf</td><td>526</td><td>$96,000</td><td>$5,600</td><td>$45K&ndash;$60K</td><td>$147K&ndash;$162K</td></tr>
+        <tr><td>Bensonwood</td><td>Nano Bas 1BR</td><td>586</td><td>$87,900&ndash;$117K</td><td>$5,000</td><td>$45K&ndash;$60K</td><td>$138K&ndash;$182K</td></tr>
+        <tr><td>Blockhouse/AZA</td><td>The CORE 2BR</td><td>852</td><td>$106,500</td><td>$14K&ndash;$20K</td><td>$55K&ndash;$75K</td><td>$176K&ndash;$202K</td></tr>
+        <tr><td>Coastal Modular</td><td>2BR Stacked</td><td>963</td><td>$145,000</td><td>$4,800</td><td>$55K&ndash;$75K</td><td>$205K&ndash;$225K</td></tr>
+        <tr><td>Preferred Building</td><td>Roanoke Ranch 2BR</td><td>938</td><td>$148,900</td><td>$7,500</td><td>$55K&ndash;$75K</td><td>$211K&ndash;$231K</td></tr>
+        <tr><td>Coastal Modular</td><td>Oberlin Ranch 3BR</td><td>1,280</td><td>$146,000</td><td>$4,800</td><td>$65K&ndash;$85K</td><td>$216K&ndash;$236K</td></tr>
+        <tr><td>Blockhouse/AZA</td><td>Potens 3BR</td><td>1,270</td><td>$184,150</td><td>$14K&ndash;$20K</td><td>$65K&ndash;$85K</td><td>$263K&ndash;$289K</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><em>Site work estimate = foundation, utilities, finish, landscaping (not including land cost)</em></p>
+
+  <h3>Where Decon Materials Reduce Site Work</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Site Work Item</th><th>Conventional Cost</th><th>With Decon Materials</th><th>Savings</th></tr></thead>
+      <tbody>
+        <tr><td>Foundation (poured or pier)</td><td>$15K&ndash;$30K</td><td>$8K&ndash;$18K</td><td class="green">$7K&ndash;$12K</td></tr>
+        <tr><td>Utility connections</td><td>$8K&ndash;$15K</td><td>Same</td><td>$0</td></tr>
+        <tr><td>Driveway / grading</td><td>$3K&ndash;$8K</td><td>$1K&ndash;$4K</td><td class="green">$2K&ndash;$4K</td></tr>
+        <tr><td>Landscaping / retaining</td><td>$2K&ndash;$5K</td><td>$1K&ndash;$2K</td><td class="green">$1K&ndash;$3K</td></tr>
+        <tr><td>Finish / trim (porches, stairs)</td><td>$5K&ndash;$10K</td><td>$3K&ndash;$7K</td><td class="green">$2K&ndash;$3K</td></tr>
+        <tr style="background: var(--surface2);">
+          <td><strong>Total site work</strong></td><td><strong>$33K&ndash;$68K</strong></td><td><strong>$21K&ndash;$46K</strong></td><td class="green"><strong>$12K&ndash;$22K</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The Hybrid Play: Factory Module + Decon Site Work</h3>
+
+  <div class="compare-grid">
+    <div class="compare-card ml">
+      <div class="cc-label">Shows up on truck</div>
+      <div class="cc-title">Factory Module</div>
+      <div class="cc-row"><span class="label">Walls, roof, interior finish</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Kitchen, bathroom</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Electrical, plumbing (rough + finish)</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Windows, doors, insulation</span><span class="value"></span></div>
+    </div>
+    <div class="compare-card green-top">
+      <div class="cc-label">Already on site</div>
+      <div class="cc-title">Decon Materials</div>
+      <div class="cc-row"><span class="label">Foundation (hybrid panels / RCA base)</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Driveway base (RCA)</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Retaining walls (concrete panels)</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Porches, stairs (recovered lumber)</span><span class="value"></span></div>
+      <div class="cc-row"><span class="label">Landscaping (urbanite walkways)</span><span class="value"></span></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Factory handles the box. Decon handles what the box sits on.</strong> "We're not just using innovative factory-built construction &mdash; we're reducing the site work cost that factory-built still requires, using materials recovered from the existing structure on that same site."</p>
+  </div>
+
+  <h3>Factory Module + Grant Math</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Line Item</th><th>Conventional Stick-Built</th><th>Factory + Decon (ML Systems)</th></tr></thead>
+      <tbody>
+        <tr><td>Structure</td><td>$180K&ndash;$280K</td><td class="green">$100K&ndash;$200K (factory)</td></tr>
+        <tr><td>Site work</td><td>$33K&ndash;$68K</td><td class="green">$21K&ndash;$46K (decon materials)</td></tr>
+        <tr><td>Demo of existing</td><td>$15K&ndash;$30K</td><td class="green">$0 (self-performed decon)</td></tr>
+        <tr><td>Land</td><td>$40K&ndash;$80K</td><td>$40K&ndash;$80K</td></tr>
+        <tr><td>Soft costs</td><td>$25K&ndash;$40K</td><td>$25K&ndash;$40K</td></tr>
+        <tr style="background: var(--surface2);">
+          <td><strong>TDC</strong></td><td><strong>$293K&ndash;$498K</strong></td><td class="highlight"><strong>$186K&ndash;$366K</strong></td>
+        </tr>
+        <tr style="background: var(--surface2);">
+          <td><strong>Grant needed (gap to $350K sale)</strong></td><td><strong>$0&ndash;$148K</strong></td><td class="green"><strong>$0&ndash;$16K</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>At the low end, the factory + decon model needs NO GRANT AT ALL.</strong> At the high end, it needs $16K &mdash; not $100K. That's a powerful scoring position.</p>
+  </div>
+</section>
+
+<!-- 51% RESALE VALUE -->
+<section id="resale">
+  <h2>The 51% Resale Value</h2>
+  <p>How the grant accelerates the 51% resale value target.</p>
+
+  <h3>Without the Grant</h3>
+  <p>Selling recovered materials through multiple channels (open house, ReStore, FB Marketplace, scrap yards). Takes time &mdash; building buyer networks, hauling, listing, negotiating.</p>
+
+  <h3>With the Grant</h3>
+  <p><strong style="color:var(--green);">You are your own buyer.</strong> Recovered materials go directly into the new home. No sales channel needed. The "resale" is internal &mdash; value captured as avoided cost.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Materials Recovered</th><th>Reused in New Build</th><th>Sold (open house + channels)</th><th>Total Value</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>A: Decon only (no new build)</td><td>$12K&ndash;$46K</td><td>$0</td><td>$9K&ndash;$25K</td><td>$9K&ndash;$25K</td>
+        </tr>
+        <tr>
+          <td>B: Decon + new build (own use)</td><td>$12K&ndash;$46K</td><td>$4K&ndash;$12K</td><td>$5K&ndash;$15K</td><td>$9K&ndash;$27K</td>
+        </tr>
+        <tr style="background: var(--orange-dim);">
+          <td class="highlight">C: Decon + grant-funded new build</td><td>$12K&ndash;$46K</td><td>$4K&ndash;$12K</td><td>$5K&ndash;$15K</td><td class="highlight">$9K&ndash;$27K + $100K subsidy</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>Scenario C is the play.</strong> The grant doesn't just fund the new build &mdash; it creates the demand signal for recovered materials. You're not hoping someone buys 50 floor joists at the open house. You're putting 50 floor joists into the next house.</p>
+  </div>
+
+  <h3>Volume Acceleration at 5 Units</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Per Unit</th><th>5-Unit Project</th></tr></thead>
+      <tbody>
+        <tr><td>Homes deconstructed</td><td>1</td><td class="highlight">5</td></tr>
+        <tr><td>Materials recovered</td><td>$12K&ndash;$46K</td><td class="highlight">$60K&ndash;$230K</td></tr>
+        <tr><td>Materials reused</td><td>$4K&ndash;$12K</td><td class="highlight">$20K&ndash;$60K</td></tr>
+        <tr><td>Grant funding</td><td>Up to $100K</td><td class="highlight">Up to $500K</td></tr>
+        <tr><td>Open houses</td><td>1</td><td class="highlight">5 (or 1 consolidated)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>5 houses deconstructed = 5 open houses = 5 data points for the ontology = 5 demonstrations for the community.</strong> The grant program forces scale to 5+, which is exactly what the open house model needs to build the buyer network.</p>
+  </div>
+</section>
+
+<!-- APPLICATION STRATEGY -->
+<section id="strategy">
+  <h2>Application Strategy</h2>
+
+  <h3>The Story</h3>
+  <blockquote>"ML Systems deconstructs existing structures and recovers 80&ndash;90% of building materials for reuse. These materials go directly into the new affordable homes we build on the same sites &mdash; reducing per-unit development costs by $15,000&ndash;$30,000 compared to conventional demolition and new-material construction. We need less subsidy per unit because the old house funds the new one."</blockquote>
+
+  <h3>Scoring Advantages</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Criterion</th><th>How We Score</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">Lower development costs</td><td>Decon eliminates demo disposal (&minus;$15K&ndash;$30K) + material reuse (&minus;$4K&ndash;$12K). Per-unit cost is $20K&ndash;$40K lower than conventional.</td></tr>
+        <tr><td class="highlight">Minimized per-unit subsidy</td><td>$60K&ndash;$80K/unit instead of $100K. State's $10M funds 125&ndash;167 units instead of 100.</td></tr>
+        <tr><td class="highlight">Innovative construction</td><td>Material reuse from decon. Hybrid steel/concrete foundation. Crane-based deconstruction.</td></tr>
+        <tr><td class="highlight">Community support</td><td>Builder's Open House at each decon site. Community sees the process, buys materials, learns about new homes.</td></tr>
+        <tr><td class="highlight">Ready-to-go</td><td>Own the crane. Own the decon capability. Site control + decon + construction = one team, one timeline.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Resilience &mdash; The Hidden Decon Advantage (Section e)</h3>
+  <p>The RFP asks about climate adaptation strategies. Deconstruction IS climate adaptation:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Strategy</th><th>Climate Impact</th><th>How We Do It</th></tr></thead>
+      <tbody>
+        <tr><td class="green">Material reuse</td><td>Reduces embodied carbon (manufacturing = emissions)</td><td>Recovered lumber, sheathing, hardware into new build</td></tr>
+        <tr><td class="green">Landfill diversion</td><td>160&ndash;190 tons/home diverted</td><td>Source-separated materials, on-site reuse</td></tr>
+        <tr><td class="green">Reduced trucking</td><td>Fewer dump truck trips to C&amp;D facilities</td><td>Materials stay on-site or go to open house nearby</td></tr>
+        <tr><td class="green">Concrete reuse as RCA</td><td>Avoids quarrying new aggregate</td><td>Foundation panels + crushed concrete = base course</td></tr>
+        <tr><td class="green">Smaller footprint homes</td><td>Less material, less energy, less land impact</td><td>600&ndash;1,200 SF (RFP encouraged range)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>No other applicant will have a resilience answer that includes "we recover 80&ndash;90% of the existing structure's materials and reuse them in the new build."</strong> This is a differentiator where most developers write about energy-efficient windows.</p>
+  </div>
+
+  <h3>Requirements Checklist</h3>
+  <ul class="checklist">
+    <li><span class="check done">&#10003;</span><strong>Developer entity</strong> &mdash; ML Systems LLC (NAICS 236115). Ready.</li>
+    <li><span class="check blocked">!</span><strong>GC Registration (RI)</strong> &mdash; Exam/requirements done. Blocked: requires liability insurance.</li>
+    <li><span class="check blocked">!</span><strong>Liability Insurance</strong> &mdash; Not yet purchased. CRITICAL PATH &mdash; capital raise must close first.</li>
+    <li><span class="check pending">~</span><strong>Site control (5+ sites)</strong> &mdash; Target: distressed/vacant properties in RI municipalities.</li>
+    <li><span class="check pending">~</span><strong>Pro forma (per-unit budget)</strong> &mdash; Build with decon savings as internal captured revenue line.</li>
+    <li><span class="check pending">~</span><strong>Design plans</strong> &mdash; Select factory-built partner or design smaller-footprint stick-built.</li>
+    <li><span class="check pending">~</span><strong>Monitoring agent</strong> &mdash; Required before selling units. Engage after award (Q6).</li>
+    <li><span class="check done">&#10003;</span><strong>Condo budget</strong> &mdash; N/A for scattered-site single-family.</li>
+    <li><span class="check pending">~</span><strong>Community letters of support</strong> &mdash; Start with municipalities where sites identified.</li>
+    <li><span class="check pending">~</span><strong>eCivis portal registration</strong> &mdash; Register at housing.ri.gov.</li>
+    <li><span class="check pending">~</span><strong>Freddie Mac PMMS rate</strong> &mdash; Use current PMMS for affordability calc (Q9).</li>
+    <li><span class="check pending">~</span><strong>Application narrative</strong> &mdash; Decon story + resilience angle + community engagement.</li>
+  </ul>
+
+  <h3>The MVE Gate</h3>
+  <div class="flow-vertical">
+    <div class="flow-step orange">
+      <div class="flow-title">Capital Raise</div>
+      <div class="flow-sub">Investor page / pitch</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange">
+      <div class="flow-title">Liability Insurance</div>
+      <div class="flow-sub">Significant startup cost</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step orange">
+      <div class="flow-title">GC Registration</div>
+      <div class="flow-sub">RI &mdash; "registration" not "license"</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step blue">
+      <div class="flow-title">Grant Application</div>
+      <div class="flow-sub">April 10, 2026 deadline</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step green">
+      <div class="flow-title">Award</div>
+      <div class="flow-sub">June 2026</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step teal">
+      <div class="flow-title">Construction Start</div>
+      <div class="flow-sub">By March 2027</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Framing for investors:</strong> "A single insurance purchase activates our GC registration, which qualifies us for a $100K/unit state grant program with an April 10 deadline. That grant funds 5+ affordable homes where our decon operations reduce per-unit costs by $38K&ndash;$62K. The insurance isn't overhead &mdash; it's the key that opens a $500K&ndash;$4M grant pipeline."</p>
+  </div>
+</section>
+
+<!-- CRITICAL PATH -->
+<section id="critical-path">
+  <h2>Critical Path to April 10</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Week</th><th>Task</th><th>Dependency</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">NOW</td><td>Close capital raise &rarr; purchase liability insurance</td><td>Investor page / pitch</td></tr>
+        <tr><td class="highlight">On insurance activation</td><td>Activate GC registration with RI</td><td>Insurance in hand</td></tr>
+        <tr><td>Mar 7&ndash;14</td><td>Register on eCivis portal. Identify 5+ scattered sites. Contact municipalities.</td><td>None &mdash; start now</td></tr>
+        <tr><td>Mar 14&ndash;21</td><td>Build per-unit pro forma with decon savings. Draft narrative.</td><td>Can start now</td></tr>
+        <tr><td>Mar 21&ndash;28</td><td>Select factory-built partner or finalize design. Finalize budget.</td><td>Can start now</td></tr>
+        <tr><td>Mar 28&ndash;Apr 4</td><td>Complete application. GC registration # required here.</td><td>Insurance &rarr; registration</td></tr>
+        <tr><td class="highlight">Apr 4&ndash;10</td><td>Final review, submit by April 10, 4:00 PM.</td><td>All above</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>Everything except the GC registration number can be worked in parallel NOW.</strong> The insurance/registration is the last piece &mdash; but it must drop before submission.</p>
+  </div>
+
+  <p><strong style="color:var(--text);">If the capital raise doesn't close before April 10:</strong> Round 2 opens late spring 2026 &mdash; same program, same rules, second chance. The application work carries over. But Round 1 is better &mdash; first-mover, less competition, state eager to deploy funds.</p>
+</section>
+
+<!-- INTERNAL CAPTURED REVENUE -->
+<section id="captured">
+  <h2>Internal Captured Revenue</h2>
+  <p>ML Systems' decon operations aren't a side business &mdash; they're an internal cost-reduction engine that makes every grant dollar go further. The state benefits directly.</p>
+
+  <h3>The Internal Loop</h3>
+
+  <div class="flow">
+    <div class="flow-step orange">
+      <div class="flow-icon">&#127968;</div>
+      <div class="flow-title">Existing Structure</div>
+      <div class="flow-sub">On site</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step orange">
+      <div class="flow-icon">&#128296;</div>
+      <div class="flow-title">ML Systems Decon</div>
+      <div class="flow-sub">Crane + crew</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step green">
+      <div class="flow-icon">&#9851;</div>
+      <div class="flow-title">Materials Split</div>
+      <div class="flow-sub">Reuse + sell + data</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step blue">
+      <div class="flow-icon">&#127975;</div>
+      <div class="flow-title">New Affordable Home</div>
+      <div class="flow-sub">Factory or stick-built</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step teal">
+      <div class="flow-icon">&#127970;</div>
+      <div class="flow-title">State Benefit</div>
+      <div class="flow-sub">More homes per dollar</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Material Path</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">Reused in new build</td><td>Reduces hard cost by $8K&ndash;$22K/unit &rarr; lower TDC &rarr; lower ask &rarr; higher scoring</td></tr>
+        <tr><td class="highlight">Surplus sold (open house)</td><td>Revenue offsets decon labor. Profit stays with ML Systems.</td></tr>
+        <tr><td class="highlight">Data captured (ontology)</td><td>Pricing model improves per project. Next project more efficient.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>State Benefit</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>State Problem</th><th>ML Systems Solution</th><th>Measurable Benefit</th></tr></thead>
+      <tbody>
+        <tr><td>Construction costs too high</td><td>Recovered materials reduce hard costs $38K&ndash;$62K/unit</td><td class="green">Homes built for $186K&ndash;$366K vs $293K&ndash;$498K</td></tr>
+        <tr><td>Grant dollars don't stretch</td><td>Lower per-unit subsidy ask</td><td class="green">$10M funds 143&ndash;200 homes vs 100</td></tr>
+        <tr><td>Landfill pressure (RIRRC)</td><td>160&ndash;190 tons diverted per house</td><td class="green">800&ndash;950 tons for 5-unit project</td></tr>
+        <tr><td>Local job creation</td><td>7-person decon crew, local hire</td><td class="green">7+ sustained jobs per pipeline</td></tr>
+        <tr><td>Housing production speed</td><td>Decon + construction = one continuous op</td><td class="green">Faster site-to-occupancy</td></tr>
+        <tr><td>Community resistance</td><td>Builder's Open House = public engagement</td><td class="green">Community sees value, not disruption</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SHINGLE ARM -->
+<section id="shingle">
+  <h2>The Shingle Arm</h2>
+  <p>Winter revenue from roofer diversion. RI has ~45,000&ndash;50,000 tons/year of tear-off shingles going to landfill. There are ZERO shingle recyclers in the state.</p>
+
+  <div class="flow">
+    <div class="flow-step orange">
+      <div class="flow-icon">&#127959;</div>
+      <div class="flow-title">Roofers (Year-Round)</div>
+      <div class="flow-sub">Currently paying $100/ton to landfill</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step orange">
+      <div class="flow-icon">&#128230;</div>
+      <div class="flow-title">ML Systems Stockpile</div>
+      <div class="flow-sub">Roofer pays $50&ndash;$70/ton (saves $30&ndash;$50)</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step blue">
+      <div class="flow-icon">&#9881;</div>
+      <div class="flow-title">Winter Grinding</div>
+      <div class="flow-sub">Same crew, off-season</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step green">
+      <div class="flow-icon">&#128739;</div>
+      <div class="flow-title">HMA Plants</div>
+      <div class="flow-sub">Buy RAS at $35&ndash;$50/ton</div>
+    </div>
+  </div>
+
+  <h3>Why It Matters for the Grant Pitch</h3>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1rem;">Year-Round Revenue</div>
+      <div class="stat-label">Shingles in winter when decon is slow</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1rem;">Shared Assets</div>
+      <div class="stat-label">Same grinder, separator, crew, site</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1rem;">State Benefits</div>
+      <div class="stat-label">45K&ndash;50K tons/yr diverted from RIRRC</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1rem;">Roofer Network</div>
+      <div class="stat-label">Every roofer becomes a decon referral</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Not in the grant pro forma</strong> &mdash; it's a separate revenue arm. But it strengthens the narrative: ML Systems isn't a one-project developer asking for a grant. It's an operating platform with year-round revenue streams, and the grant-funded homes are one output.</p>
+  </div>
+</section>
+
+<!-- PRO FORMA IMPACT -->
+<section id="pro-forma">
+  <h2>Pro Forma Impact</h2>
+  <p>Decon savings show as lower expense lines, not a separate revenue stream.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Line Item</th><th>Without Decon</th><th>With Decon (ML Systems)</th><th>Difference</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Demolition / site clearing</td><td>$15K&ndash;$30K</td><td class="green">$0 (self-performed, reimbursable per Q12)</td><td class="green">&minus;$15K&ndash;$30K</td>
+        </tr>
+        <tr>
+          <td>Foundation</td><td>$20K&ndash;$35K</td><td class="green">$10K&ndash;$20K (hybrid reuse, RCA base)</td><td class="green">&minus;$10K&ndash;$15K</td>
+        </tr>
+        <tr>
+          <td>Framing materials</td><td>$30K&ndash;$50K</td><td class="green">$22K&ndash;$40K (recovered lumber offsets)</td><td class="green">&minus;$8K&ndash;$10K</td>
+        </tr>
+        <tr>
+          <td>Site work (driveway, grading, retaining)</td><td>$8K&ndash;$15K</td><td class="green">$3K&ndash;$8K (RCA, panels)</td><td class="green">&minus;$5K&ndash;$7K</td>
+        </tr>
+        <tr style="background: var(--surface2);">
+          <td><strong>Total hard cost reduction</strong></td><td></td><td></td><td class="highlight"><strong>&minus;$38K&ndash;$62K</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Where the Reduction Flows</h3>
+  <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:1rem;">Lower Grant Ask</div>
+      <div class="stat-label">$50K&ndash;$70K vs $100K (scored higher per Q14)</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value" style="font-size:1rem;">Developer Profit</div>
+      <div class="stat-label">Q10: no cap. Keep the difference.</div>
+    </div>
+    <div class="stat-card teal">
+      <div class="stat-value" style="font-size:1rem;">Lower Sale Price</div>
+      <div class="stat-label">Optional: $300K&ndash;$350K for deeper affordability</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY NOBODY ELSE -->
+<section id="nobody">
+  <h2>Why Nobody Else Can Do This</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Differentiator</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">1</td><td class="highlight">Self-performing decon</td><td>Every other developer subs out demo or skips it</td></tr>
+        <tr><td class="highlight">2</td><td class="highlight">On-site material reuse</td><td>Conventional demo = dumpster. We reuse on the same site.</td></tr>
+        <tr><td class="highlight">3</td><td class="highlight">Hard cost reduction via reuse</td><td>Everyone else buys 100% new materials</td></tr>
+        <tr><td class="highlight">4</td><td class="highlight">Community engagement through decon</td><td>Builder's Open House is unique to ML Systems</td></tr>
+        <tr><td class="highlight">5</td><td class="highlight">Data feedback loop</td><td>Ontology captures data &rarr; next project is cheaper and faster</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>The Q&amp;A confirms nobody asked about material reuse, deconstruction, or recovered materials.</strong> Nobody else is thinking about this. We're alone in this lane.</p>
+  </div>
+
+  <h3>The State's Incentive</h3>
+  <div class="compare-grid">
+    <div class="compare-card conventional">
+      <div class="cc-label">Every other applicant</div>
+      <div class="cc-title">Conventional Developer</div>
+      <div class="cc-row"><span class="label">Demo cost</span><span class="value">&minus;$25,000</span></div>
+      <div class="cc-row"><span class="label">Material recovery</span><span class="value">$0</span></div>
+      <div class="cc-row"><span class="label">New materials</span><span class="value">&minus;$80,000</span></div>
+      <div class="cc-row"><span class="label">Total cost</span><span class="value">&minus;$105,000</span></div>
+      <div class="cc-row"><span class="label">Subsidy needed</span><span class="value">$100,000/unit</span></div>
+      <div class="cc-row"><span class="label">$10M funds</span><span class="value">100 homes</span></div>
+    </div>
+    <div class="compare-card ml">
+      <div class="cc-label">Decon-powered construction</div>
+      <div class="cc-title">ML Systems</div>
+      <div class="cc-row"><span class="label">Decon cost</span><span class="value" style="color:var(--green);">$0</span></div>
+      <div class="cc-row"><span class="label">Material reuse</span><span class="value" style="color:var(--green);">+$8,000</span></div>
+      <div class="cc-row"><span class="label">New materials</span><span class="value" style="color:var(--green);">&minus;$68,000</span></div>
+      <div class="cc-row"><span class="label">Total cost</span><span class="value" style="color:var(--green);">&minus;$60,000</span></div>
+      <div class="cc-row"><span class="label">Subsidy needed</span><span class="value" style="color:var(--orange);">$60,000/unit</span></div>
+      <div class="cc-row"><span class="label">$10M funds</span><span class="value" style="color:var(--green);">167 homes</span></div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <p><strong>"The old house funds the new one."</strong> Give us the grant. We'll stretch your dollar further because the old house pays for part of the new one. The state gets 67% more homes with the same $10M.</p>
+  </div>
+</section>
+
+<!-- BIGGER PLAY -->
+<section id="bigger">
+  <h2>The Bigger Play</h2>
+
+  <h3>Round 2 (Late Spring 2026)</h3>
+  <p>Another $10M. If Round 1 goes well, Round 2 application is stronger with data from completed decon + open house events.</p>
+
+  <h3>15,000 Homes Target &mdash; 3-Year Scale</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scale</th><th>Homes/Year</th><th>Decon Revenue</th><th>Material Reuse Savings</th><th>Grant Funding</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Year 1 (grant pilot)</td><td>5&ndash;10</td><td>$60K&ndash;$460K</td><td>$20K&ndash;$120K</td><td class="highlight">$300K&ndash;$1M</td>
+        </tr>
+        <tr>
+          <td>Year 2 (proven model)</td><td>15&ndash;25</td><td>$180K&ndash;$1.15M</td><td>$65K&ndash;$300K</td><td class="highlight">$900K&ndash;$2.5M</td>
+        </tr>
+        <tr>
+          <td>Year 3 (scaled)</td><td>30&ndash;50</td><td>$360K&ndash;$2.3M</td><td>$130K&ndash;$600K</td><td class="highlight">$1.8M&ndash;$5M</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>The grant program is the launchpad.</strong> 5 homes proves the model. 15 proves the economics. 50 proves the market. Each house generates 4 returns: material value, ontology data, robot training, market intelligence &mdash; AND qualifies for $60K&ndash;$100K in grant funding.</p>
+  </div>
+
+  <h3>Other Housing 2030 Programs (Same Bond, Same Portal)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Program</th><th>Funding</th><th>Relevance</th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">Acquisition and Revitalization</td><td>$10M+</td><td>Buy distressed homes &rarr; decon &rarr; rebuild</td></tr>
+        <tr><td class="highlight">Small Scale</td><td>Up to $500K/unit</td><td>Smaller projects, same decon advantage</td></tr>
+        <tr><td>Affordable Rental New Development</td><td>$27M</td><td>Rental units &mdash; same decon cost savings apply</td></tr>
+        <tr><td>Permanent Supportive Housing</td><td>Varies</td><td>Specialized &mdash; less relevant but same cost story</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>The decon cost-efficiency story works across ALL Housing 2030 programs.</strong> Entry-level homeownership is the entry point, but the same pitch applies to rental, revitalization, and supportive housing.</p>
+  </div>
+
+  <h3>The Lucent Lens &mdash; Full Circle</h3>
+  <div class="flow">
+    <div class="flow-step orange">
+      <div class="flow-icon">&#127968;</div>
+      <div class="flow-title">Old House</div>
+      <div class="flow-sub">Deconstructed (local jobs)</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step teal">
+      <div class="flow-icon">&#128296;</div>
+      <div class="flow-title">Materials</div>
+      <div class="flow-sub">Open House + reuse</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step blue">
+      <div class="flow-icon">&#127975;</div>
+      <div class="flow-title">New Home</div>
+      <div class="flow-sub">Grant-funded, &lt;$400K</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step green">
+      <div class="flow-icon">&#127969;</div>
+      <div class="flow-title">New Owner</div>
+      <div class="flow-sub">Equity from day one</div>
+    </div>
+  </div>
+  <p style="color:var(--text); text-align:center; max-width:none;">The old house glows through the new one. The family who moves in is living inside materials that another family once called home.</p>
+</section>
+
+<!-- SOURCES -->
+<section id="sources">
+  <h2>Sources</h2>
+
+  <h3>State Documents</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Document</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>2030 Entry Level Homeownership Q&amp;A (2.27.26)</td><td>EOH official Q&amp;A, 14 questions answered</td></tr>
+        <tr><td>Factory Built Housing Pricing Sheet</td><td>EOH-compiled pricing from 10+ manufacturers</td></tr>
+        <tr><td>Housing 2030 Final Plan (12-2-25)</td><td>State Planning Council approved, statewide strategy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Web Sources</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Source</th><th>Link</th></tr></thead>
+      <tbody>
+        <tr><td>Governor McKee Press Release</td><td><a href="https://governor.ri.gov/press-releases/governor-mckee-and-executive-office-housing-open-applications-20-million-bond-funded" target="_blank" style="color:var(--orange);">governor.ri.gov</a></td></tr>
+        <tr><td>Brown Daily Herald</td><td><a href="https://www.browndailyherald.com/article/2026/02/state-launches-affordable-housing-programs-aiming-to-expand-access-to-homeownership-rentals" target="_blank" style="color:var(--orange);">browndailyherald.com</a></td></tr>
+        <tr><td>Yahoo/WPRI</td><td><a href="https://www.yahoo.com/news/articles/initiative-hopes-accelerate-development-entry-223028250.html" target="_blank" style="color:var(--orange);">yahoo.com/news</a></td></tr>
+        <tr><td>Ocean State Media</td><td><a href="https://www.oceanstatemedia.org/news-and-culture/community/15-000-new-homes-in-four-years-state-housing-officials-set-ambitious-target" target="_blank" style="color:var(--orange);">oceanstatemedia.org</a></td></tr>
+        <tr><td>RI 2030</td><td><a href="https://rhodeisland2030.ri.gov/ri-2030-priorities/building-rhode-prosperity/improving-housing-ecosystem-and-prioritizing" target="_blank" style="color:var(--orange);">rhodeisland2030.ri.gov</a></td></tr>
+        <tr><td>Housing 2030 Portal</td><td><a href="https://housing.ri.gov/programs/entry-level-homeownership-program" target="_blank" style="color:var(--orange);">housing.ri.gov</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Internal Cross-References</h3>
+  <p>ML Systems 1-day-logistics.md, builders-open-house.md</p>
+</section>
+
+<footer>
+  <p>ML Systems LLC &middot; Deconstruction Lab &middot; Lucent Lens</p>
+  <p style="margin-top:0.5rem;"><a href="housing-2030-grant.md">Markdown Source</a> &middot; <a href="master-pitch.md">Master Pitch</a></p>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('section').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

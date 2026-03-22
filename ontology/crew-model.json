@@ -1,0 +1,199 @@
+{
+  "description": "Crew model for full-house residential deconstruction. Constants (on-site all day, break when they can) + shift workers (90/45 cadence). 6 shifts per day × 2 days = 12 total shifts.",
+  "shiftModel": {
+    "laborDuration": 90,
+    "solveDuration": 45,
+    "shiftTotal": 135,
+    "unit": "minutes",
+    "shiftsPerDay": 6,
+    "totalShifts": 12,
+    "siteDay": { "start": "5:30", "end": "19:00", "hoursOnSite": 13.5 },
+    "philosophy": {
+      "the45": "The 45 is NOT a break — it's the other half of the job. 90 minutes of sustained physical work, then stop, step back, ask: What took too long? What broke? What's the better way? What did I learn about this house? Then go back in with the insight.",
+      "compensation": "ML Systems pays for both. 90 minutes of labor (the body) + 45 minutes of problem-solving (the brain). Both are compensated.",
+      "2xClaim": "Conventional crew: 8 hrs → 6 hrs effective output (fatigue, lunch, slowdowns, repeated mistakes). ML Systems: 6 shifts → 9 hrs focused labor + 4.5 hrs problem-solving that compounds. Each 90-min block is 15%+ more efficient than continuous fatigued labor. 2 days with this structure > 4 days conventional.",
+      "flexibility": "Nobody is required to work consecutive shifts. Pick the ones that fit your schedule or skills. Work 1 shift and go home, or work all 6 if you're built like that."
+    },
+    "the45Feeds": [
+      { "activity": "Photograph materials you just pulled", "platform": "BOH", "why": "Listings go live during the decon — not after" },
+      { "activity": "Write descriptions, set prices", "platform": "BOH", "why": "You touched it, you know its condition" },
+      { "activity": "Log material conditions, separation times", "platform": "Decon Lab", "why": "Every house trains the model for the next house" },
+      { "activity": "Record dimensions, species, grades", "platform": "Design Studio", "why": "Material specs for the design reference library" },
+      { "activity": "Shoot video of process/progress", "platform": "Social / Marketing", "why": "Real content from real work" },
+      { "activity": "Update project status, log hours", "platform": "Client App", "why": "Project tracking, billing" },
+      { "activity": "Help plan the next shift's work", "platform": "Internal", "why": "Problem-solve with Sal and the constants" }
+    ],
+    "schedule": [
+      { "shift": 1, "day": 1, "time": "5:30–7:45",   "labor": "5:30–7:00",   "solve": "7:00–7:45" },
+      { "shift": 2, "day": 1, "time": "7:45–10:00",  "labor": "7:45–9:15",   "solve": "9:15–10:00" },
+      { "shift": 3, "day": 1, "time": "10:00–12:15", "labor": "10:00–11:30", "solve": "11:30–12:15" },
+      { "shift": 4, "day": 1, "time": "12:15–2:30",  "labor": "12:15–1:45",  "solve": "1:45–2:30" },
+      { "shift": 5, "day": 1, "time": "2:30–4:45",   "labor": "2:30–4:00",   "solve": "4:00–4:45" },
+      { "shift": 6, "day": 1, "time": "4:45–7:00",   "labor": "4:45–6:15",   "solve": "6:15–7:00" },
+      { "shift": 7, "day": 2, "time": "5:30–7:45",   "labor": "5:30–7:00",   "solve": "7:00–7:45" },
+      { "shift": 8, "day": 2, "time": "7:45–10:00",  "labor": "7:45–9:15",   "solve": "9:15–10:00" },
+      { "shift": 9, "day": 2, "time": "10:00–12:15", "labor": "10:00–11:30", "solve": "11:30–12:15" },
+      { "shift": 10, "day": 2, "time": "12:15–2:30", "labor": "12:15–1:45",  "solve": "1:45–2:30" },
+      { "shift": 11, "day": 2, "time": "2:30–4:45",  "labor": "2:30–4:00",   "solve": "4:00–4:45" },
+      { "shift": 12, "day": 2, "time": "4:45–7:00",  "labor": "4:45–6:15",   "solve": "6:15–7:00" }
+    ],
+    "phaseMapping": [
+      { "shift": 1, "day": 1, "phase": "PRE + Phase A (Kitchen)", "shiftCrew": 3, "crewFocus": "Interior soft strip", "constantsDoing": "Sal: supervise + lockout. Crane op: setup + rigging. Brokk op: saw-cutting foundation walls." },
+      { "shift": 2, "day": 1, "phase": "Phase B (Trim) + Phase C (E&P)", "shiftCrew": 4, "crewFocus": "2 trim, 2 electrical/plumbing", "constantsDoing": "Sal: supervise. Crane op: finish setup, begin roof rigging. Brokk op: continues foundation." },
+      { "shift": 3, "day": 1, "phase": "ROOF: cuts + first lifts", "shiftCrew": 4, "crewFocus": "Rigger + cutter + 2 ground", "constantsDoing": "Sal: on structure or ground. Crane op: in cab. Brokk op: core drilling." },
+      { "shift": 4, "day": 1, "phase": "ROOF finish + WALLS: cuts start", "shiftCrew": 4, "crewFocus": "Rigger + cutter + 2 ground disassembly", "constantsDoing": "Crane op: continuous. Brokk op: freeing panels." },
+      { "shift": 5, "day": 1, "phase": "WALLS: lifts continue", "shiftCrew": 4, "crewFocus": "Rigger + cutter + 2 ground disassembly", "constantsDoing": "Crane op: continuous. Brokk op: continues foundation." },
+      { "shift": 6, "day": 1, "phase": "WALLS finish + ground catch-up", "shiftCrew": 3, "crewFocus": "Ground crew: staging, sorting", "constantsDoing": "Crane op: wrapping for day. Brokk op: may continue or wrap." },
+      { "shift": 7, "day": 2, "phase": "FLOORS: hardwood + brace + cuts", "shiftCrew": 4, "crewFocus": "Rigger + cutter + 2 ground", "constantsDoing": "Crane op: in cab. Brokk op: foundation continues." },
+      { "shift": 8, "day": 2, "phase": "FLOORS finish: lifts + disassembly", "shiftCrew": 4, "crewFocus": "Rigger + 3 ground disassembly", "constantsDoing": "Crane op: lifts. Brokk op: panels fully freed." },
+      { "shift": 9, "day": 2, "phase": "FOUNDATION: panel lifts (pre-freed)", "shiftCrew": 3, "crewFocus": "Rigger + 2 ground receiving", "constantsDoing": "Crane op: quick picks. Brokk op: in-hole, loosening slab." },
+      { "shift": 10, "day": 2, "phase": "FOUNDATION: slab lifts + footing crush", "shiftCrew": 3, "crewFocus": "Rigger + 2 ground", "constantsDoing": "Crane op: lifts. Brokk op: crushing footings." },
+      { "shift": 11, "day": 2, "phase": "FOUNDATION finish + zone staging", "shiftCrew": 3, "crewFocus": "Ground: sort, stack, organize", "constantsDoing": "Crane op: last lifts. Brokk op: done." },
+      { "shift": 12, "day": 2, "phase": "POST: merchandising + cleanup", "shiftCrew": 3, "crewFocus": "Price tags, signage, magnetic sweep", "constantsDoing": "Sal: final walkthrough, BOH review. Crane: done or helping." }
+    ],
+    "capacityCheck": {
+      "shiftWorkerHours": { "day1": 33, "day2": 30, "total": 63, "note": "avg 3.7/shift × 90 min" },
+      "salHours": { "perDay": 13.5, "total": 27 },
+      "craneOpHours": { "perDay": 13.5, "total": 27 },
+      "brokkOpHours": { "day1": 13.5, "day2": 10, "total": 23.5, "note": "Done by Shift 11" },
+      "totalPersonHours": 140.5,
+      "vsConventional": "7 people × 14 hrs = 98 person-hours. This model: ~140 person-hours. 42% more capacity, spread so nobody burns out.",
+      "craneTime": "Shifts 3–6 (Day 1) + Shifts 7–10 (Day 2) = 8 shifts × 90 min = 12 hrs crane windows. Original needed ~12–14 hrs. Fits.",
+      "foundationRunway": "Brokk starts Shift 1 Day 1 (5:30 AM). Foundation panel lifts start Shift 9 Day 2 (10:00 AM). 28.5 hrs elapsed for Brokk prep before first foundation crane lift. Original had 4.5 hrs head start — this has 6× more runway."
+    },
+    "fieldTestingNeeded": [
+      "Do constants actually need fixed breaks, or do they naturally pause during rigging resets and shift transitions?",
+      "Is the universal 45-minute solve window too long? Too short? Maybe some shifts 30, some 60.",
+      "Can phases really fit within 90-minute labor blocks? Kitchen alone is 1.5–2.5 hrs — may spill into Shift 2.",
+      "Does the crane actually stop during break? Mid-rig = finish the lift, break starts after.",
+      "Right number of shifts per day? 6 might be too many, 5 might be enough. Field proves it.",
+      "Shift crew continuity — does it matter if different people show up? Constants as anchors may be enough."
+    ]
+  },
+  "constants": {
+    "description": "On-site 5:30 AM – 7:00 PM both days. Break when they can — not on a fixed schedule. Crane op rests during rigging reset. Brokk op pauses between cuts. The right rhythm comes from the field, not a document.",
+    "roles": [
+      {
+        "id": "supervisor",
+        "name": "Sal — Supervisor / Founder",
+        "responsibilities": [
+          "Full-site structural awareness — knows what's been cut, rigged, and what's next",
+          "Safety authority — can halt any operation",
+          "Cross-shift synthesis — insights from one crew fed to next",
+          "Decision-making on material recovery (save vs discard)",
+          "Data capture — ontology insights from each project",
+          "During the 45: collects insights from crew — what took too long, what broke, what's the better way"
+        ],
+        "phases": ["all"],
+        "hoursPerDay": 13.5,
+        "lucentLens": "When the shift crew stops to think, Sal is the person they think WITH. A Shift 2 crew member notices trim pulls faster from the bottom — Sal carries that to Shift 3. The operation gets smarter every 2.25 hours. This is 'utilize the person, not the process' in practice."
+      },
+      {
+        "id": "crane_operator",
+        "name": "Crane Operator",
+        "responsibilities": [
+          "Crane operation for all structural lifts",
+          "Load weight assessment and swing radius management",
+          "Weather monitoring (wind limits)",
+          "Communication with signal person",
+          "Rests during rigging resets — natural pause rhythm"
+        ],
+        "phases": ["PRE", "ROOF", "WALLS", "FLOORS", "FOUNDATION"],
+        "hoursPerDay": 13.5,
+        "certification": "NCCCO certified",
+        "craneShifts": "Active Shifts 3–6 (Day 1) + 7–10 (Day 2). Setup in Shifts 1–2. Done or helping ground by Shift 11–12."
+      },
+      {
+        "id": "brokk_operator",
+        "name": "Brokk 170 Operator",
+        "responsibilities": [
+          "Remote operation of Brokk demolition robot",
+          "Foundation wall saw-cutting (starts Shift 1 Day 1)",
+          "Core drilling lift holes",
+          "Panel freeing at footing joints",
+          "Footing crushing",
+          "28.5 hrs of prep runway before first foundation crane lift"
+        ],
+        "phases": ["FOUNDATION"],
+        "hoursDay1": 13.5,
+        "hoursDay2": 10,
+        "note": "Starts Day 1 Shift 1 — 28.5 hrs elapsed before first foundation crane lift (Shift 9 Day 2). Done by Shift 11. Cross-trains ground roles off-phase."
+      }
+    ]
+  },
+  "shiftWorkers": {
+    "description": "90 minutes of sustained physical labor + 45 minutes of problem-solving. Pick which shifts you show up for — nobody required to work consecutive shifts. Work 1 shift and go home, or work all 6.",
+    "roles": [
+      {
+        "id": "rigger",
+        "name": "Rigger / Signal Person",
+        "responsibilities": [
+          "Attach slings, shackles, spreader bars to loads",
+          "Verify center of gravity and load security",
+          "Give hand signals to crane operator (OSHA standard)",
+          "Manage tag lines during lifts"
+        ],
+        "phases": ["ROOF", "WALLS", "FLOORS", "FOUNDATION"],
+        "activeShifts": "3–6 (Day 1), 7–11 (Day 2)",
+        "certification": "Qualified rigger + signal person"
+      },
+      {
+        "id": "ground_lead",
+        "name": "Ground Lead",
+        "responsibilities": [
+          "Lead ground disassembly of sections (reverse order)",
+          "Material quality assessment — recovery decisions",
+          "Tool selection for material preservation (flush-cut vs extract)",
+          "Staging zone assignments",
+          "During the 45: photograph materials, log conditions, plan next block"
+        ],
+        "phases": ["ROOF", "WALLS", "FLOORS", "FOUNDATION", "POST"],
+        "skills": ["flush_cut_nail", "material_grading", "tool_proficiency"]
+      },
+      {
+        "id": "ground_support",
+        "name": "Ground Support",
+        "responsibilities": [
+          "Material carrying and staging",
+          "Sorting into recovery streams",
+          "Zone organization + cleanup",
+          "Nail sweeping (magnetic)",
+          "Soft strip (parallel with crane work)",
+          "During the 45: photograph what you just pulled for BOH, log data"
+        ],
+        "phases": ["all"],
+        "note": "Entry-level role — feeds into ground lead and rigger with experience"
+      }
+    ]
+  },
+  "crewSizing": {
+    "minimum": {
+      "constants": 3,
+      "shiftWorkers": 2,
+      "total": 5,
+      "note": "Supervisor + crane op + Brokk op + 2 rotating ground"
+    },
+    "optimal": {
+      "constants": 3,
+      "shiftWorkers": 4,
+      "total": 7,
+      "note": "Rigger + cutter + 2 ground for structural shifts. 3 ground for soft strip and staging shifts."
+    },
+    "peakShift": {
+      "constants": 3,
+      "shiftWorkers": 4,
+      "total": 7,
+      "note": "Shifts 3–5 (Day 1) and 7–8 (Day 2) are peak — crane active, full ground crew needed"
+    }
+  },
+  "humanoidBridge": {
+    "note": "Every crew role maps to humanoid-ontology task primitives. Ground support = Tier 1 robot deployment (sweep, carry, sort). Ground lead = Tier 2–3 (structured, force-adaptive). Rigger + crane = Tier 4+ (complex spatial, safety-critical).",
+    "robotDisplacement": {
+      "tier1_now": ["ground_support (partial) — sweep, carry, sort, magnetic sweep"],
+      "tier2_near": ["ground_support (expanded) — organized stacking, material grading assist"],
+      "tier3_mid": ["ground_lead (assist) — pry, unfasten under supervision"],
+      "tier4_long": ["rigger (assist), crane_operator stays human"],
+      "lucentLens": "Robot deployment follows Lucent Lens: does this reduce a human's hours? If yes, human must explicitly decide and approve. Logged."
+    }
+  }
+}

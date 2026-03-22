@@ -47,3 +47,42 @@ bash sync-to-monorepo.sh
 ```
 
 ## Color: Orange #F97316
+
+## Research Drop Zone
+
+### Source of Truth
+- **Platform:** Ocean State Procures (OSP) — osp.ri.gov (Sal's login)
+- **Rule:** Source PDFs stay on OSP. Never store locally long-term.
+
+### Ingest
+- **Path:** `research/Sals Research Pulls/`
+- **Trigger:** "process new research" or "check research folder"
+- **Do NOT auto-process** — only when Sal initiates
+
+### Processing Rules
+1. Read dropped files, extract intelligence
+2. **Solicitations / Grant Programs:**
+   - Create analysis `.md` + `.html` pair in `research/processed/`
+   - HTML: dark theme, orange accent (#F97316), glassmorphism — shareable without markdown viewer
+   - Integrate findings into `research/master-pitch.md` if they strengthen the decon expansion story
+3. **Equipment / technical research:** → `research/potential-products/` or relevant phase folder
+4. **Market / policy research:** → `research/` as standalone docs
+5. Update `research/master-pitch.md` with new facts/numbers (compact — no full specs)
+6. Cross-reference with EOH grant strategy (`research/housing-2030-grant.md`) for scoring implications
+
+### Cleanup (after processing)
+- **DELETE source PDFs** — they live on OSP or original source, not on disk
+- Delete the `Sals Research Pulls/` contents after processing
+- Only analysis md/html files stay on disk
+
+### What stays on disk
+- Analysis md/html pairs (~10-20 KB per item)
+- Master pitch gets a one-liner update, not a full section per research pull
+
+### Archived Research Pulls
+| Date | Source | Topic | Processed To |
+|---|---|---|---|
+| 2026-03-07 | OSP / housing.ri.gov | Housing 2030 EOH — RFP, Q&A, Factory Built pricing, Housing 2030 Plan | `research/housing-2030-grant.md` |
+| 2026-03-11 | OSP | Vendor OSP Training Presentation | Reviewed, no action needed |
+| 2026-03-16 | naca.com | NACA One-Dollar Homeownership Program | `research/processed/naca-one-dollar-program.md` + `.html` → master pitch updated |
+| 2026-03-16 | Web research | RI Optimized Plan — dual-track EOH+NACA, PRA Land Bank, CHLT, BOH integration | `research/processed/ri-optimized-plan.md` → master pitch + partnership-map.html updated |

@@ -1,0 +1,91 @@
+{
+  "description": "Equipment and tools for full-house residential deconstruction. Organized by ownership model (core fleet vs phase-specific vs consumable).",
+  "coreFleet": [
+    {
+      "id": "crane",
+      "name": "Crane",
+      "phases": ["PRE", "ROOF", "WALLS", "FLOORS", "FOUNDATION", "POST"],
+      "ownership": "owned",
+      "cost": null,
+      "note": "Already owned by ML Systems. Central to all structural phases — lifts roof sections, wall sections, floor sections, foundation panels."
+    },
+    {
+      "id": "brokk_170",
+      "name": "Brokk 170 Demolition Robot",
+      "phases": ["FOUNDATION"],
+      "ownership": "purchase",
+      "cost": "$80,000–130,000 (used)",
+      "note": "Replaces excavator + breaker crew + crusher + rebar cutter. Remote-operated. Primary in Phase 4, assists all phases. IS a robot — highest robot feasibility."
+    },
+    {
+      "id": "spreader_bar",
+      "name": "Spreader Bar + Rigging Kit",
+      "phases": ["ROOF", "WALLS", "FLOORS"],
+      "ownership": "owned",
+      "items": ["spreader_bar", "basket_slings", "shackles", "through_bolts", "tag_lines"],
+      "note": "Used for every crane lift. Basket slings for roof, standard slings for walls/floors."
+    },
+    {
+      "id": "skid_steer",
+      "name": "Skid Steer",
+      "phases": ["POST"],
+      "ownership": "rent_per_project",
+      "cost": "$250–400/day",
+      "note": "Backfill, grading, material staging for heavy items"
+    }
+  ],
+  "phaseEquipment": {
+    "cutting": [
+      { "id": "reciprocating_saw", "name": "Reciprocating Saw", "phases": ["ROOF", "WALLS", "FLOORS"], "cost": "$100–300", "note": "Primary section-cutting tool" },
+      { "id": "circular_saw", "name": "Circular Saw", "phases": ["PRE", "FLOORS"], "cost": "$100–250", "note": "Subfloor cutting — depth control critical" },
+      { "id": "oscillating_tool", "name": "Oscillating Multi-Tool", "phases": ["ROOF", "WALLS", "FLOORS"], "cost": "$100–200", "note": "Flush-cut nails to preserve sheet goods — THE decon preservation tool" },
+      { "id": "concrete_chain_saw", "name": "Concrete Chain Saw (ICS/Husqvarna)", "phases": ["FOUNDATION"], "cost": "$3,000–5,000", "note": "Foundation wall sectioning. Water-cooled diamond chain." },
+      { "id": "walk_behind_slab_saw", "name": "Walk-Behind Slab Saw", "phases": ["FOUNDATION"], "cost": "$200–400/day rental", "note": "Slab grid cutting" },
+      { "id": "bolt_cutters", "name": "Bolt Cutters", "phases": ["FOUNDATION"], "cost": "$30–80", "note": "Rebar cutting" }
+    ],
+    "drilling": [
+      { "id": "impact_driver", "name": "Cordless Impact Driver", "phases": ["all"], "cost": "$150–300", "note": "Primary unfastening tool — screw removal across all phases" },
+      { "id": "core_drill", "name": "Core Drill + 2\" Diamond Bit", "phases": ["FOUNDATION"], "cost": "$500–800", "note": "Lifting holes in concrete panels" }
+    ],
+    "demolition": [
+      { "id": "pry_bar", "name": "Pry Bar (36\")", "phases": ["ROOF", "WALLS", "FLOORS"], "cost": "$20–40", "note": "Primary separation tool" },
+      { "id": "flat_bar", "name": "Flat Bar (15\")", "phases": ["ROOF", "WALLS", "FLOORS"], "cost": "$10–20", "note": "Precision prying — drywall, trim, sheathing" },
+      { "id": "cats_paw", "name": "Cat's Paw / Nail Puller", "phases": ["ROOF", "WALLS", "FLOORS"], "cost": "$10–20", "note": "Nail extraction where flush-cut not needed" },
+      { "id": "sledgehammer", "name": "Sledgehammer (8 lb)", "phases": ["WALLS"], "cost": "$30–50", "note": "Selective demolition" }
+    ],
+    "safety_equipment": [
+      { "id": "magnetic_sweeper", "name": "Magnetic Sweeper", "phases": ["ROOF", "WALLS", "FLOORS", "FOUNDATION", "POST"], "cost": "$1,500–3,000", "note": "Nail collection after every phase + end of day. Also collects rebar fragments in Phase 4." },
+      { "id": "fall_harness", "name": "Fall Protection Harness + Lanyard", "phases": ["ROOF"], "cost": "$100–200/set", "qty": "per crew member on roof", "note": "100% tie-off required until roof is off" },
+      { "id": "loto_kit", "name": "Lockout/Tagout Kit", "phases": ["PRE"], "cost": "$50–100", "note": "Energy isolation for all utilities" },
+      { "id": "voltage_tester", "name": "Non-Contact Voltage Tester", "phases": ["PRE", "WALLS"], "cost": "$20–50", "note": "Verify dead circuits before electrical strip" }
+    ],
+    "material_handling": [
+      { "id": "wheelbarrow", "name": "Wheelbarrow", "phases": ["all"], "cost": "$80–150", "note": "Shingle transport, debris, small material moves" },
+      { "id": "hand_truck", "name": "Hand Truck / Appliance Dolly", "phases": ["WALLS"], "cost": "$50–150", "note": "Appliance removal" },
+      { "id": "pallets", "name": "Pallets", "phases": ["POST"], "cost": "$5–15/ea or free", "note": "Sheet goods staging (sheathing, drywall, subfloor)" },
+      { "id": "a_frames", "name": "A-Frames", "phases": ["POST"], "cost": "$50–100/ea", "note": "Door and window display for BOH" }
+    ]
+  },
+  "rdEquipment": [
+    {
+      "id": "track_breaker",
+      "name": "Track Breaker",
+      "phase": "FOUNDATION",
+      "status": "R&D — V0/V0a/V1 prototyping",
+      "versions": {
+        "v0": { "description": "Rigid bolted frame, manual carriage", "cost": "$10,000–15,000" },
+        "v0a": { "description": "Swing bar (pivots to next line)", "cost": "$9,600–14,400", "advantage": "31% faster per 200 LF" },
+        "v1": { "description": "Motorized carriage + camera + RPi + fracture detection", "cost": "$11,200–16,600" }
+      },
+      "note": "No commercial precedent. Patent scope identified. Solves Phase 4 bottleneck."
+    },
+    {
+      "id": "shingle_grinder",
+      "name": "Shingle Grinder (Morbark 950)",
+      "phase": "ROOF",
+      "status": "future — at 3+ homes/year",
+      "cost": "$60,000–85,000 used or $1,200/mo lease",
+      "note": "Grinds shingles to RAS for HMA plants. Winter grinding (Nov–Mar) when asphalt is brittle. Scale threshold: 20+ homes for owned equipment."
+    }
+  ]
+}

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Pitch — ML Systems Deconstruction Operations</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0A0A;--surface:#141414;--surface2:#1C1C1C;--border:#2A2A2A;
+  --text:#E5E5E5;--text-dim:#999;--text-faint:#555;
+  --orange:#F97316;--orange-dim:rgba(249,115,22,0.12);--orange-glow:rgba(249,115,22,0.4);
+  --green:#22C55E;--green-dim:rgba(34,197,94,0.12);
+  --blue:#60A5FA;--blue-dim:rgba(96,165,250,0.12);
+  --teal:#14B8A6;--teal-dim:rgba(20,184,166,0.12);
+  --yellow:#FFE500;--yellow-dim:rgba(255,229,0,0.12);
+  --red:#EF4444;
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+nav .logo{font-weight:700;font-size:0.95rem;letter-spacing:0.5px}
+nav .logo span{color:var(--orange)}
+nav .nav-links{display:flex;gap:1.2rem;flex-wrap:wrap}
+nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;transition:color 0.2s}
+nav .nav-links a:hover{color:var(--orange)}
+
+/* LAYOUT */
+.page{max-width:1200px;margin:0 auto;padding:70px 2rem 4rem}
+
+/* HERO */
+.hero{text-align:center;padding:4rem 0 3rem}
+.hero .badge{display:inline-block;background:var(--orange-dim);color:var(--orange);padding:0.3rem 0.9rem;border-radius:999px;font-size:0.8rem;font-weight:600;margin-bottom:1rem;border:1px solid rgba(249,115,22,0.3)}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;margin-bottom:0.75rem}
+.hero h1 span{color:var(--orange)}
+.hero .one-liner{font-size:1.05rem;color:var(--text-dim);max-width:700px;margin:0 auto 2rem}
+
+/* MIND MAP CONTAINER */
+#mindmap{width:100%;height:680px;position:relative;border:1px solid var(--border);border-radius:16px;background:radial-gradient(ellipse at center,rgba(249,115,22,0.03) 0%,var(--bg) 70%);overflow:hidden;margin-bottom:3rem}
+#mindmap canvas{width:100%;height:100%;cursor:default}
+
+/* DETAIL PANEL */
+#detail{position:fixed;top:70px;right:20px;z-index:50;width:340px;max-height:calc(100vh - 90px);overflow-y:auto;background:rgba(10,10,10,0.96);border:1px solid var(--border);border-radius:12px;padding:0;backdrop-filter:blur(16px);box-shadow:0 20px 60px rgba(0,0,0,0.8);transform:translateX(380px);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#detail.open{transform:translateX(0)}
+#detail .d-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,10,0.98);z-index:1}
+#detail .d-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:4px 8px}
+#detail .d-close:hover{color:var(--text)}
+#detail .d-name{font-size:1.2rem;font-weight:800;margin-bottom:0.15rem}
+#detail .d-type{font-size:0.7rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px}
+#detail .d-body{padding:1rem 1.5rem 1.5rem}
+#detail .d-body p{color:var(--text-dim);font-size:0.88rem;margin-bottom:1rem;line-height:1.7}
+#detail .d-stat{display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border);font-size:0.85rem}
+#detail .d-stat:last-child{border-bottom:none}
+#detail .d-stat .label{color:var(--text-dim)}
+#detail .d-stat .value{color:var(--text);font-weight:600}
+#detail .d-link{display:inline-block;margin-top:1rem;padding:0.5rem 1rem;background:var(--orange-dim);color:var(--orange);border:1px solid rgba(249,115,22,0.3);border-radius:6px;text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.2s}
+#detail .d-link:hover{background:rgba(249,115,22,0.2);border-color:var(--orange)}
+#detail .d-links{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem}
+
+/* SECTIONS BELOW MAP */
+h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;color:var(--orange);margin-bottom:1.25rem;margin-top:3rem}
+h3{font-size:1rem;font-weight:600;margin:1.5rem 0 0.75rem;color:var(--text)}
+p.section-desc{color:var(--text-dim);max-width:700px;margin-bottom:1.5rem;font-size:0.92rem}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.75rem;margin:1.5rem 0}
+.ss{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;transition:border-color 0.3s}
+.ss:hover{border-color:rgba(249,115,22,0.3)}
+.ss .sv{font-size:1.5rem;font-weight:800;color:var(--orange)}
+.ss .sl{font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:0.2rem}
+.ss.green .sv{color:var(--green)}.ss.blue .sv{color:var(--blue)}.ss.teal .sv{color:var(--teal)}.ss.yellow .sv{color:var(--yellow)}
+
+/* QUICK CONTACTS */
+.contacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1.5rem 0}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;transition:border-color 0.3s}
+.contact-card:hover{border-color:rgba(249,115,22,0.3)}
+.contact-card .cc-org{font-size:0.95rem;font-weight:700;margin-bottom:0.25rem}
+.contact-card .cc-name{font-size:0.85rem;color:var(--text-dim)}
+.contact-card .cc-phone{font-size:0.85rem;color:var(--orange);font-weight:600;margin-top:0.25rem}
+.contact-card .cc-note{font-size:0.78rem;color:var(--text-faint);margin-top:0.35rem}
+
+/* CALLOUT */
+.callout{background:var(--orange-dim);border:1px solid rgba(249,115,22,0.25);border-left:4px solid var(--orange);border-radius:8px;padding:1.1rem 1.3rem;margin:1.5rem 0}
+.callout p{color:var(--text);margin:0;max-width:none;font-size:0.9rem}
+.callout strong{color:var(--orange)}
+
+/* FOOTER */
+footer{text-align:center;padding:3rem 2rem;color:var(--text-dim);font-size:0.78rem;border-top:1px solid var(--border);margin-top:3rem}
+footer a{color:var(--orange);text-decoration:none}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  #detail{width:calc(100vw - 20px);right:10px;top:60px}
+  #mindmap{height:500px}
+  nav .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">ML <span>Systems</span> &middot; Master Pitch</div>
+  <div class="nav-links">
+    <a href="#mindmap">Map</a>
+    <a href="#numbers">Numbers</a>
+    <a href="#pipeline">Pipeline</a>
+    <a href="#contacts">Contacts</a>
+    <a href="master-pitch.md">Markdown</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">Deconstruction Operations &middot; Call Prep</div>
+  <h1>The Old House<span> Funds the New One</span></h1>
+  <p class="one-liner">ML Systems deconstructs existing homes, recovers 80&ndash;90% of building materials, and reuses them to build new affordable housing &mdash; cutting per-unit development costs by $38K&ndash;$62K and stretching every state housing dollar further.</p>
+</div>
+
+<!-- MIND MAP -->
+<div id="mindmap">
+  <canvas id="canvas"></canvas>
+</div>
+<p style="text-align:center;color:var(--text-faint);font-size:0.75rem;margin-top:-2.5rem;margin-bottom:2rem">Click any node to see details and linked research &middot; Drag to pan &middot; Scroll to zoom</p>
+
+<!-- DETAIL PANEL -->
+<div id="detail">
+  <div class="d-header">
+    <button class="d-close" onclick="closeDetail()">&times;</button>
+    <div class="d-name" id="d-name"></div>
+    <div class="d-type" id="d-type"></div>
+  </div>
+  <div class="d-body" id="d-body"></div>
+</div>
+
+<!-- KEY NUMBERS -->
+<div id="numbers">
+  <h2>Key Numbers</h2>
+  <div class="stat-strip">
+    <div class="ss"><div class="sv">80&ndash;90%</div><div class="sl">Material Recovery</div></div>
+    <div class="ss green"><div class="sv">$38K&ndash;$62K</div><div class="sl">Cost Savings / Unit</div></div>
+    <div class="ss blue"><div class="sv">$20B</div><div class="sl">NACA Committed</div></div>
+    <div class="ss teal"><div class="sv">$8.5M</div><div class="sl">PRA Land Bank</div></div>
+    <div class="ss yellow"><div class="sv">$1</div><div class="sl">NACA Lot Price</div></div>
+    <div class="ss"><div class="sv">0</div><div class="sl">RI Competitors</div></div>
+    <div class="ss green"><div class="sv">7,950</div><div class="sl">PVD Vacant Units</div></div>
+    <div class="ss blue"><div class="sv">$146K</div><div class="sl">Min TDC ($1 Lot)</div></div>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div id="pipeline">
+  <h2>Dual-Track Pipeline</h2>
+  <p class="section-desc">Two programs, same operations. EOH for developer-led scale in RI. NACA/Land Bank for contractor-led reach with near-$0 land. BOH is the integration layer.</p>
+  <div class="stat-strip">
+    <div class="ss blue"><div class="sv">EOH 2030</div><div class="sl">$20M Grant &middot; Developer</div></div>
+    <div class="ss green"><div class="sv">NACA</div><div class="sl">$20B &middot; $1 Lots &middot; Contractor</div></div>
+    <div class="ss teal"><div class="sv">BOH</div><div class="sl">Materials Hub &middot; Provenance</div></div>
+    <div class="ss"><div class="sv">PRA</div><div class="sl">$8.5M Land Bank &middot; Providence</div></div>
+  </div>
+  <div class="callout">
+    <p><strong>The housing programs bootstrap the marketplace.</strong> Every EOH/NACA/land bank project pulls materials from BOH. That volume proves pricing, builds inventory, creates visibility, and attracts external buyers. The marketplace then grows beyond the programs.</p>
+  </div>
+</div>
+
+<!-- QUICK CONTACTS -->
+<div id="contacts">
+  <h2>Call List &mdash; No Dependency on Capital Raise</h2>
+  <p class="section-desc">All of these can be contacted NOW. None require GC registration or insurance.</p>
+  <div class="contacts">
+    <div class="contact-card">
+      <div class="cc-org">PRA Land Bank (Providence)</div>
+      <div class="cc-name">Darcy Charleson, Recording Secretary</div>
+      <div class="cc-phone">401.680.8501</div>
+      <div class="cc-note">Request available lots list. Ask about RFP process for developers. Pre-approved home plans exist.</div>
+    </div>
+    <div class="contact-card">
+      <div class="cc-org">CHLT of RI (Pawtucket)</div>
+      <div class="cc-name">Melina Lodge, Executive Director</div>
+      <div class="cc-phone">401.721.5680 x104</div>
+      <div class="cc-note">Developer partnership. Ground lease model. Statewide scope, 100+ homes in trust.</div>
+    </div>
+    <div class="contact-card">
+      <div class="cc-org">RIHousing Land Bank</div>
+      <div class="cc-name">Rolling Applications</div>
+      <div class="cc-phone">rihousing.com/rfps-rfqs</div>
+      <div class="cc-note">Statewide vacant property pipeline. 90-day review. Up to 97% LTV acquisition loans.</div>
+    </div>
+    <div class="contact-card">
+      <div class="cc-org">NACA (Boston HQ)</div>
+      <div class="cc-name">National Office</div>
+      <div class="cc-phone">naca.com &middot; Boston, MA</div>
+      <div class="cc-note">Explore Providence-Warwick MSA coverage. Propose city partnership. $1 lot + 5.375% mortgage.</div>
+    </div>
+    <div class="contact-card">
+      <div class="cc-org">EOH / RI Housing</div>
+      <div class="cc-name">Entry-Level Homeownership</div>
+      <div class="cc-phone">EOH.Production@housing.ri.gov</div>
+      <div class="cc-note">eCivis portal registration. April 10, 2026 (Rd 1). $100K/unit max, 5+ units, 70-pt scoring.</div>
+    </div>
+    <div class="contact-card">
+      <div class="cc-org">Building Futures RI</div>
+      <div class="cc-name">Andrew Cortes, Director</div>
+      <div class="cc-phone">buildingfuturesri.org</div>
+      <div class="cc-note">Pre-apprenticeship pipeline. 79% people of color. Decon crew talent.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<footer>
+  <p>ML Systems LLC &middot; Deconstruction Lab &middot; Lucent Lens</p>
+  <p style="margin-top:0.5rem">
+    <a href="master-pitch.md">Markdown Source</a> &middot;
+    <a href="processed/naca-one-dollar-program.html">NACA Analysis</a> &middot;
+    <a href="processed/ri-optimized-plan.md">RI Operations Plan</a> &middot;
+    <a href="potential-products/track-breaker-vs-brokk.html">Track Breaker vs Brokk</a>
+  </p>
+</footer>
+
+<script>
+// ═══ NODE DATA ═══
+const NODES = [
+  // Center
+  { id:'ml', label:'ML Systems', x:0, y:0, r:38, color:'#FFE500', ring:0,
+    type:'Core Entity', desc:'Construction proptech — closed-loop deconstruction, design, build. NAICS 236115, Rhode Island.',
+    stats:[['Elevator Pitch','Decon → BOH → Build → Homeowner'],['TDC Range','$146K–$366K'],['Cost Advantage','$38K–$62K/unit'],['Competitors in RI','Zero']],
+    links:[{label:'Master Pitch (MD)',href:'master-pitch.md'},{label:'RI Optimized Plan',href:'processed/ri-optimized-plan.md'}]},
+
+  // Ring 1 — Operations (inner)
+  { id:'decon', label:'Deconstruction', x:-150, y:-90, r:28, color:'#F97316', ring:1,
+    type:'Core Operation', desc:'4-phase decon: Roof → Walls → Floor → Foundation. Self-performed, crane + Track Breaker + Brokk. 80–90% material recovery, 160–190 tons concrete per home.',
+    stats:[['Recovery Rate','80–90%'],['Phases','4 (Roof, Walls, Floor, Foundation)'],['Foundation Tonnage','160–190 tons/home'],['Timeline','~2 days (foundation)']],
+    links:[{label:'Phase 1: Roof',href:'phase-1-roof/protocol.md'},{label:'Phase 4: Foundation',href:'phase-4-foundation/analysis.md'},{label:'1-Day Logistics',href:'1-day-logistics.md'}]},
+
+  { id:'boh', label:'Builder\'s\nOpen House', x:160, y:-80, r:28, color:'#14B8A6', ring:1,
+    type:'Integration Layer', desc:'Secondary materials marketplace — mlsystemsri.store. Sits between decon (supply) and housing programs (demand). ML Material IDs, provenance tracking, /program/housing-2030 institutional portal. 10 zone-based categories.',
+    stats:[['Categories','10 (zone-based)'],['Portal','/program/housing-2030'],['Role','Procurement hub for programs'],['Pricing','Documented, traceable']],
+    links:[{label:'BOH Research',href:'builders-open-house.md'}]},
+
+  { id:'build', label:'New Build', x:0, y:130, r:26, color:'#22C55E', ring:1,
+    type:'Core Operation', desc:'Factory module (Coastal Modular or Mod-Tech) on decon-sourced foundation + site work. Materials pulled from BOH with provenance. $100K–$200K module, $21K–$46K site work.',
+    stats:[['Module Cost','$100K–$200K'],['Site Work (decon)','$21K–$46K'],['TDC (PRA lot)','$146K–$225K'],['Sale Price','$300K–$350K']],
+    links:[{label:'Housing 2030 Grant',href:'housing-2030-grant.md'},{label:'Factory-Built Pricing',href:'housing-2030-grant.md'}]},
+
+  // Ring 2 — Equipment
+  { id:'tb', label:'Track\nBreaker', x:-280, y:-20, r:22, color:'#F97316', ring:2,
+    type:'Custom Equipment', desc:'Wall-mounted, track-guided hydraulic breaker. HYCON HH27, 75J, 1,400 BPM. ±1/8" precision. ~$15K complete. Patent-worthy, no prior art. V0→V1→V2→V3 autonomy path.',
+    stats:[['Cost','$11K–$17K'],['Precision','±1/8"'],['Weight','362–402 lbs'],['IP','Patent-worthy']],
+    links:[{label:'Track Breaker Pitch',href:'potential-products/track-breaker-pitch.html'},{label:'vs Brokk Comparison',href:'potential-products/track-breaker-vs-brokk.html'},{label:'Rail Specs',href:'potential-products/track-breaker-rail-specs.html'}]},
+
+  { id:'brokk', label:'Brokk 170', x:-240, y:120, r:20, color:'#60A5FA', ring:2,
+    type:'Commercial Equipment', desc:'Remote-controlled demolition robot. 3,527 lbs, ~405 J/strike. Frees panels, breaks footings/slab, cuts rebar, grades hole. ~$100K used, $1,200–$1,800/day rental.',
+    stats:[['Purchase (used)','~$100K'],['Rental/day','$1,200–$1,800'],['Weight','3,527 lbs'],['Attachments','Breaker, crusher, grapple, shears, bucket']],
+    links:[{label:'vs Track Breaker',href:'potential-products/track-breaker-vs-brokk.html'}]},
+
+  // Ring 2 — Revenue Arms
+  { id:'shingle', label:'Shingle\nGrinding', x:280, y:40, r:20, color:'#F97316', ring:2,
+    type:'Revenue Arm', desc:'Winter revenue. RI has ZERO shingle recyclers, 45K–50K tons/year of tear-offs going to landfill. Roofers pay us $50–$70/ton (vs $100/ton landfill). We grind to RAS, sell to HMA plants.',
+    stats:[['RI Market','45K–50K tons/year'],['Competitors','Zero'],['Tipping Fee','$50–$70/ton'],['Season','Winter (off-season)']],
+    links:[{label:'Shingle Analysis',href:'phase-1-roof/shingle-recycling/analysis.md'},{label:'Site Aggregator Model',href:'phase-1-roof/shingle-recycling/site-aggregator-model.md'}]},
+
+  { id:'ontology', label:'Data /\nOntology', x:240, y:140, r:18, color:'#A78BFA', ring:2,
+    type:'Revenue Arm (Future)', desc:'ML Material IDs on every recovered item. Fracture pattern data by concrete age/mix/rebar. Pricing intelligence from BOH transactions. Training data for V3 autonomous Track Breaker.',
+    stats:[['Material ID Format','ML-{year}-{project}-{zone+seq}'],['Data Sources','Camera, accelerometer, BOH sales'],['Autonomy Target','V3 (AI-trained)']],
+    links:[]},
+
+  // Ring 3 — Programs & Partners
+  { id:'eoh', label:'EOH 2030', x:-120, y:-220, r:22, color:'#60A5FA', ring:3,
+    type:'Grant Program', desc:'Entry-Level Homeownership Program. $20M ($10M Rd 1). $100K/unit max, 5+ units, <$400K price. 70-point scoring — ML Systems targets 44–52 pts. April 10, 2026 deadline. ML Systems = developer.',
+    stats:[['Funding','$20M ($10M Rd 1)'],['Per Unit Max','$100K'],['ML Systems Score','44–52 / 70 pts'],['Deadline','April 10, 2026'],['ML Role','Developer']],
+    links:[{label:'Full Grant Strategy',href:'housing-2030-grant.md'}]},
+
+  { id:'naca', label:'NACA $1', x:120, y:-220, r:22, color:'#22C55E', ring:3,
+    type:'National Program', desc:'$20B committed ($15B Bank of America). City-owned vacant lots for $1. NACA mortgage: 5.375% 30yr, $0 down, $0 closing, $0 PMI. Covers Providence-Warwick MSA via Boston HQ. No RI office yet. ML Systems = contractor.',
+    stats:[['Committed Funding','$20B'],['Lot Price','$1'],['Mortgage Rate','5.375% (30yr)'],['Down Payment','$0'],['ML Role','Contractor / Partner']],
+    links:[{label:'NACA Analysis',href:'processed/naca-one-dollar-program.html'},{label:'NACA Program Page',href:'https://www.naca.com/city-one-dollar-homeownership-program/'}]},
+
+  { id:'pra', label:'PRA Land\nBank', x:-260, y:-180, r:20, color:'#14B8A6', ring:3,
+    type:'Municipal Agency', desc:'Providence Redevelopment Agency Land Bank. $8.5M ARPA funded. Acquires tax-reverted/vacant properties, provides pre-approved home plans on fully permitted lots. Contact: Darcy Charleson, 401.680.8501.',
+    stats:[['Funding','$8.5M (ARPA)'],['Lots','Pre-approved + permitted'],['Contact','Darcy Charleson'],['Phone','401.680.8501']],
+    links:[{label:'RI Optimized Plan',href:'processed/ri-optimized-plan.md'}]},
+
+  { id:'ribank', label:'RI Land\nBank', x:0, y:-260, r:18, color:'#60A5FA', ring:3,
+    type:'State Program', desc:'Statewide Housing Land Bank (NEW 2025). RIHousing operated. Acquires/holds/transfers vacant properties for affordable housing. Rolling applications, 90-day review, up to 97% LTV.',
+    stats:[['Operator','RIHousing'],['Applications','Rolling'],['Review','90 days'],['LTV','Up to 97%']],
+    links:[{label:'RI Optimized Plan',href:'processed/ri-optimized-plan.md'}]},
+
+  { id:'chlt', label:'CHLT', x:260, y:-180, r:18, color:'#14B8A6', ring:3,
+    type:'Land Trust', desc:'Community Housing Land Trust of RI. Statewide scope, 100+ homes, 99-year ground leases. HQ: Pawtucket. Dir: Melina Lodge, 401.721.5680 x104.',
+    stats:[['Homes in Trust','100+'],['Lease Term','99-year ground lease'],['Scope','Statewide'],['Contact','Melina Lodge, 401.721.5680 x104']],
+    links:[{label:'RI Optimized Plan',href:'processed/ri-optimized-plan.md'}]},
+
+  // Ring 3 — Target Cities
+  { id:'pvd', label:'Providence', x:-340, y:-120, r:16, color:'#F97316', ring:3,
+    type:'Target Municipality (#1)', desc:'11.31% vacancy (~7,950 units). 55.61% pre-1939 housing (high salvage value). PRA Land Bank active. Non-Utilization Tax since 2018. Median HH income $68,119.',
+    stats:[['Vacancy','11.31% (~7,950 units)'],['Pre-1939','55.61%'],['Median Income','$68,119'],['Priority','#1']],
+    links:[{label:'RI Optimized Plan',href:'processed/ri-optimized-plan.md'}]},
+
+  { id:'cf', label:'Central\nFalls', x:340, y:-120, r:14, color:'#F97316', ring:3,
+    type:'Target Municipality (#2)', desc:'10.24% vacancy (~767 units). Densest city in RI. Receivership program for nuisance properties. Heavy development activity (25-unit, 46-unit, 58-unit projects). Conant Thread complex = massive potential.',
+    stats:[['Vacancy','10.24% (~767 units)'],['Median Income','$49,285'],['Active Projects','25 + 46 + 58 units'],['Priority','#2']],
+    links:[{label:'RI Optimized Plan',href:'processed/ri-optimized-plan.md'}]},
+
+  // Revenue / Labor
+  { id:'wip', label:'Work\nImmersion', x:320, y:220, r:16, color:'#22C55E', ring:3,
+    type:'State Labor Program', desc:'RI Work Immersion Program (GWB/DLT). 75% wage reimbursement. $20/hr min → $5/hr effective. 4 interns × 400 hrs = 1,600 hrs/year at $8K total. Interns staff BOH inventory pipeline.',
+    stats:[['Reimbursement','75%'],['Effective Rate','$5/hr'],['Max Interns','4/year'],['Total Cost','$8K/year for 1,600 hrs']],
+    links:[]},
+];
+
+// ═══ EDGES ═══
+const EDGES = [
+  // Core loop
+  {from:'decon',to:'ml',color:'#F97316'},{from:'ml',to:'boh',color:'#14B8A6'},{from:'boh',to:'build',color:'#22C55E'},{from:'build',to:'ml',color:'#22C55E'},
+  // Decon → BOH (materials flow)
+  {from:'decon',to:'boh',color:'#F97316',dashed:true},
+  // Equipment → Decon
+  {from:'tb',to:'decon',color:'#F97316'},{from:'brokk',to:'decon',color:'#60A5FA'},
+  // Programs → ML (funding/lots)
+  {from:'eoh',to:'ml',color:'#60A5FA'},{from:'naca',to:'ml',color:'#22C55E'},
+  // Land sources → ML
+  {from:'pra',to:'ml',color:'#14B8A6'},{from:'ribank',to:'ml',color:'#60A5FA'},{from:'chlt',to:'ml',color:'#14B8A6'},
+  // BOH → Programs (materials procurement)
+  {from:'boh',to:'eoh',color:'#14B8A6',dashed:true},{from:'boh',to:'naca',color:'#14B8A6',dashed:true},
+  // Revenue arms
+  {from:'shingle',to:'ml',color:'#F97316'},{from:'ontology',to:'ml',color:'#A78BFA'},
+  // Cities → PRA
+  {from:'pvd',to:'pra',color:'#14B8A6'},
+  // Labor
+  {from:'wip',to:'boh',color:'#22C55E'},
+  // Cross
+  {from:'eoh',to:'ribank',color:'#60A5FA'},{from:'pra',to:'ribank',color:'#60A5FA'},
+  {from:'chlt',to:'naca',color:'#14B8A6'},
+];
+
+// ═══ CANVAS DRAWING ═══
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, dpr, cx, cy, pan={x:0,y:0}, zoom=1, dragging=false, dragStart={x:0,y:0}, panStart={x:0,y:0};
+let hoveredNode=null, selectedNode=null;
+
+function resize(){
+  const rect = canvas.parentElement.getBoundingClientRect();
+  dpr = Math.min(window.devicePixelRatio,2);
+  W = rect.width; H = rect.height;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  cx = W/2; cy = H/2;
+}
+resize();
+window.addEventListener('resize',()=>{resize();draw()});
+
+function worldToScreen(wx,wy){return{x:cx+pan.x+(wx)*zoom,y:cy+pan.y+(wy)*zoom}}
+function screenToWorld(sx,sy){return{x:(sx-cx-pan.x)/zoom,y:(sy-cy-pan.y)/zoom}}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  // Edges
+  EDGES.forEach(e=>{
+    const from=NODES.find(n=>n.id===e.from), to=NODES.find(n=>n.id===e.to);
+    const p1=worldToScreen(from.x,from.y), p2=worldToScreen(to.x,to.y);
+    ctx.beginPath();
+    ctx.strokeStyle=e.color;
+    ctx.globalAlpha=0.2;
+    ctx.lineWidth=1.5;
+    if(e.dashed){ctx.setLineDash([6,4])}else{ctx.setLineDash([])}
+    ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
+    ctx.globalAlpha=1;ctx.setLineDash([]);
+  });
+
+  // Nodes
+  NODES.forEach(n=>{
+    const p=worldToScreen(n.x,n.y);
+    const r=n.r*zoom;
+    const isHovered=hoveredNode===n.id;
+    const isSelected=selectedNode===n.id;
+
+    // Glow
+    if(isHovered||isSelected){
+      const grd=ctx.createRadialGradient(p.x,p.y,r*0.5,p.x,p.y,r*2.5);
+      grd.addColorStop(0,n.color+'40');grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(p.x,p.y,r*2.5,0,Math.PI*2);ctx.fill();
+    }
+
+    // Circle
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle=n.color+(isHovered||isSelected?'30':'18');
+    ctx.fill();
+    ctx.strokeStyle=n.color+(isHovered||isSelected?'cc':'55');
+    ctx.lineWidth=isSelected?2.5:isHovered?2:1.2;
+    ctx.stroke();
+
+    // Inner dot
+    ctx.beginPath();ctx.arc(p.x,p.y,r*0.25,0,Math.PI*2);
+    ctx.fillStyle=n.color;ctx.fill();
+
+    // Label
+    const lines=n.label.split('\n');
+    ctx.font=`${Math.max(10,11*zoom)}px -apple-system,system-ui,sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=isHovered||isSelected?'#fff':n.color;
+    lines.forEach((line,i)=>{
+      const ly=p.y+r+12*zoom+(i*14*zoom);
+      ctx.fillText(line,p.x,ly);
+    });
+  });
+}
+
+// ═══ INTERACTION ═══
+function getNodeAt(sx,sy){
+  const w=screenToWorld(sx,sy);
+  for(let i=NODES.length-1;i>=0;i--){
+    const n=NODES[i];
+    const dx=w.x-n.x,dy=w.y-n.y;
+    if(Math.sqrt(dx*dx+dy*dy)<n.r*1.3)return n;
+  }
+  return null;
+}
+
+canvas.addEventListener('mousedown',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const sx=e.clientX-rect.left,sy=e.clientY-rect.top;
+  const node=getNodeAt(sx,sy);
+  if(node){showDetail(node);selectedNode=node.id;draw();return}
+  dragging=true;dragStart={x:e.clientX,y:e.clientY};panStart={x:pan.x,y:pan.y};
+  canvas.style.cursor='grabbing';
+});
+canvas.addEventListener('mousemove',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const sx=e.clientX-rect.left,sy=e.clientY-rect.top;
+  if(dragging){pan.x=panStart.x+(e.clientX-dragStart.x);pan.y=panStart.y+(e.clientY-dragStart.y);draw();return}
+  const node=getNodeAt(sx,sy);
+  const newHover=node?node.id:null;
+  if(newHover!==hoveredNode){hoveredNode=newHover;canvas.style.cursor=node?'pointer':'grab';draw()}
+});
+canvas.addEventListener('mouseup',()=>{dragging=false;canvas.style.cursor=hoveredNode?'pointer':'grab'});
+canvas.addEventListener('mouseleave',()=>{dragging=false;hoveredNode=null;canvas.style.cursor='grab';draw()});
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const factor=e.deltaY>0?0.9:1.1;
+  zoom=Math.max(0.4,Math.min(3,zoom*factor));
+  draw();
+},{passive:false});
+
+// Touch support
+canvas.addEventListener('touchstart',e=>{
+  const t=e.touches[0];const rect=canvas.getBoundingClientRect();
+  const sx=t.clientX-rect.left,sy=t.clientY-rect.top;
+  const node=getNodeAt(sx,sy);
+  if(node){showDetail(node);selectedNode=node.id;draw();return}
+  dragging=true;dragStart={x:t.clientX,y:t.clientY};panStart={x:pan.x,y:pan.y};
+},{passive:true});
+canvas.addEventListener('touchmove',e=>{
+  if(!dragging)return;const t=e.touches[0];
+  pan.x=panStart.x+(t.clientX-dragStart.x);pan.y=panStart.y+(t.clientY-dragStart.y);draw();
+},{passive:true});
+canvas.addEventListener('touchend',()=>{dragging=false});
+
+// ═══ DETAIL PANEL ═══
+function showDetail(node){
+  document.getElementById('d-name').textContent=node.label.replace('\n',' ');
+  document.getElementById('d-name').style.color=node.color;
+  document.getElementById('d-type').textContent=node.type;
+
+  let html='<p>'+node.desc+'</p>';
+  if(node.stats&&node.stats.length){
+    node.stats.forEach(s=>{html+=`<div class="d-stat"><span class="label">${s[0]}</span><span class="value" style="color:${node.color}">${s[1]}</span></div>`});
+  }
+  if(node.links&&node.links.length){
+    html+='<div class="d-links">';
+    node.links.forEach(l=>{html+=`<a class="d-link" href="${l.href}" ${l.href.startsWith('http')?'target="_blank"':''}>${l.label}</a>`});
+    html+='</div>';
+  }
+  document.getElementById('d-body').innerHTML=html;
+  document.getElementById('detail').classList.add('open');
+}
+window.closeDetail=()=>{document.getElementById('detail').classList.remove('open');selectedNode=null;draw()};
+
+// Initial draw
+draw();
+</script>
+
+</body>
+</html>

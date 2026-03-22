@@ -31,3 +31,40 @@ export const deconSessions = pgTable("decon_sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ── Materials (provenance-tracked) ──────────────────────────────────
+export const materials = pgTable("materials", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  projectId: uuid("project_id"),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  quantity: text("quantity"),
+  unit: text("unit"),
+  weightLbs: text("weight_lbs"),
+  estimatedValueCents: integer("estimated_value_cents").notNull().default(0),
+  actualValueCents: integer("actual_value_cents"),
+  disposition: text("disposition").notNull().default("resale"),
+  status: text("status").notNull().default("identified"),
+  recoveredAt: timestamp("recovered_at"),
+  mlMaterialId: text("ml_material_id").unique(),
+  grade: text("grade"),
+  contaminationStatus: text("contamination_status").default("untested"),
+  photos: jsonb("photos").default([]),
+  dimensions: text("dimensions"),
+  species: text("species"),
+  deconSessionId: uuid("decon_session_id").references(() => deconSessions.id),
+  qrCodeUrl: text("qr_code_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ── Material Provenance (audit log) ─────────────────────────────────
+export const materialProvenance = pgTable("material_provenance", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  materialId: uuid("material_id").notNull().references(() => materials.id),
+  eventType: text("event_type").notNull(),
+  eventData: jsonb("event_data").default({}),
+  performedBy: uuid("performed_by").references(() => users.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

@@ -1,0 +1,162 @@
+{
+  "description": "Deconstruction phases — operational sequence for full-house residential deconstruction. Reverse of construction sequence with pre/post logistics phases.",
+  "phases": [
+    {
+      "code": "PRE",
+      "name": "Pre-Deconstruction",
+      "order": 0,
+      "type": "logistics",
+      "duration": "2–4 hours (day before or morning of Day 1)",
+      "description": "Site preparation, utility isolation, hazmat survey, permits, crane setup, crew briefing.",
+      "prerequisite": null,
+      "crewRequired": ["supervisor", "crane_operator"],
+      "equipmentRequired": ["crane"],
+      "safetyFocus": "LOTO, utility confirmation, hazmat sampling",
+      "taskCodes": ["site_assess", "util_isolate", "haz_survey", "haz_contain", "crane_setup", "crew_brief", "brace_install"],
+      "humanoidBridge": {
+        "mirrorPhases": ["DCN-UT", "DCN-HZ"],
+        "note": "Maps to humanoid-ontology utility isolation + hazmat survey phases"
+      }
+    },
+    {
+      "code": "ROOF",
+      "name": "Roof Deconstruction",
+      "order": 1,
+      "type": "structural",
+      "duration": "6–9 hours (Day 1)",
+      "description": "Section-cut roof into 4–6 pieces, crane-lift to ground, disassemble in reverse order: shingles → underlayment → sheathing → rafters → hardware.",
+      "prerequisite": "PRE",
+      "crewRequired": ["supervisor", "crane_operator", "rigger", "ground_lead", "ground_support"],
+      "equipmentRequired": ["crane", "spreader_bar", "reciprocating_saw", "oscillating_tool", "magnetic_sweeper"],
+      "safetyFocus": "100% fall protection tie-off, crane lift plan, 20ft power-line clearance, <20mph wind",
+      "taskCodes": ["roof_section_cut", "roof_rig", "roof_lift", "rafter_remove", "sheathing_remove", "underlayment_remove", "shingle_separate", "hardware_collect", "nail_sweep"],
+      "materialOutput": {
+        "rafters": { "recovery": "80–95%", "value": "$280–645/roof" },
+        "sheathing": { "recovery": "40–70%", "value": "$300–620/roof" },
+        "underlayment": { "recovery": "60%", "value": "$40–60/roof" },
+        "shingles": { "recovery": "100%", "value": "$53–400/roof" },
+        "hardware": { "recovery": "90%", "value": "$20–30/roof" }
+      },
+      "humanoidBridge": {
+        "mirrorPhases": ["DCN-RS"],
+        "taskCodeMap": { "roof_sheathing_removal": "sheathing_remove", "rafter_removal": "rafter_remove" }
+      }
+    },
+    {
+      "code": "WALLS",
+      "name": "Wall Deconstruction",
+      "order": 2,
+      "type": "structural",
+      "duration": "8–12 hours (Day 1 soft strip parallel + Day 2 structural)",
+      "description": "Soft strip interiors (cabinets, fixtures, trim, windows) while crane works roof. Then crane-lift wall sections on sides for ground disassembly: drywall → insulation → sheathing → studs → siding.",
+      "prerequisite": "ROOF (structural) | PRE (soft strip starts parallel with ROOF)",
+      "crewRequired": ["supervisor", "crane_operator", "rigger", "ground_lead", "ground_support"],
+      "equipmentRequired": ["crane", "spreader_bar", "reciprocating_saw", "pry_bar", "cordless_drill"],
+      "safetyFocus": "Dust control (drywall/insulation), load path awareness during section removal, PPE for fiberglass",
+      "taskCodes": [
+        "cabinet_remove", "counter_remove", "appliance_remove",
+        "electric_strip", "plumb_strip", "fixture_remove",
+        "trim_remove", "door_remove", "window_remove", "hardwood_pull",
+        "wall_section_cut", "wall_rig", "wall_lift",
+        "drywall_remove", "insulation_remove", "ext_sheathing_remove",
+        "stud_remove", "header_remove", "plate_remove", "siding_remove",
+        "shearwall_hardware_remove"
+      ],
+      "materialOutput": {
+        "studs": { "recovery": "85–95%", "value": "$200–500/home" },
+        "headers_beams": { "recovery": "80–90%", "value": "$200–600/home" },
+        "drywall_intact": { "recovery": "40–70%", "value": "$200–770/home" },
+        "drywall_damaged": { "recovery": "100%", "value": "$450–1500/ton as powder" },
+        "insulation": { "recovery": "60–80%", "value": "minimal" },
+        "siding": { "recovery": "50–70%", "value": "$100–400/home" },
+        "cabinets": { "recovery": "70–90%", "value": "$200–1000/home" },
+        "fixtures": { "recovery": "80–95%", "value": "$100–500/home" },
+        "copper_wire": { "recovery": "95%", "value": "$2–3/lb" },
+        "trim_doors_windows": { "recovery": "60–85%", "value": "$200–800/home" }
+      },
+      "humanoidBridge": {
+        "mirrorPhases": ["DCN-FNC", "DCN-TS", "DCN-WS", "DCN-FRM"],
+        "taskCodeMap": {
+          "dwr": "door_remove",
+          "inr": "insulation_remove",
+          "shr": "sheathing_remove",
+          "trmr": "trim_remove",
+          "cfr": "cabinet_remove",
+          "ffr": "fixture_remove",
+          "fd": "stud_remove"
+        }
+      }
+    },
+    {
+      "code": "FLOORS",
+      "name": "Floor System Deconstruction",
+      "order": 3,
+      "type": "structural",
+      "duration": "2.5–4.5 hours crane time (Day 2)",
+      "description": "Brace lower walls (diaphragm loss), cut subfloor along joist lines, cut joists at bearing points, rig at 1/3 points, crane-lift sections on sides. Ground disassembly: subfloor → bridging → joists → rim joist → hardware.",
+      "prerequisite": "WALLS (structural removal complete above floor line)",
+      "crewRequired": ["supervisor", "crane_operator", "rigger", "ground_lead"],
+      "equipmentRequired": ["crane", "spreader_bar", "circular_saw", "reciprocating_saw"],
+      "safetyFocus": "Diaphragm bracing BEFORE floor removal (critical), depth-set circular saw (subfloor thickness only)",
+      "taskCodes": ["floor_brace", "subfloor_cut", "joist_cut", "floor_rig", "floor_lift", "subfloor_remove", "bridging_remove", "joist_remove", "rim_joist_remove", "floor_hardware_remove"],
+      "materialOutput": {
+        "joists": { "recovery": "85–95%", "value": "$340–1140/home (premium lumber)" },
+        "subfloor": { "recovery": "50–70%", "value": "$15–20/sheet" },
+        "bridging": { "recovery": "80%+", "value": "minimal" },
+        "rim_joist": { "recovery": "70–85%", "value": "$40–80/home" },
+        "hardwood_flooring": { "recovery": "60–80%", "value": "$1700–4300/home (if present)" }
+      },
+      "humanoidBridge": {
+        "mirrorPhases": ["DCN-DS"],
+        "taskCodeMap": {
+          "dp_removal": "subfloor_remove",
+          "joist_removal": "joist_remove"
+        }
+      }
+    },
+    {
+      "code": "FOUNDATION",
+      "name": "Foundation Deconstruction",
+      "order": 4,
+      "type": "structural",
+      "duration": "2–4 days (currently exceeds 2-day window — Track Breaker R&D target)",
+      "description": "Saw-cut wall panels into 4x8 sections, core-drill lifting holes, Brokk breaks bond at footing joint, crane lifts panels. Walk-behind slab saw cuts grid. Brokk crushes footings. Rebar bundled for scrap.",
+      "prerequisite": "FLOORS",
+      "crewRequired": ["supervisor", "crane_operator", "brokk_operator", "ground_lead"],
+      "equipmentRequired": ["crane", "brokk_170", "concrete_chain_saw", "core_drill", "slab_saw", "magnetic_separator"],
+      "safetyFocus": "160–190 tons concrete, section weight management (3,200 lbs/panel), dust suppression, rebar exposure",
+      "taskCodes": ["wall_panel_saw", "core_drill_lift", "brokk_break_base", "panel_lift", "slab_saw_grid", "slab_lift", "footing_crush", "rebar_bundle", "rca_process"],
+      "materialOutput": {
+        "wall_panels": { "recovery": "60–80%", "value": "$2000–6000/home (landscape/retaining)" },
+        "slab_sections": { "recovery": "70–90%", "value": "$8–12/ton (patios, walkways)" },
+        "rca_aggregate": { "recovery": "45–80% reused on-site", "value": "$0 (base course, fill, roads)" },
+        "rebar": { "recovery": "90%+", "value": "$200–250/ton scrap" }
+      },
+      "humanoidBridge": {
+        "mirrorPhases": ["DCN-SS", "DCN-FND"],
+        "taskCodeMap": {
+          "bc": "brokk_break_base",
+          "ag": "rca_process"
+        }
+      },
+      "rdNote": "Track Breaker (V0–V3) is the R&D product targeting Phase 4 bottleneck. Crew-portable, wall-mounted hydraulic breaking system. Patent scope: no commercial precedent."
+    },
+    {
+      "code": "POST",
+      "name": "Post-Deconstruction",
+      "order": 5,
+      "type": "logistics",
+      "description": "Material staging into BOH zones, site cleanup, final magnetic sweep, grade/backfill, equipment breakdown, crew debrief, data capture.",
+      "duration": "4–8 hours",
+      "prerequisite": "FOUNDATION",
+      "crewRequired": ["supervisor", "ground_lead", "ground_support"],
+      "equipmentRequired": ["magnetic_sweeper", "skid_steer"],
+      "safetyFocus": "Final nail sweep, site security, material inventory verification",
+      "taskCodes": ["material_stage", "zone_organize", "site_cleanup", "final_sweep", "grade_backfill", "equip_breakdown", "crew_debrief", "data_capture"],
+      "humanoidBridge": {
+        "mirrorPhases": ["CLN"],
+        "note": "Maps to humanoid-ontology cleaning/protection phase — same primitives (sweep, sort, organize, carry)"
+      }
+    }
+  ]
+}

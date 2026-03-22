@@ -1,0 +1,455 @@
+{
+  "description": "Atomic actions for deconstruction work. 36 primitives bridged from humanoid-ontology + 9 decon-specific primitives. Each primitive is the smallest unit of work a human (or robot) performs. Task codes are ordered sequences of these primitives.",
+  "bridgeNote": "Primitives with humanoidId match humanoid-ontology/nets/physical/task-primitives.json exactly — shared vocabulary across construction and deconstruction ontologies.",
+  "primitives": [
+    {
+      "id": "bipedal_transit",
+      "name": "Walk / Traverse",
+      "category": "locomotion",
+      "description": "Move on foot across uneven, debris-covered surfaces. Includes stair/ramp traversal.",
+      "humanoidId": "bipedal_transit",
+      "robotFeasibility": 3,
+      "deconRelevance": "high",
+      "safetyNotes": "Trip hazards from nails, debris, uneven ground"
+    },
+    {
+      "id": "climb_ladder",
+      "name": "Ladder Climb",
+      "category": "locomotion",
+      "description": "Ascend/descend ladder with or without tools in hand.",
+      "humanoidId": "climb_ladder",
+      "robotFeasibility": 2,
+      "deconRelevance": "high",
+      "safetyNotes": "Fall protection required above 6ft"
+    },
+    {
+      "id": "carry_bilateral",
+      "name": "Two-Hand Carry",
+      "category": "material_handling",
+      "description": "Carry object with both hands (1–50 kg). Sheets, lumber, fixtures.",
+      "humanoidId": "carry_bilateral",
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "safetyNotes": "Load path awareness, pinch points on sheet goods"
+    },
+    {
+      "id": "carry_unilateral",
+      "name": "One-Hand Carry",
+      "category": "material_handling",
+      "description": "Carry object with one hand (0.5–15 kg). Tools, hardware, small fixtures.",
+      "humanoidId": "carry_unilateral",
+      "robotFeasibility": 4,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "lift_floor",
+      "name": "Lift from Ground",
+      "category": "material_handling",
+      "description": "Deadlift object from ground level (5–120 kg).",
+      "humanoidId": "lift_floor",
+      "robotFeasibility": 4,
+      "deconRelevance": "critical",
+      "safetyNotes": "Proper body mechanics, team lift >50 lbs"
+    },
+    {
+      "id": "lift_overhead",
+      "name": "Overhead Lift",
+      "category": "material_handling",
+      "description": "Raise object above shoulder height (10–60 kg).",
+      "humanoidId": "lift_overhead",
+      "robotFeasibility": 3,
+      "deconRelevance": "high",
+      "safetyNotes": "Falling object hazard, hard hat required"
+    },
+    {
+      "id": "demo_strike",
+      "name": "Demolition Strike",
+      "category": "demolition",
+      "description": "Sledgehammer or similar impact tool to break connections. Force-adaptive — requires feel for material resistance.",
+      "humanoidId": "demo_strike",
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Eye protection, flying debris, structural awareness"
+    },
+    {
+      "id": "demo_pry",
+      "name": "Pry / Lever",
+      "category": "demolition",
+      "description": "Leverage-based separation of connected materials. Pry bar, flat bar, cat's paw.",
+      "humanoidId": "demo_pry",
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Controlled force direction, material preservation awareness"
+    },
+    {
+      "id": "cut_power_saw",
+      "name": "Power Saw Cut",
+      "category": "cutting",
+      "description": "Cut with powered saw — circular, reciprocating, oscillating, or chain saw.",
+      "humanoidId": "cut_power_saw",
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Blade guard, cut depth awareness (hidden utilities, adjacent materials)"
+    },
+    {
+      "id": "cut_hand",
+      "name": "Hand Cut",
+      "category": "cutting",
+      "description": "Cut with non-powered tool — hand saw, snips, utility knife.",
+      "humanoidId": "cut_hand",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "fasten_nail_gun",
+      "name": "Nail Gun Fasten",
+      "category": "fastening",
+      "description": "Pneumatic or cordless nailer. Used in bracing installation during decon.",
+      "humanoidId": "fasten_nail_gun",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium",
+      "safetyNotes": "Trigger discipline, muzzle awareness"
+    },
+    {
+      "id": "fasten_screw",
+      "name": "Screw Drive",
+      "category": "fastening",
+      "description": "Impact driver or drill-driver to drive/remove screws.",
+      "humanoidId": "fasten_screw",
+      "robotFeasibility": 4,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "unfasten_screw",
+      "name": "Screw Remove",
+      "category": "unfastening",
+      "description": "Reverse-drive screws to separate assemblies. Preserves both materials.",
+      "humanoidId": null,
+      "robotFeasibility": 4,
+      "deconRelevance": "critical",
+      "note": "Decon-specific — construction ontology fastens, decon ontology unfastens"
+    },
+    {
+      "id": "unfasten_nail",
+      "name": "Nail Extract",
+      "category": "unfastening",
+      "description": "Remove nails with cat's paw, flat bar, or nail puller. Flush-cut with oscillating tool when extraction would damage material.",
+      "humanoidId": null,
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "note": "Decon-specific. Flush-cut vs extract decision = material preservation skill"
+    },
+    {
+      "id": "fasten_manual",
+      "name": "Manual Fasten",
+      "category": "fastening",
+      "description": "Hammer, wrench, or hand tool fastening.",
+      "humanoidId": "fasten_manual",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "drill",
+      "name": "Drill",
+      "category": "cutting",
+      "description": "Create holes with drill or impact driver. Includes core drilling for concrete.",
+      "humanoidId": "drill",
+      "robotFeasibility": 4,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "measure",
+      "name": "Measure",
+      "category": "sensing",
+      "description": "Tape measure, laser measure, or ruler to determine dimensions.",
+      "humanoidId": "measure",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "mark",
+      "name": "Mark",
+      "category": "sensing",
+      "description": "Pencil, chalk line, or spray paint to indicate cut lines, lift points, or staging positions.",
+      "humanoidId": "mark",
+      "robotFeasibility": 4,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "inspect_visual",
+      "name": "Visual Inspection",
+      "category": "sensing",
+      "description": "Assess condition, quality, structural integrity, or material type by sight.",
+      "humanoidId": "inspect_visual",
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "note": "Recovery rate depends on inspection quality — knowing what to save vs discard"
+    },
+    {
+      "id": "align_plumb",
+      "name": "Plumb Check",
+      "category": "sensing",
+      "description": "Verify vertical alignment with level or plumb bob.",
+      "humanoidId": "align_plumb",
+      "robotFeasibility": 4,
+      "deconRelevance": "low"
+    },
+    {
+      "id": "align_level",
+      "name": "Level Check",
+      "category": "sensing",
+      "description": "Verify horizontal alignment.",
+      "humanoidId": "align_level",
+      "robotFeasibility": 5,
+      "deconRelevance": "low"
+    },
+    {
+      "id": "position_hold",
+      "name": "Position Hold",
+      "category": "support",
+      "description": "Hold component in position during fastening, cutting, or rigging. Extremely high robot value — frees human hands.",
+      "humanoidId": "position_hold",
+      "robotFeasibility": 5,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "sweep",
+      "name": "Sweep",
+      "category": "cleaning",
+      "description": "Broom sweeping of debris, dust, nails.",
+      "humanoidId": "sweep",
+      "robotFeasibility": 4,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "dump_debris",
+      "name": "Dump / Deposit",
+      "category": "cleaning",
+      "description": "Load debris into container, dump to staging area or waste stream.",
+      "humanoidId": "dump_debris",
+      "robotFeasibility": 4,
+      "deconRelevance": "high"
+    },
+    {
+      "id": "stack_organize",
+      "name": "Stack / Organize",
+      "category": "material_handling",
+      "description": "Sort and arrange materials by type, size, or destination zone.",
+      "humanoidId": "stack_organize",
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "note": "Directly feeds BOH zone staging. Sort quality = resale value"
+    },
+    {
+      "id": "sort_material",
+      "name": "Material Sort",
+      "category": "material_handling",
+      "description": "Classify material into recovery streams: resale, reuse, recycle, waste. Core decon skill.",
+      "humanoidId": "sort_material",
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "note": "HIGH robot ROI — repetitive classification task with visual + weight signals"
+    },
+    {
+      "id": "wipe",
+      "name": "Wipe / Clean Surface",
+      "category": "cleaning",
+      "description": "Surface cleaning of recovered materials for resale preparation.",
+      "humanoidId": "wipe",
+      "robotFeasibility": 4,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "roll_material",
+      "name": "Roll Material",
+      "category": "material_handling",
+      "description": "Deploy or retrieve roll goods — housewrap, underlayment, insulation batts.",
+      "humanoidId": "roll_material",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "dig",
+      "name": "Dig / Excavate",
+      "category": "earthwork",
+      "description": "Shovel, post-hole digger, or hand excavation.",
+      "humanoidId": "dig",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "pour",
+      "name": "Pour",
+      "category": "material_handling",
+      "description": "Controlled liquid pour — water for dust suppression, concrete for backfill.",
+      "humanoidId": "pour",
+      "robotFeasibility": 4,
+      "deconRelevance": "low"
+    },
+    {
+      "id": "shovel_lift",
+      "name": "Shovel Lift",
+      "category": "earthwork",
+      "description": "Scoop and lift with shovel — gravel, soil, debris.",
+      "humanoidId": "shovel_lift",
+      "robotFeasibility": 3,
+      "deconRelevance": "medium"
+    },
+    {
+      "id": "hazmat_sample",
+      "name": "Hazmat Sample",
+      "category": "safety",
+      "description": "Controlled collection of hazardous material sample with sealing protocol. Asbestos, lead paint, mold.",
+      "humanoidId": "hazmat_sample",
+      "robotFeasibility": 4,
+      "deconRelevance": "critical",
+      "safetyNotes": "PPE Level C minimum, sealed container, chain of custody"
+    },
+    {
+      "id": "contain_hazmat",
+      "name": "Hazmat Containment",
+      "category": "safety",
+      "description": "Seal and maintain containment of hazardous materials. Poly sheeting, negative pressure.",
+      "humanoidId": "contain_hazmat",
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "safetyNotes": "Regulatory compliance (EPA, RIDEM)"
+    },
+    {
+      "id": "lock_out_tag_out",
+      "name": "Lockout / Tagout",
+      "category": "safety",
+      "description": "Energy isolation protocol for electrical, gas, water, and mechanical systems.",
+      "humanoidId": "lock_out_tag_out",
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Must be verified by licensed professional (electrical, plumbing)"
+    },
+    {
+      "id": "push_sand",
+      "name": "Floor Sand / Push",
+      "category": "material_handling",
+      "description": "Floor sander operation or push-type material movement.",
+      "humanoidId": "push_sand",
+      "robotFeasibility": 4,
+      "deconRelevance": "low"
+    },
+    {
+      "id": "fasten_staple",
+      "name": "Staple",
+      "category": "fastening",
+      "description": "Staple gun for vapor barrier, poly sheeting, or temporary fastening.",
+      "humanoidId": "fasten_staple",
+      "robotFeasibility": 4,
+      "deconRelevance": "low"
+    },
+    {
+      "id": "rig_crane",
+      "name": "Crane Rigging",
+      "category": "rigging",
+      "description": "Attach slings, shackles, spreader bars to load for crane lift. Includes weight estimation, center-of-gravity assessment, and lift point selection.",
+      "humanoidId": null,
+      "robotFeasibility": 1,
+      "deconRelevance": "critical",
+      "safetyNotes": "Certified rigger required. Load must be secured before signal.",
+      "note": "Decon-specific — construction uses crane but rigging is decon's core choreography"
+    },
+    {
+      "id": "signal_crane",
+      "name": "Crane Signal",
+      "category": "rigging",
+      "description": "Hand signals or radio communication to direct crane operator. Standard OSHA hand signals.",
+      "humanoidId": null,
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Designated signal person only. Clear line of sight to operator."
+    },
+    {
+      "id": "section_cut",
+      "name": "Section Cut",
+      "category": "cutting",
+      "description": "Strategic structural cuts to divide roof, wall, or floor into liftable sections. Requires structural awareness — cut sequence matters.",
+      "humanoidId": null,
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Structural engineer sign-off on cut plan. Never cut last bearing connection before rigging.",
+      "note": "Decon-specific — the defining skill of crane-based deconstruction"
+    },
+    {
+      "id": "flush_cut_nail",
+      "name": "Flush-Cut Nail",
+      "category": "unfastening",
+      "description": "Cut nail flush with material surface using oscillating tool rather than extracting. Preserves sheet goods (sheathing, subfloor) when ring-shank or spiral nails resist extraction.",
+      "humanoidId": null,
+      "robotFeasibility": 3,
+      "deconRelevance": "critical",
+      "note": "Decon-specific. Key material preservation technique — extraction damages the sheet, flush-cut preserves it."
+    },
+    {
+      "id": "core_drill_concrete",
+      "name": "Core Drill (Concrete)",
+      "category": "cutting",
+      "description": "Diamond core drill to create lifting holes in concrete panels. 2-inch minimum for through-bolt + shackle rigging.",
+      "humanoidId": null,
+      "robotFeasibility": 4,
+      "deconRelevance": "high",
+      "safetyNotes": "Water cooling, dust extraction, rebar location scan before drilling"
+    },
+    {
+      "id": "hydraulic_break",
+      "name": "Hydraulic Break",
+      "category": "demolition",
+      "description": "Brokk 170 or Track Breaker hydraulic impact to fracture concrete at controlled locations. Bond-breaking at footing joints, slab sectioning.",
+      "humanoidId": null,
+      "robotFeasibility": 5,
+      "deconRelevance": "critical",
+      "note": "Decon-specific. Brokk is already a robot — highest robot feasibility. Track Breaker extends this to wall-mounted precision."
+    },
+    {
+      "id": "magnetic_sweep",
+      "name": "Magnetic Sweep",
+      "category": "cleaning",
+      "description": "Pass magnetic sweeper over ground to collect loose nails, screws, metal debris. Critical safety step after every phase.",
+      "humanoidId": null,
+      "robotFeasibility": 5,
+      "deconRelevance": "high",
+      "safetyNotes": "Required after roof, wall, and floor phases. Protects crew, tires, and future site use.",
+      "note": "Decon-specific. High robot feasibility — repetitive, spatial, safety-critical."
+    },
+    {
+      "id": "brace_install",
+      "name": "Temporary Brace",
+      "category": "support",
+      "description": "Install temporary bracing to maintain structural integrity during sequential removal. Walls braced before floor removal, top floor braced before roof removal.",
+      "humanoidId": null,
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Structural sequencing — brace BEFORE removing the element that provides current support.",
+      "note": "Decon-specific. Construction installs permanent structure; decon must temporarily replace what it's removing."
+    },
+    {
+      "id": "disconnect_utility",
+      "name": "Utility Disconnect",
+      "category": "safety",
+      "description": "Physically disconnect electrical, gas, water, or sewer connections. Precedes all structural work.",
+      "humanoidId": null,
+      "robotFeasibility": 2,
+      "deconRelevance": "critical",
+      "safetyNotes": "Licensed professional required for gas and electrical. Verification test after disconnect."
+    }
+  ],
+  "categories": {
+    "locomotion": { "count": 2, "note": "Movement across site" },
+    "material_handling": { "count": 8, "note": "Carry, lift, sort, stage, organize" },
+    "demolition": { "count": 3, "note": "Strike, pry, hydraulic break" },
+    "cutting": { "count": 5, "note": "Power saw, hand, drill, section cut, core drill" },
+    "fastening": { "count": 4, "note": "Nail gun, screw, manual, staple — used in bracing" },
+    "unfastening": { "count": 3, "note": "Screw remove, nail extract, flush-cut — decon core" },
+    "sensing": { "count": 5, "note": "Measure, mark, inspect, plumb, level" },
+    "support": { "count": 2, "note": "Position hold, temporary brace" },
+    "cleaning": { "count": 4, "note": "Sweep, dump, wipe, magnetic sweep" },
+    "rigging": { "count": 2, "note": "Crane rig + signal — decon-specific" },
+    "safety": { "count": 4, "note": "Hazmat, LOTO, containment, utility disconnect" },
+    "earthwork": { "count": 2, "note": "Dig, shovel" }
+  }
+}

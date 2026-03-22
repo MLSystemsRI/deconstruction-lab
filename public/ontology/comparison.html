@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ontology Comparison — Human Vision vs Optimized Vision</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  :root {
+    --orange: #F97316;
+    --orange-dim: #F9731640;
+    --black: #0A0A0A;
+    --surface: #141414;
+    --elevated: #1E1E1E;
+    --border: #2A2A2A;
+    --text: #F5F5F5;
+    --muted: #888;
+    --green: #22C55E;
+    --teal: #14B8A6;
+    --blue: #60A5FA;
+    --red: #EF4444;
+    --yellow: #FFE500;
+    --purple: #A78BFA;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: var(--black); color: var(--text); }
+
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.9); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+  }
+  .header h1 { font-size: 22px; font-weight: 800; }
+  .header h1 span { color: var(--orange); }
+  .header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+
+  /* ── Finding the Missing Layer ── */
+  .insight-banner {
+    background: linear-gradient(135deg, var(--surface), #1a1208);
+    border: 1px solid var(--orange);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 0 60px rgba(249,115,22,0.08);
+  }
+  .insight-banner h2 { font-size: 20px; font-weight: 800; color: var(--orange); margin-bottom: 12px; }
+  .insight-banner p { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 900px; }
+  .insight-banner .highlight { color: var(--yellow); font-weight: 700; }
+
+  /* ── Layer Diagram ── */
+  .layer-diagram {
+    display: flex; flex-direction: column; gap: 2px;
+    margin: 32px 0;
+    max-width: 700px;
+  }
+  .layer {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  .layer-label { font-weight: 700; min-width: 160px; }
+  .layer-desc { color: var(--muted); font-size: 12px; }
+  .layer.exists { background: var(--surface); border: 1px solid var(--border); }
+  .layer.missing {
+    background: linear-gradient(90deg, rgba(249,115,22,0.15), transparent);
+    border: 1px solid var(--orange);
+    box-shadow: 0 0 20px rgba(249,115,22,0.1);
+  }
+  .layer .tag {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .tag.green { background: var(--green); color: var(--black); }
+  .tag.orange { background: var(--orange); color: var(--black); }
+  .tag.red { background: var(--red); color: white; }
+
+  /* ── Nav ── */
+  .nav {
+    display: flex; gap: 2px; margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .nav button {
+    background: none; border: none; color: var(--muted);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    padding: 12px 20px; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .nav button:hover { color: var(--text); }
+  .nav button.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Comparison Table ── */
+  .comp-section { margin-bottom: 40px; }
+  .comp-section h3 {
+    font-size: 15px; font-weight: 700; color: var(--orange);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    text-align: left; padding: 10px 12px;
+    background: var(--surface); color: var(--muted);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1a1a1a;
+    vertical-align: top;
+  }
+  tr:hover td { background: #111; }
+
+  .badge {
+    display: inline-block;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .badge-new { background: var(--orange); color: var(--black); }
+  .badge-enhanced { background: var(--blue); color: var(--black); }
+  .badge-split { background: var(--purple); color: var(--black); }
+  .badge-kept { background: var(--border); color: var(--muted); }
+  .badge-moved { background: var(--teal); color: var(--black); }
+  .badge-missing { background: var(--red); color: white; }
+
+  .code { font-family: 'Courier New', monospace; font-size: 11px; color: var(--orange); }
+  .dim { color: #555; }
+  .bright { color: var(--text); font-weight: 600; }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .num { font-size: 28px; font-weight: 900; color: var(--orange); }
+  .stat-card .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+  .vs {
+    display: flex; gap: 24px; margin-bottom: 32px;
+  }
+  .vs-col {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .vs-col h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .vs-col.human h4 { color: var(--green); }
+  .vs-col.optimized h4 { color: var(--orange); }
+  .vs-col ul { list-style: none; padding: 0; }
+  .vs-col li { font-size: 12px; color: var(--muted); padding: 4px 0; border-bottom: 1px solid #1a1a1a; }
+
+  /* ── Merged View ── */
+  .merged-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .merged-card.new-task {
+    border-color: var(--orange);
+    box-shadow: 0 0 20px rgba(249,115,22,0.06);
+  }
+  .merged-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .merged-card .meta { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .merged-card .desc { font-size: 12px; color: #aaa; line-height: 1.6; }
+  .merged-card .primitives { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .merged-card .prim {
+    font-size: 10px; background: var(--elevated); border: 1px solid var(--border);
+    padding: 2px 8px; border-radius: 4px; color: var(--muted);
+  }
+  .merged-card .prim.new-prim { border-color: var(--orange); color: var(--orange); }
+
+  .phase-header {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--orange); margin: 32px 0 16px; padding: 8px 0;
+    border-bottom: 2px solid var(--orange);
+  }
+
+  @media (max-width: 768px) {
+    .vs { flex-direction: column; }
+    .container { padding: 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>Ontology Comparison</span> — Human Vision vs Optimized Vision</h1>
+  <p>Finding the missing layer between construction bridge and deconstruction reality</p>
+</div>
+
+<div class="container">
+
+  <!-- ── THE FINDING ── -->
+  <div class="insight-banner">
+    <h2>The Missing Layer: Intelligence Operations</h2>
+    <p>
+      Your ontology has two strong layers: <strong>Phases</strong> (chronological order) and <strong>Primitives</strong> (atomic physical actions bridged from construction).
+      Between them sit 55 task codes — but these were built by reversing construction tasks. Construction doesn't have
+      <span class="highlight">assessment</span>, <span class="highlight">material routing decisions</span>,
+      <span class="highlight">intact recovery techniques</span>, <span class="highlight">contamination gating</span>,
+      <span class="highlight">documentation/data capture</span>, or <span class="highlight">the 45-minute problem-solving operations</span>.
+    </p>
+    <p style="margin-top: 12px;">
+      These aren't just "nice to have" — they're the operations that make deconstruction different from demolition and that create the value. A demolition crew doesn't grade lumber. A construction crew doesn't photograph what they just pulled for resale. The <span class="highlight">intelligence layer</span> is what turns physical labor into data, materials into inventory, and a tear-down into a business.
+    </p>
+
+    <div class="layer-diagram">
+      <div class="layer exists">
+        <span class="tag green">Has</span>
+        <span class="layer-label">Phases (6)</span>
+        <span class="layer-desc">PRE → ROOF → WALLS → FLOORS → FOUNDATION → POST</span>
+      </div>
+      <div class="layer exists">
+        <span class="tag green">Has</span>
+        <span class="layer-label">Task Codes (55)</span>
+        <span class="layer-desc">Physical operations — cut, rig, lift, remove, strip</span>
+      </div>
+      <div class="layer missing">
+        <span class="tag orange">Missing</span>
+        <span class="layer-label">Intelligence Ops (19 new)</span>
+        <span class="layer-desc">Assess, grade, route, document, price, decide, test, photograph</span>
+      </div>
+      <div class="layer exists">
+        <span class="tag green">Has</span>
+        <span class="layer-label">Primitives (45)</span>
+        <span class="layer-desc">Atomic actions bridged from construction — pry, cut, carry, lift</span>
+      </div>
+      <div class="layer missing">
+        <span class="tag orange">Missing</span>
+        <span class="layer-label">Intelligence Primitives (8 new)</span>
+        <span class="layer-desc">grade_material, photograph, price_estimate, condition_log, dimension_record, species_identify, route_decision, contamination_test</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="num">55</div>
+      <div class="label">Current Tasks</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color: var(--orange);">74</div>
+      <div class="label">Optimized Tasks</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color: var(--yellow);">19</div>
+      <div class="label">New Tasks</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">45</div>
+      <div class="label">Current Primitives</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color: var(--orange);">53</div>
+      <div class="label">Optimized Primitives</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color: var(--yellow);">8</div>
+      <div class="label">New Primitives</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">6</div>
+      <div class="label">Phases (unchanged)</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color: var(--teal);">3</div>
+      <div class="label">New Categories</div>
+    </div>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="nav">
+    <button class="active" onclick="showPanel('gap')">The Gap Analysis</button>
+    <button onclick="showPanel('new-tasks')">19 New Task Codes</button>
+    <button onclick="showPanel('new-prims')">8 New Primitives</button>
+    <button onclick="showPanel('merged')">Merged Ontology (74)</button>
+    <button onclick="showPanel('side')">Side-by-Side</button>
+    <button onclick="showPanel('provenance')">ML Provenance Brand</button>
+  </div>
+
+  <!-- ══════ GAP ANALYSIS ══════ -->
+  <div id="panel-gap" class="panel active">
+    <div class="comp-section">
+      <h3>What Construction Bridge Captured Well</h3>
+      <table>
+        <tr><th>Category</th><th>Coverage</th><th>Why It Worked</th></tr>
+        <tr>
+          <td class="bright">Structural removal</td>
+          <td><span class="badge badge-kept">Complete</span></td>
+          <td>Cutting, rigging, lifting — direct reverse of construction framing/roofing</td>
+        </tr>
+        <tr>
+          <td class="bright">Fastener operations</td>
+          <td><span class="badge badge-kept">Complete</span></td>
+          <td>unfasten_screw, unfasten_nail, flush_cut_nail — inverting fasten operations</td>
+        </tr>
+        <tr>
+          <td class="bright">Safety/hazmat</td>
+          <td><span class="badge badge-kept">Complete</span></td>
+          <td>LOTO, hazmat survey/containment carry from construction safety protocols</td>
+        </tr>
+        <tr>
+          <td class="bright">Equipment operations</td>
+          <td><span class="badge badge-kept">Complete</span></td>
+          <td>Crane, Brokk, saws — equipment is equipment regardless of direction</td>
+        </tr>
+        <tr>
+          <td class="bright">Phase sequencing</td>
+          <td><span class="badge badge-kept">Complete</span></td>
+          <td>Reverse of construction order preserves structural logic</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>What Construction Bridge Could NOT Capture</h3>
+      <table>
+        <tr><th>Missing Category</th><th>Why</th><th>Impact</th><th>New Tasks</th></tr>
+        <tr>
+          <td class="bright">Material Assessment & Grading</td>
+          <td>Construction installs KNOWN materials. Deconstruction discovers UNKNOWN ones.</td>
+          <td class="dim">Without grading, you can't price. Without pricing, BOH doesn't work.</td>
+          <td><span class="badge badge-new">4 tasks</span></td>
+        </tr>
+        <tr>
+          <td class="bright">Material Conditioning</td>
+          <td>Construction uses clean, new materials. Deconstruction recovers dirty, nailed, painted ones.</td>
+          <td class="dim">De-nailing, cleaning, straightening determine if a board is $2 or $12.</td>
+          <td><span class="badge badge-new">3 tasks</span></td>
+        </tr>
+        <tr>
+          <td class="bright">Documentation & Data Capture</td>
+          <td>Construction documents progress. Deconstruction documents discovery — materials, conditions, techniques.</td>
+          <td class="dim">Feeds ontology, BOH listings, Design Studio specs, robot training. The 45 depends on this.</td>
+          <td><span class="badge badge-new">3 tasks</span></td>
+        </tr>
+        <tr>
+          <td class="bright">Material Flow Routing</td>
+          <td>Construction has a bill of materials (known destinations). Deconstruction has routing decisions (resale? reuse? recycle? landfill?).</td>
+          <td class="dim">Every piece of material needs a decision. This is the 51% resale rate in action.</td>
+          <td><span class="badge badge-new">2 tasks</span></td>
+        </tr>
+        <tr>
+          <td class="bright">Contamination Gating</td>
+          <td>Construction uses certified clean materials. Deconstruction must TEST before touching — lead, asbestos, mold.</td>
+          <td class="dim">Pre-1978 homes = mandatory. One contaminated board in BOH = liability.</td>
+          <td><span class="badge badge-new">2 tasks</span></td>
+        </tr>
+        <tr>
+          <td class="bright">Intact Recovery Techniques</td>
+          <td>Construction installs — attachment is the goal. Deconstruction detaches — preservation is the goal. Fundamentally different techniques.</td>
+          <td class="dim">A cabinet removed intact is worth $200. Broken: $0. The technique IS the value.</td>
+          <td><span class="badge badge-new">2 tasks</span></td>
+        </tr>
+        <tr>
+          <td class="bright">The 45 Operations</td>
+          <td>Construction has no structured problem-solving cadence. The 45 is Sal's innovation — it doesn't exist in any construction ontology.</td>
+          <td class="dim">The 45 feeds 7 platforms. Without codified tasks, it's just "take a break."</td>
+          <td><span class="badge badge-new">3 tasks</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════ 19 NEW TASK CODES ══════ -->
+  <div id="panel-new-tasks" class="panel">
+    <div class="comp-section">
+      <h3>Material Assessment & Grading (4 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">mat_grade_lumber</td>
+          <td class="bright">Lumber Grading</td>
+          <td>ALL (per recovery)</td>
+          <td>Grade recovered lumber: species identification, check for rot/insect damage, measure dimensions, assess straightness. Determines BOH price tier ($2/board-foot vs $0.50) and Design Studio eligibility.</td>
+          <td>5 per piece</td>
+        </tr>
+        <tr>
+          <td class="code">mat_grade_sheet</td>
+          <td class="bright">Sheet Goods Grading</td>
+          <td>ALL (per recovery)</td>
+          <td>Grade recovered plywood/OSB/drywall sheets: check delamination, water damage, nail holes, edge integrity. Intact sheets ($3–20) vs damaged (grind/recycle). Gating function for BOH vs waste stream.</td>
+          <td>3 per sheet</td>
+        </tr>
+        <tr>
+          <td class="code">mat_grade_fixture</td>
+          <td class="bright">Fixture & Appliance Grading</td>
+          <td>WALLS</td>
+          <td>Grade cabinets, appliances, fixtures, doors, windows: functional test where possible, cosmetic assessment, completeness check (all hardware present?). Sets BOH pricing and zone assignment.</td>
+          <td>5 per unit</td>
+        </tr>
+        <tr>
+          <td class="code">mat_grade_concrete</td>
+          <td class="bright">Concrete Panel Grading</td>
+          <td>FOUNDATION</td>
+          <td>Grade foundation panels: check for cracks, spalling, rebar corrosion exposure. Determines: landscape reuse (premium), retaining wall (standard), or crush to RCA (damaged).</td>
+          <td>5 per panel</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>Material Conditioning (3 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">denail_lumber</td>
+          <td class="bright">Lumber De-nailing</td>
+          <td>ALL (post-recovery)</td>
+          <td>Remove all nails, screws, and fastener remnants from recovered lumber. Pneumatic de-nailer for volume, cats paw for stubborn. Clean lumber sells for 2–3x over nailed lumber. This is the operation that turns scrap into inventory.</td>
+          <td>3 per piece</td>
+        </tr>
+        <tr>
+          <td class="code">clean_condition</td>
+          <td class="bright">Material Cleaning & Conditioning</td>
+          <td>POST</td>
+          <td>Clean recovered materials for presentation: brush/wipe down, remove adhesive residue, scrape paint drips. BOH presentation quality directly affects sale price. Dirty lumber with a price tag = yard sale. Clean lumber with a price tag = reclaimed materials market.</td>
+          <td>60 per batch</td>
+        </tr>
+        <tr>
+          <td class="code">bundle_stack</td>
+          <td class="bright">Bundle & Stack for Sale</td>
+          <td>POST</td>
+          <td>Bundle lumber by dimension (2x4, 2x6, 2x10, 2x12), band with strapping, place on pallets. Stack sheet goods by type. Lean doors/windows on A-frames. Professional presentation = professional prices.</td>
+          <td>45 per zone</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>Documentation & Data Capture (3 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">photo_document</td>
+          <td class="bright">Material Photography</td>
+          <td>ALL (during the 45)</td>
+          <td>Photograph recovered materials for BOH listings, Design Studio reference library, and ontology documentation. Standardized angles: front, detail, damage, dimensions visible. The person who pulled the material photographs it — they know its condition best.</td>
+          <td>2 per item</td>
+        </tr>
+        <tr>
+          <td class="code">dimension_record</td>
+          <td class="bright">Dimension & Species Recording</td>
+          <td>ALL (during the 45)</td>
+          <td>Record material dimensions, species (for lumber), grade marks, manufacturer info. Feeds Design Studio material database and BOH listing details. Tape measure + camera + the app.</td>
+          <td>3 per item</td>
+        </tr>
+        <tr>
+          <td class="code">session_log</td>
+          <td class="bright">Decon Session Logging</td>
+          <td>ALL (during the 45)</td>
+          <td>Log separation times, technique effectiveness, adhesive types encountered, unexpected conditions. "What took too long? What broke? What's the better way?" — Sal's 45-minute questions, formalized. Feeds ontology dataset for next house.</td>
+          <td>10 per shift</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>Material Flow Routing (2 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">route_decision</td>
+          <td class="bright">Material Routing Decision</td>
+          <td>ALL</td>
+          <td>Triage each recovered item: BOH resale → reuse in next build → recycle stream → landfill. This is the 51% resale rate in action — every piece gets a routing decision. Sal or Ground Lead makes the call. Logged for ontology.</td>
+          <td>1 per item</td>
+        </tr>
+        <tr>
+          <td class="code">price_tag</td>
+          <td class="bright">Pricing & Tagging</td>
+          <td>POST</td>
+          <td>Price each BOH item based on grade, condition, and market research. Write price tag with material details (species, dimensions, condition notes). The price tag IS the sales pitch — it tells the buyer exactly what they're getting.</td>
+          <td>2 per item</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>Contamination Gating (2 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">lead_test_gate</td>
+          <td class="bright">Lead Paint Field Test</td>
+          <td>PRE + WALLS</td>
+          <td>Swab-test painted surfaces before removal. Pre-1978 homes: assumed positive until tested. Positive result gates the entire recovery path — painted trim, doors, and windows need RRP-certified handling or go to waste. One contaminated board in BOH = liability.</td>
+          <td>5 per surface</td>
+        </tr>
+        <tr>
+          <td class="code">moisture_mold_scan</td>
+          <td class="bright">Moisture & Mold Scan</td>
+          <td>PRE + WALLS + FLOORS</td>
+          <td>Moisture meter scan of wall cavities, floor systems, and roof sheathing after opening. Mold presence gates material routing — affected materials cannot enter BOH. Critical for RI climate (high humidity, old housing stock).</td>
+          <td>3 per area</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>Intact Recovery Techniques (2 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">adhesive_separate</td>
+          <td class="bright">Adhesive Separation</td>
+          <td>WALLS + FLOORS</td>
+          <td>Separate materials bonded by construction adhesive (subfloor-to-joist, tile-to-backer, trim-to-wall). Heat gun for thermoplastic adhesives, oscillating tool for rigid bonds, solvent for PVA. This is the core science of Decon Lab — the technique determines recovery rate.</td>
+          <td>varies</td>
+        </tr>
+        <tr>
+          <td class="code">glazing_extract</td>
+          <td class="bright">Window Glazing Extraction</td>
+          <td>WALLS</td>
+          <td>Extract glass panes from frames for separate recovery. Score and break single-pane. IGU (insulated glass units) extracted whole — resale value in intact IGUs. Glass-only to recycle stream.</td>
+          <td>10 per window</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="comp-section">
+      <h3>The 45 Operations (3 new tasks)</h3>
+      <table>
+        <tr><th style="width:140px">Code</th><th>Name</th><th>Phase</th><th>Description</th><th style="width:90px">Est. Min</th></tr>
+        <tr>
+          <td class="code">boh_listing</td>
+          <td class="bright">BOH Listing Creation</td>
+          <td>ALL (the 45)</td>
+          <td>Create Builder's Open House listings during the 45: photograph, describe, price, publish. "Listings go live during the decon — not after." The person who touched the material creates the listing because they know its condition. Platform: BOH app.</td>
+          <td>5 per listing</td>
+        </tr>
+        <tr>
+          <td class="code">shift_plan</td>
+          <td class="bright">Next-Shift Planning</td>
+          <td>ALL (the 45)</td>
+          <td>During the 45: crew reviews what happened in the last 90 minutes, identifies bottlenecks, plans the next shift's work. Sal synthesizes across shifts — "a Shift 2 crew member notices trim pulls faster from the bottom — Sal carries that to Shift 3." The operation gets smarter every 2.25 hours.</td>
+          <td>15 per shift</td>
+        </tr>
+        <tr>
+          <td class="code">video_capture</td>
+          <td class="bright">Process Video Capture</td>
+          <td>ALL (the 45)</td>
+          <td>Record video of techniques, material conditions, problem areas. Feeds: social media content, ontology video annotation, robot training dataset (at 500 clips → robot-params export). Real content from real work.</td>
+          <td>5 per clip</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════ 8 NEW PRIMITIVES ══════ -->
+  <div id="panel-new-prims" class="panel">
+    <div class="comp-section">
+      <h3>8 New Intelligence Primitives</h3>
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">
+        The current 45 primitives are all <strong>physical actions</strong> — pry, cut, carry, lift, sweep.
+        The missing layer needs <strong>cognitive/assessment primitives</strong> that don't exist in construction.
+      </p>
+      <table>
+        <tr><th>ID</th><th>Name</th><th>Category</th><th>Description</th><th>Robot Feasibility</th><th>Why Construction Doesn't Have It</th></tr>
+        <tr>
+          <td class="code">grade_material</td>
+          <td class="bright">Grade Material</td>
+          <td>assessment</td>
+          <td>Assess material condition, structural integrity, cosmetic quality. Assign grade (A/B/C/D) that determines price and routing.</td>
+          <td>3 — vision AI can assist</td>
+          <td>Construction uses NEW materials with known specs. No grading needed.</td>
+        </tr>
+        <tr>
+          <td class="code">photograph</td>
+          <td class="bright">Photograph</td>
+          <td>documentation</td>
+          <td>Capture standardized photos of materials, conditions, damage, dimensions. Feeds BOH, Design Studio, ontology.</td>
+          <td>5 — trivial for robots</td>
+          <td>Construction documents PROGRESS. Decon documents DISCOVERY.</td>
+        </tr>
+        <tr>
+          <td class="code">price_estimate</td>
+          <td class="bright">Price Estimate</td>
+          <td>assessment</td>
+          <td>Estimate resale value based on grade, market comps, condition, species, dimensions.</td>
+          <td>2 — needs market context</td>
+          <td>Construction has a bill of materials with KNOWN costs. No estimation.</td>
+        </tr>
+        <tr>
+          <td class="code">condition_log</td>
+          <td class="bright">Condition Log</td>
+          <td>documentation</td>
+          <td>Record material condition, separation difficulty, adhesive type, technique used, time taken. Feeds ontology for next house.</td>
+          <td>4 — structured data entry</td>
+          <td>Construction logs installation. Decon logs DISCOVERY + separation science.</td>
+        </tr>
+        <tr>
+          <td class="code">dimension_record</td>
+          <td class="bright">Dimension Record</td>
+          <td>documentation</td>
+          <td>Measure and record material dimensions, species marks, grade stamps. Populates Design Studio material database.</td>
+          <td>4 — tape + camera + OCR</td>
+          <td>Construction has specs on the plan. Decon finds dimensions in the field.</td>
+        </tr>
+        <tr>
+          <td class="code">species_identify</td>
+          <td class="bright">Species Identify</td>
+          <td>assessment</td>
+          <td>Identify wood species by grain pattern, weight, color, grade stamp. Pine vs oak vs fir changes price 3–5x.</td>
+          <td>3 — vision AI trainable</td>
+          <td>Construction specifies species. Decon discovers it.</td>
+        </tr>
+        <tr>
+          <td class="code">route_decision</td>
+          <td class="bright">Route Decision</td>
+          <td>assessment</td>
+          <td>Triage material to disposition path: BOH resale → project reuse → recycle → landfill. Every piece gets a decision.</td>
+          <td>2 — needs business logic</td>
+          <td>Construction has a bill of materials with known destinations. No routing.</td>
+        </tr>
+        <tr>
+          <td class="code">contamination_test</td>
+          <td class="bright">Contamination Test</td>
+          <td>safety</td>
+          <td>Field-test for lead paint (swab), moisture/mold (meter), asbestos (visual + sample). Gates material routing.</td>
+          <td>3 — sensor-based</td>
+          <td>Construction uses certified clean materials. No testing needed.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════ MERGED ONTOLOGY ══════ -->
+  <div id="panel-merged" class="panel">
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 24px;">
+      The merged ontology keeps all 55 of Sal's original task codes (the human vision) and integrates 19 new intelligence operations (the optimized vision).
+      New tasks are highlighted with an orange border. The result: <strong>74 task codes</strong> covering physical operations AND the intelligence layer that creates value.
+    </p>
+
+    <div class="phase-header">PRE Phase — 8 tasks (was 7, +1 new)</div>
+    <div class="merged-card"><h4><span class="code">site_assess</span> Site Assessment</h4><div class="meta">60 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">util_isolate</span> Utility Isolation</h4><div class="meta">90 min · 2 crew · Human original · DCN: ui</div></div>
+    <div class="merged-card"><h4><span class="code">haz_survey</span> Hazmat Survey</h4><div class="meta">120 min · 1 crew · Human original · DCN: hzs</div></div>
+    <div class="merged-card"><h4><span class="code">haz_contain</span> Hazmat Containment</h4><div class="meta">60 min · 2 crew · Human original · DCN: hzc</div></div>
+    <div class="merged-card new-task"><h4><span class="code">lead_test_gate</span> Lead Paint Field Test <span class="badge badge-new">New</span></h4><div class="meta">5 min/surface · Intelligence Op</div><div class="desc">Swab-test painted surfaces. Pre-1978 = assumed positive. Gates recovery path for painted trim, doors, windows.</div><div class="primitives"><span class="prim new-prim">contamination_test</span><span class="prim">inspect_visual</span></div></div>
+    <div class="merged-card"><h4><span class="code">crane_setup</span> Crane Setup</h4><div class="meta">90 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">crew_brief</span> Crew Briefing</h4><div class="meta">15 min · all · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">brace_install</span> Temporary Bracing</h4><div class="meta">120 min · 3 crew · Human original</div></div>
+
+    <div class="phase-header">ROOF Phase — 10 tasks (was 8, +2 new)</div>
+    <div class="merged-card"><h4><span class="code">roof_section_cut</span> Roof Section Cutting</h4><div class="meta">90 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">roof_rig</span> Roof Section Rigging</h4><div class="meta">20 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">roof_lift</span> Roof Section Crane Lift</h4><div class="meta">15 min · 3 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">rafter_remove</span> Rafter Removal</h4><div class="meta">45 min · 2 crew · Human original · DCN: rafter_removal</div></div>
+    <div class="merged-card"><h4><span class="code">sheathing_remove</span> Sheathing Removal</h4><div class="meta">60 min · 2 crew · Human original · DCN: shr</div></div>
+    <div class="merged-card"><h4><span class="code">underlayment_remove</span> Underlayment Removal</h4><div class="meta">30 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">shingle_separate</span> Shingle Separation</h4><div class="meta">60 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">hardware_collect</span> Hardware Collection</h4><div class="meta">30 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">nail_sweep</span> Nail Sweep</h4><div class="meta">15 min · 1 crew · Human original</div></div>
+    <div class="merged-card new-task"><h4><span class="code">mat_grade_lumber</span> Lumber Grading <span class="badge badge-new">New</span></h4><div class="meta">5 min/piece · Intelligence Op · Runs during the 45 after rafter/sheathing recovery</div><div class="desc">Species ID, rot check, dimension verify, straightness assess. Determines BOH price tier.</div><div class="primitives"><span class="prim new-prim">grade_material</span><span class="prim new-prim">species_identify</span><span class="prim new-prim">dimension_record</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">mat_grade_sheet</span> Sheet Goods Grading <span class="badge badge-new">New</span></h4><div class="meta">3 min/sheet · Intelligence Op</div><div class="desc">Check delamination, water damage, nail holes, edge integrity. Intact → BOH ($3–20/sheet), damaged → grind/recycle.</div><div class="primitives"><span class="prim new-prim">grade_material</span><span class="prim">inspect_visual</span></div></div>
+
+    <div class="phase-header">WALLS Phase — 21 tasks (was 18, +3 new)</div>
+    <div class="merged-card"><h4><span class="code">cabinet_remove</span> Cabinet Removal</h4><div class="meta">60 min · 2 crew · Human original · DCN: cfr</div></div>
+    <div class="merged-card"><h4><span class="code">counter_remove</span> Countertop Removal</h4><div class="meta">30 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">appliance_remove</span> Appliance Removal</h4><div class="meta">45 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">electric_strip</span> Electrical Strip</h4><div class="meta">90 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">plumb_strip</span> Plumbing Strip</h4><div class="meta">90 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">fixture_remove</span> Fixture Removal</h4><div class="meta">45 min · 1 crew · Human original · DCN: ffr</div></div>
+    <div class="merged-card"><h4><span class="code">trim_remove</span> Trim Removal</h4><div class="meta">60 min · 2 crew · Human original · DCN: trmr</div></div>
+    <div class="merged-card"><h4><span class="code">door_remove</span> Door Removal</h4><div class="meta">30 min · 1 crew · Human original · DCN: dwr</div></div>
+    <div class="merged-card"><h4><span class="code">window_remove</span> Window Removal</h4><div class="meta">20 min/window · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">hardwood_pull</span> Hardwood Flooring Pull</h4><div class="meta">120 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">wall_section_cut</span> Wall Section Cutting</h4><div class="meta">60 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">wall_rig</span> Wall Section Rigging</h4><div class="meta">15 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">wall_lift</span> Wall Section Crane Lift</h4><div class="meta">10 min · 3 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">drywall_remove</span> Drywall Removal</h4><div class="meta">45 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">insulation_remove</span> Insulation Removal</h4><div class="meta">30 min · 1 crew · Human original · DCN: inr</div></div>
+    <div class="merged-card"><h4><span class="code">ext_sheathing_remove</span> Exterior Sheathing Removal</h4><div class="meta">45 min · 2 crew · Human original · DCN: shr</div></div>
+    <div class="merged-card"><h4><span class="code">stud_remove</span> Stud / Plate Removal</h4><div class="meta">60 min · 2 crew · Human original · DCN: fd</div></div>
+    <div class="merged-card"><h4><span class="code">header_remove</span> Header / Beam Removal</h4><div class="meta">30 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">siding_remove</span> Siding Removal</h4><div class="meta">45 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">shearwall_hardware_remove</span> Shearwall Hardware Removal</h4><div class="meta">20 min · 1 crew · Human original</div></div>
+    <div class="merged-card new-task"><h4><span class="code">mat_grade_fixture</span> Fixture & Appliance Grading <span class="badge badge-new">New</span></h4><div class="meta">5 min/unit · Intelligence Op</div><div class="desc">Functional test, cosmetic assessment, completeness check. Sets BOH pricing.</div><div class="primitives"><span class="prim new-prim">grade_material</span><span class="prim">inspect_visual</span><span class="prim new-prim">price_estimate</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">moisture_mold_scan</span> Moisture & Mold Scan <span class="badge badge-new">New</span></h4><div class="meta">3 min/area · Intelligence Op</div><div class="desc">Moisture meter scan of cavities after opening. Mold gates routing — affected materials cannot enter BOH.</div><div class="primitives"><span class="prim new-prim">contamination_test</span><span class="prim">inspect_visual</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">adhesive_separate</span> Adhesive Separation <span class="badge badge-new">New</span></h4><div class="meta">varies · Intelligence Op · Core Decon Lab science</div><div class="desc">Heat gun for thermoplastic, oscillating tool for rigid, solvent for PVA. The technique determines recovery rate.</div><div class="primitives"><span class="prim">demo_pry</span><span class="prim">cut_hand</span><span class="prim">inspect_visual</span><span class="prim new-prim">condition_log</span></div></div>
+
+    <div class="phase-header">FLOORS Phase — 10 tasks (unchanged)</div>
+    <div class="merged-card"><h4><span class="code">floor_brace</span> Floor System Bracing</h4><div class="meta">60 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">subfloor_cut</span> Subfloor Cutting</h4><div class="meta">45 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">joist_cut</span> Joist Cutting</h4><div class="meta">30 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">floor_rig</span> Floor Section Rigging</h4><div class="meta">20 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">floor_lift</span> Floor Section Crane Lift</h4><div class="meta">15 min · 3 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">subfloor_remove</span> Subfloor Sheet Removal</h4><div class="meta">30 min · 2 crew · Human original · DCN: dp_removal</div></div>
+    <div class="merged-card"><h4><span class="code">bridging_remove</span> Bridging / Blocking Removal</h4><div class="meta">15 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">joist_remove</span> Floor Joist Recovery</h4><div class="meta">60 min · 2 crew · Human original · DCN: joist_removal</div></div>
+    <div class="merged-card"><h4><span class="code">rim_joist_remove</span> Rim Joist & Hardware Removal</h4><div class="meta">20 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">glazing_extract</span> Window Glazing Extraction <span class="badge badge-new">New</span></h4><div class="meta">10 min/window · Intelligence Op</div><div class="desc">Extract glass panes for separate recovery. IGUs extracted whole for resale value.</div></div>
+
+    <div class="phase-header">FOUNDATION Phase — 8 tasks (was 7, +1 new)</div>
+    <div class="merged-card"><h4><span class="code">wall_panel_saw</span> Foundation Wall Panel Sawing</h4><div class="meta">180 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">core_drill_lift</span> Core Drill Lifting Holes</h4><div class="meta">60 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">brokk_break_base</span> Brokk Base Breaking</h4><div class="meta">120 min · 1 crew · Human original · DCN: bc</div></div>
+    <div class="merged-card"><h4><span class="code">panel_lift</span> Foundation Panel Crane Lift</h4><div class="meta">15 min · 3 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">slab_saw_grid</span> Slab Saw Grid Cutting</h4><div class="meta">120 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">slab_lift</span> Slab Section Lift</h4><div class="meta">10 min · 3 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">footing_crush</span> Footing Crushing</h4><div class="meta">120 min · 1 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">rebar_bundle</span> Rebar Bundling</h4><div class="meta">60 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">rca_process</span> RCA Processing</h4><div class="meta">90 min · 2 crew · Human original · DCN: ag</div></div>
+    <div class="merged-card new-task"><h4><span class="code">mat_grade_concrete</span> Concrete Panel Grading <span class="badge badge-new">New</span></h4><div class="meta">5 min/panel · Intelligence Op</div><div class="desc">Check cracks, spalling, rebar exposure. Routes to: landscape reuse (premium), retaining wall, or RCA crush.</div><div class="primitives"><span class="prim new-prim">grade_material</span><span class="prim">inspect_visual</span></div></div>
+
+    <div class="phase-header">POST Phase — 15 tasks (was 7, +8 new)</div>
+    <div class="merged-card"><h4><span class="code">material_stage</span> Material Staging</h4><div class="meta">120 min · 3 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">zone_organize</span> Zone Organization</h4><div class="meta">90 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">site_cleanup</span> Site Cleanup</h4><div class="meta">60 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">grade_backfill</span> Grade & Backfill</h4><div class="meta">120 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">equip_breakdown</span> Equipment Breakdown</h4><div class="meta">120 min · 2 crew · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">crew_debrief</span> Crew Debrief</h4><div class="meta">30 min · all · Human original</div></div>
+    <div class="merged-card"><h4><span class="code">data_capture</span> Data Capture</h4><div class="meta">60 min · 1 crew · Human original</div></div>
+    <div class="merged-card new-task"><h4><span class="code">denail_lumber</span> Lumber De-nailing <span class="badge badge-new">New</span></h4><div class="meta">3 min/piece · Material Conditioning</div><div class="desc">Remove all nails/screws. Clean lumber sells 2–3x over nailed. Turns scrap into inventory.</div><div class="primitives"><span class="prim">unfasten_nail</span><span class="prim">flush_cut_nail</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">clean_condition</span> Material Cleaning <span class="badge badge-new">New</span></h4><div class="meta">60 min/batch · Material Conditioning</div><div class="desc">Brush, wipe, scrape. Clean lumber with a price tag = reclaimed materials market.</div></div>
+    <div class="merged-card new-task"><h4><span class="code">bundle_stack</span> Bundle & Stack for Sale <span class="badge badge-new">New</span></h4><div class="meta">45 min/zone · Material Conditioning</div><div class="desc">Band by dimension, pallet, A-frame. Professional presentation = professional prices.</div><div class="primitives"><span class="prim">stack_organize</span><span class="prim">sort_material</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">price_tag</span> Pricing & Tagging <span class="badge badge-new">New</span></h4><div class="meta">2 min/item · Material Flow</div><div class="desc">Price based on grade + market. The price tag IS the sales pitch.</div><div class="primitives"><span class="prim new-prim">price_estimate</span><span class="prim new-prim">grade_material</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">route_decision</span> Material Routing Decision <span class="badge badge-new">New</span></h4><div class="meta">1 min/item · Material Flow · Runs throughout</div><div class="desc">BOH resale → project reuse → recycle → landfill. The 51% rate in action.</div><div class="primitives"><span class="prim new-prim">route_decision</span><span class="prim new-prim">grade_material</span></div></div>
+
+    <div class="phase-header" style="border-color: var(--yellow); color: var(--yellow);">THE 45 — Cross-Phase Intelligence Ops (3 new, run every shift)</div>
+    <div class="merged-card new-task"><h4><span class="code">photo_document</span> Material Photography <span class="badge badge-new">New</span></h4><div class="meta">2 min/item · Documentation · Feeds: BOH, Design Studio, Ontology</div><div class="desc">The person who pulled the material photographs it — they know its condition best.</div><div class="primitives"><span class="prim new-prim">photograph</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">dimension_record</span> Dimension & Species Recording <span class="badge badge-new">New</span></h4><div class="meta">3 min/item · Documentation · Feeds: Design Studio, BOH listings</div><div class="desc">Measure, identify species, record grade marks. Tape measure + camera + the app.</div><div class="primitives"><span class="prim new-prim">dimension_record</span><span class="prim new-prim">species_identify</span><span class="prim">measure</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">session_log</span> Decon Session Logging <span class="badge badge-new">New</span></h4><div class="meta">10 min/shift · Documentation · Feeds: Ontology dataset</div><div class="desc">"What took too long? What broke? What's the better way?" — formalized.</div><div class="primitives"><span class="prim new-prim">condition_log</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">boh_listing</span> BOH Listing Creation <span class="badge badge-new">New</span></h4><div class="meta">5 min/listing · The 45 · Feeds: Builder's Open House</div><div class="desc">Listings go live during the decon — not after.</div><div class="primitives"><span class="prim new-prim">photograph</span><span class="prim new-prim">price_estimate</span><span class="prim new-prim">grade_material</span></div></div>
+    <div class="merged-card new-task"><h4><span class="code">shift_plan</span> Next-Shift Planning <span class="badge badge-new">New</span></h4><div class="meta">15 min/shift · The 45 · Feeds: Internal</div><div class="desc">The operation gets smarter every 2.25 hours.</div></div>
+    <div class="merged-card new-task"><h4><span class="code">video_capture</span> Process Video Capture <span class="badge badge-new">New</span></h4><div class="meta">5 min/clip · The 45 · Feeds: Social, Ontology, Robot Training</div><div class="desc">At 500 clips → robot-params export. Real content from real work.</div><div class="primitives"><span class="prim new-prim">photograph</span></div></div>
+  </div>
+
+  <!-- ══════ SIDE BY SIDE ══════ -->
+  <div id="panel-side" class="panel">
+    <div class="vs">
+      <div class="vs-col human">
+        <h4>Sal's Human Vision (Current — 55 tasks)</h4>
+        <ul>
+          <li><strong>Strength:</strong> Physical operations are complete and accurate</li>
+          <li><strong>Strength:</strong> Phase sequencing matches field reality</li>
+          <li><strong>Strength:</strong> Recovery rates and BOH zones are mapped</li>
+          <li><strong>Strength:</strong> Equipment and PPE are detailed</li>
+          <li><strong>Strength:</strong> Crew sizing is realistic</li>
+          <li><strong>Strength:</strong> Humanoid-ontology bridge preserves shared vocabulary</li>
+          <li style="color: var(--yellow);">Gap: Material grading happens mentally but isn't codified</li>
+          <li style="color: var(--yellow);">Gap: De-nailing/conditioning treated as part of removal, not separate</li>
+          <li style="color: var(--yellow);">Gap: The 45 activities described in crew-model but not in task codes</li>
+          <li style="color: var(--yellow);">Gap: Contamination testing gates decisions but isn't a tracked operation</li>
+          <li style="color: var(--yellow);">Gap: Material routing is implicit (BOH zone mentioned) but not explicit</li>
+          <li style="color: var(--yellow);">Gap: Documentation is POST-only — should be continuous</li>
+        </ul>
+      </div>
+      <div class="vs-col optimized">
+        <h4>Optimized Vision (Merged — 74 tasks)</h4>
+        <ul>
+          <li><strong>Keeps:</strong> All 55 original task codes unchanged</li>
+          <li><strong>Adds:</strong> 4 material grading tasks (lumber, sheet, fixture, concrete)</li>
+          <li><strong>Adds:</strong> 3 material conditioning tasks (de-nail, clean, bundle)</li>
+          <li><strong>Adds:</strong> 3 documentation tasks (photo, dimension, session log)</li>
+          <li><strong>Adds:</strong> 2 material flow tasks (route decision, pricing)</li>
+          <li><strong>Adds:</strong> 2 contamination gating tasks (lead test, moisture/mold)</li>
+          <li><strong>Adds:</strong> 2 intact recovery tasks (adhesive separation, glazing)</li>
+          <li><strong>Adds:</strong> 3 the-45 operations (BOH listing, shift planning, video)</li>
+          <li><strong>Adds:</strong> 8 new intelligence primitives</li>
+          <li style="color: var(--teal);">Codifies what Sal already does in his head</li>
+          <li style="color: var(--teal);">Makes implicit decisions trackable and trainable</li>
+          <li style="color: var(--teal);">Connects physical labor to data pipeline</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <h3>The Key Insight</h3>
+      <div style="background: var(--surface); border: 1px solid var(--orange); border-radius: 12px; padding: 24px;">
+        <p style="font-size: 14px; line-height: 1.8; color: #ccc;">
+          The construction bridge captured <strong style="color: var(--green);">what hands do</strong> — pry, cut, carry, lift.
+          But deconstruction's value comes from <strong style="color: var(--orange);">what the brain does</strong> — grade, assess, route, price, document.
+        </p>
+        <p style="font-size: 14px; line-height: 1.8; color: #ccc; margin-top: 12px;">
+          Your 90/45 model already accounts for this — 90 minutes of body, 45 minutes of brain. But the ontology only codified the 90.
+          The 19 new tasks codify the 45. Now the full shift is in the system.
+        </p>
+        <p style="font-size: 14px; line-height: 1.8; color: #ccc; margin-top: 12px;">
+          This also means every intelligence operation is <strong style="color: var(--yellow);">trackable</strong> — time per grade, pricing accuracy, routing decisions, photo coverage.
+          When the robot tier arrives, these are the tasks humans keep longest (Tier 4+). They're also the tasks that train the AI.
+          <strong style="color: var(--orange);">The intelligence layer is both the last to automate and the first to compound.</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ ML PROVENANCE BRAND ══════ -->
+  <div id="panel-provenance" class="panel">
+
+    <div class="insight-banner" style="border-color: var(--teal);">
+      <h2 style="color: var(--teal);">The Redundancy Problem</h2>
+      <p>
+        Once materials leave the site, ML Systems loses control. A board sold at BOH could be resold on Facebook Marketplace,
+        listed on Craigslist, or flipped by a contractor — all without ML Systems attribution. Worse: without provenance tracking,
+        the same material could theoretically be listed twice, sold to two buyers, or re-entered into the system as "new" recovered material.
+      </p>
+      <p style="margin-top: 12px;">
+        The fix isn't just preventing fraud — it's <span class="highlight">branding the material itself</span> so that every piece of recovered
+        lumber, every salvaged cabinet, every concrete panel carries ML Systems provenance through its entire second life.
+        The brand travels with the material, not just the receipt.
+      </p>
+    </div>
+
+    <div class="comp-section">
+      <h3>ML Provenance System — 3 Layers</h3>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; margin-bottom: 32px;">
+
+        <!-- Layer 1: Physical Brand -->
+        <div style="background: var(--surface); border: 1px solid var(--teal); border-radius: 12px; padding: 24px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(20,184,166,0.15); color: var(--teal); font-weight: 900; font-size: 14px;">1</span>
+            <div>
+              <p style="font-size: 14px; font-weight: 700; color: var(--text);">Physical Brand Mark</p>
+              <p style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;">On the Material Itself</p>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px;">
+            Every graded piece of lumber gets an <strong style="color: var(--teal);">ML Systems brand stamp</strong> — a physical ink stamp or brand
+            burned into the end grain. Includes:
+          </p>
+          <ul style="list-style: none; padding: 0; font-size: 12px; color: #aaa;">
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">ML mark</strong> — the logo, physically on the wood
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Material ID</strong> — unique code (e.g. ML-2026-001-R042)
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Grade</strong> — A/B/C stamped on the piece
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">QR code sticker</strong> — links to digital provenance record
+            </li>
+            <li style="padding: 6px 0;">
+              <strong style="color: var(--text);">Species & dimensions</strong> — stamped or tagged
+            </li>
+          </ul>
+          <p style="font-size: 11px; color: var(--teal); margin-top: 12px; font-weight: 600;">
+            Precedent: FSC-certified lumber carries a chain-of-custody stamp. ML Systems does the same for recovered materials.
+          </p>
+        </div>
+
+        <!-- Layer 2: Digital Provenance -->
+        <div style="background: var(--surface); border: 1px solid var(--orange); border-radius: 12px; padding: 24px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(249,115,22,0.15); color: var(--orange); font-weight: 900; font-size: 14px;">2</span>
+            <div>
+              <p style="font-size: 14px; font-weight: 700; color: var(--text);">Digital Provenance Record</p>
+              <p style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;">QR → Full Material History</p>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px;">
+            Every QR code links to a <strong style="color: var(--orange);">provenance page</strong> on mlsystemsri.com showing:
+          </p>
+          <ul style="list-style: none; padding: 0; font-size: 12px; color: #aaa;">
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Source house</strong> — address, year built, era (tells buyer what adhesives/treatments to expect)
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Recovery date</strong> — when it was pulled
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Recovery method</strong> — which task code was used (links to ontology)
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Grade + photos</strong> — condition at time of recovery
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Contamination status</strong> — lead test result, moisture scan
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--text);">Sale status</strong> — available / sold / reserved
+            </li>
+            <li style="padding: 6px 0;">
+              <strong style="color: var(--text);">ML Systems branding</strong> — "Recovered by ML Systems LLC"
+            </li>
+          </ul>
+          <p style="font-size: 11px; color: var(--orange); margin-top: 12px; font-weight: 600;">
+            Anti-redundancy: once marked SOLD, the QR page shows "This material has been purchased" — cannot be relisted.
+          </p>
+        </div>
+
+        <!-- Layer 3: Inventory Dedup -->
+        <div style="background: var(--surface); border: 1px solid var(--green); border-radius: 12px; padding: 24px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(34,197,94,0.15); color: var(--green); font-weight: 900; font-size: 14px;">3</span>
+            <div>
+              <p style="font-size: 14px; font-weight: 700; color: var(--text);">Inventory Deduplication</p>
+              <p style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;">System-Level Prevention</p>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px;">
+            The <strong style="color: var(--green);">Material ID</strong> is the primary key in the system. It prevents:
+          </p>
+          <ul style="list-style: none; padding: 0; font-size: 12px; color: #aaa;">
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--red);">Double-listing</strong> — same ID can only have one active BOH listing
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--red);">Double-sale</strong> — once sold, ID is locked to buyer
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--red);">Ghost inventory</strong> — material must be graded + photographed before listing is created
+            </li>
+            <li style="padding: 6px 0; border-bottom: 1px solid #1a1a1a;">
+              <strong style="color: var(--red);">Re-entry fraud</strong> — ID is tied to source project. Same board can't be "recovered" from two houses
+            </li>
+            <li style="padding: 6px 0;">
+              <strong style="color: var(--green);">Lifecycle tracking</strong> — recovered → graded → listed → sold → (optional: installed in next build → tracked in Design Studio)
+            </li>
+          </ul>
+          <p style="font-size: 11px; color: var(--green); margin-top: 12px; font-weight: 600;">
+            Full circle: if the buyer uses the material in an ML Systems build, it re-enters the system with a new context — same ID, new lifecycle stage.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <h3>Material ID Format</h3>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+        <div style="font-family: 'Courier New', monospace; font-size: 18px; color: var(--orange); margin-bottom: 16px; letter-spacing: 2px;">
+          ML-2026-001-R042
+        </div>
+        <table style="font-size: 12px;">
+          <tr>
+            <td style="padding: 6px 16px 6px 0; color: var(--orange); font-family: monospace; font-weight: 700;">ML</td>
+            <td style="padding: 6px 0; color: var(--muted);">ML Systems — always prefixed. The brand is in the ID itself.</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 16px 6px 0; color: var(--orange); font-family: monospace; font-weight: 700;">2026</td>
+            <td style="padding: 6px 0; color: var(--muted);">Recovery year</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 16px 6px 0; color: var(--orange); font-family: monospace; font-weight: 700;">001</td>
+            <td style="padding: 6px 0; color: var(--muted);">Project number (sequential — first decon = 001)</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 16px 6px 0; color: var(--orange); font-family: monospace; font-weight: 700;">R042</td>
+            <td style="padding: 6px 0; color: var(--muted);">Item number within project (R = roof, W = walls, F = floors, N = foundation, K = kitchen, H = hardware). 042 = 42nd item recovered from this phase.</td>
+          </tr>
+        </table>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.7;">
+          This format means: even if someone resells an ML Systems board on Craigslist, the buyer can scan the QR or look up
+          <strong style="color: var(--text);">ML-2026-001-R042</strong> and find ML Systems. The brand is <em>in</em> the material,
+          not just on the price tag. When someone sees "ML" stamped on reclaimed lumber at a job site two years later,
+          they know where it came from.
+        </p>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <h3>How This Fits the Ontology</h3>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+        <p style="font-size: 13px; color: #aaa; line-height: 1.8; margin-bottom: 16px;">
+          The provenance system plugs directly into the 19 new intelligence tasks:
+        </p>
+        <table>
+          <tr><th>Intelligence Task</th><th>Provenance Action</th></tr>
+          <tr>
+            <td class="code">mat_grade_*</td>
+            <td style="color: var(--muted);">Creates the Material ID. Grade stamp goes on the piece. Record enters the system.</td>
+          </tr>
+          <tr>
+            <td class="code">photo_document</td>
+            <td style="color: var(--muted);">Photos attach to the Material ID record. Visible on QR provenance page.</td>
+          </tr>
+          <tr>
+            <td class="code">dimension_record</td>
+            <td style="color: var(--muted);">Dimensions and species populate the provenance record and BOH listing.</td>
+          </tr>
+          <tr>
+            <td class="code">lead_test_gate</td>
+            <td style="color: var(--muted);">Test result (pass/fail) stored on Material ID. Visible to buyer on QR scan.</td>
+          </tr>
+          <tr>
+            <td class="code">route_decision</td>
+            <td style="color: var(--muted);">Sets the material's disposition path. BOH items get QR sticker. Non-BOH items still get ML stamp for aggregate tracking.</td>
+          </tr>
+          <tr>
+            <td class="code">price_tag</td>
+            <td style="color: var(--muted);">Price tag includes Material ID + QR code. The tag IS the provenance link.</td>
+          </tr>
+          <tr>
+            <td class="code">boh_listing</td>
+            <td style="color: var(--muted);">Listing references Material ID. One ID = one listing. Cannot duplicate.</td>
+          </tr>
+          <tr>
+            <td class="code">session_log</td>
+            <td style="color: var(--muted);">Recovery technique and time logged against Material ID. Feeds ontology dataset.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <h3>The Brand Flywheel</h3>
+      <div style="background: linear-gradient(135deg, var(--surface), #0a1a14); border: 1px solid var(--teal); border-radius: 12px; padding: 24px;">
+        <p style="font-size: 14px; color: #ccc; line-height: 1.8;">
+          Every material that leaves ML Systems carries the brand with it. Every QR scan is a touchpoint.
+          Every resale — even by a third party — routes attention back to mlsystemsri.com.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0;">
+          <span style="background: var(--teal); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Material recovered</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--orange); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">ML stamp + QR</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--teal); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Sold at BOH</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--orange); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Buyer scans QR</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--green); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Sees ML Systems provenance</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--teal); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Installs in new build</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--orange); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Design Studio tracks it</span>
+          <span style="color: var(--muted); padding: 6px 4px;">→</span>
+          <span style="background: var(--yellow); color: var(--black); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;">Next decon recovers it again</span>
+        </div>
+        <p style="font-size: 13px; color: var(--teal); font-weight: 700; margin-top: 8px;">
+          The material ID never dies. It accumulates lifecycle stages. A board with three lifecycle entries is proof that circular construction works — and ML Systems made it happen every time.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>

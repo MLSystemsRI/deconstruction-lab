@@ -1,0 +1,51 @@
+{
+  "name": "ml-systems-deconstruction-ontology",
+  "version": "0.1.0",
+  "description": "Operational ontology for residential deconstruction — task decomposition, material taxonomy, crew modeling, and equipment mapping. Bridges humanoid-ontology task primitives to field deconstruction protocols.",
+  "source": {
+    "humanoidOntology": {
+      "repo": "C:/Users/salma/humanoid-ontology",
+      "bridgedAssets": ["task-primitives (36 atoms)", "dcn-task-codes (34 codes)", "deconstruction-ontology (9 phases)"],
+      "relationship": "This ontology expands the humanoid-ontology DCN layer with operational detail from field research. Task primitives are shared vocabulary — same atom IDs, extended with decon-specific primitives."
+    },
+    "research": {
+      "path": "C:/Users/salma/deconstruction-lab/research/",
+      "phases": ["phase-1-roof", "phase-2-walls", "phase-3-floor-system", "phase-4-foundation"],
+      "protocols": 4,
+      "logistics": "1-day-logistics.md"
+    },
+    "fieldExperience": {
+      "ml1Dataset": "269 work days, 1,480 task executions (Oct 2020 – Jul 2022)",
+      "note": "ML1 construction experience informs deconstruction sequencing — reverse order preserves structural logic"
+    }
+  },
+  "targetHome": {
+    "type": "single/multi-story residential",
+    "sqft": 2500,
+    "timeline": "2 days (crane + Brokk + 5-person crew)",
+    "recoveryTarget": "80–90% material, 51% resale value"
+  },
+  "stats": {
+    "phases": 6,
+    "taskCodes": 55,
+    "taskPrimitives": 45,
+    "materialCategories": 8,
+    "equipmentItems": 18,
+    "crewRoles": 7
+  },
+  "shiftModel": {
+    "integrated": true,
+    "structure": "90 min sustained labor + 45 min problem-solving = 2.25 hrs per shift",
+    "shiftsPerDay": 6,
+    "totalShifts": 12,
+    "siteDay": "5:30 AM – 7:00 PM (13.5 hrs)",
+    "philosophy": "The 45 is not a break — it's the other half of the job. Labor is the body, the 45 is the brain. Both compensated.",
+    "phaseMapping": "12 shifts mapped to PRE → Soft Strip → ROOF → WALLS → FLOORS → FOUNDATION → POST across 2 days"
+  },
+  "futureMerge": {
+    "shiftFit": "Each task code has estimatedMinutes — shiftFit (how many repetitions fit in one 90-min labor block) will be calculated from field data.",
+    "robotParams": "At 500 verified video clips, task primitives export to robot-params for ML1 scorer integration."
+  },
+  "created": "2026-03-14",
+  "author": "ML Systems LLC"
+}

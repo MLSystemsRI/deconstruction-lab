@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deconstruction Ontology — ML Systems</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --orange: #F97316;
+    --orange-dim: #F9731640;
+    --orange-glow: #F9731620;
+    --black: #0A0A0A;
+    --surface: #141414;
+    --elevated: #1E1E1E;
+    --border: #2A2A2A;
+    --text: #F5F5F5;
+    --muted: #888;
+    --green: #22C55E;
+    --teal: #14B8A6;
+    --blue: #60A5FA;
+    --red: #EF4444;
+    --yellow: #FFE500;
+    --purple: #A78BFA;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--black);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .header-mark {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px; color: var(--black);
+  }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--orange); }
+  .header-stats {
+    margin-left: auto;
+    display: flex; gap: 24px; font-size: 12px; color: var(--muted);
+  }
+  .header-stats strong { color: var(--orange); font-weight: 600; }
+
+  /* ── Nav tabs ── */
+  .nav {
+    display: flex; gap: 2px; padding: 0 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .nav button {
+    background: none; border: none; color: var(--muted);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    padding: 12px 20px; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav button:hover { color: var(--text); }
+  .nav button.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* ── Panels ── */
+  .panel { display: none; padding: 32px; max-width: 1400px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  /* ── Phase Flow ── */
+  .phase-flow {
+    display: flex; gap: 12px; overflow-x: auto; padding: 8px 0 24px;
+  }
+  .phase-card {
+    min-width: 200px; flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .phase-card:hover, .phase-card.selected {
+    border-color: var(--orange);
+    box-shadow: 0 0 30px var(--orange-glow);
+    transform: translateY(-2px);
+  }
+  .phase-card .order {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 11px; font-weight: 700; color: var(--orange);
+    background: var(--orange-glow);
+    border-radius: 4px; padding: 2px 8px;
+  }
+  .phase-card .code { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .phase-card .name { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .phase-card .type-badge {
+    display: inline-block;
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--elevated); color: var(--muted);
+  }
+  .phase-card .type-badge.structural { background: var(--orange-dim); color: var(--orange); }
+  .phase-card .type-badge.logistics { background: rgba(20,184,166,0.2); color: var(--teal); }
+  .phase-card .duration { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .phase-arrow {
+    display: flex; align-items: center; color: var(--border); font-size: 24px; flex-shrink: 0;
+  }
+
+  /* ── Phase Detail ── */
+  .phase-detail {
+    margin-top: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    display: none;
+  }
+  .phase-detail.visible { display: block; animation: fadeIn 0.3s ease; }
+  .phase-detail h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .phase-detail h2 span { color: var(--orange); }
+  .phase-detail .desc { color: var(--muted); font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+  .detail-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
+  }
+  .detail-box {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .detail-box h3 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    color: var(--orange); margin-bottom: 8px; letter-spacing: 0.5px;
+  }
+  .detail-box ul { list-style: none; }
+  .detail-box ul li {
+    font-size: 13px; padding: 3px 0; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .detail-box ul li::before { content: '›'; color: var(--orange); font-weight: 700; }
+  .material-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .material-row:last-child { border-bottom: none; }
+  .material-row .val { color: var(--green); font-weight: 600; font-size: 12px; }
+  .material-row .rate { color: var(--muted); font-size: 11px; }
+
+  /* ── Task Codes Table ── */
+  .task-filters {
+    display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .task-filters button {
+    background: var(--elevated); border: 1px solid var(--border);
+    color: var(--muted); font-family: inherit; font-size: 12px; font-weight: 500;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .task-filters button:hover { border-color: var(--orange); color: var(--text); }
+  .task-filters button.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+
+  .task-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px;
+  }
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .task-card:hover { border-color: var(--orange); }
+  .task-card .task-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .task-card .task-code {
+    font-family: monospace; font-size: 14px; font-weight: 700; color: var(--orange);
+  }
+  .task-card .task-phase {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 4px; background: var(--elevated); color: var(--muted);
+  }
+  .task-card .task-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .task-card .task-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 10px; }
+  .task-card .primitives {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+  }
+  .task-card .prim-tag {
+    font-size: 10px; padding: 2px 6px;
+    background: var(--orange-glow); color: var(--orange);
+    border-radius: 3px; font-family: monospace;
+  }
+  .task-card .task-meta {
+    display: flex; gap: 12px; font-size: 11px; color: var(--muted);
+  }
+  .task-card .task-meta .difficulty { display: flex; gap: 4px; }
+  .task-card .task-meta .difficulty .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border);
+  }
+  .task-card .task-meta .difficulty .dot.filled { background: var(--orange); }
+  .task-card .task-meta .difficulty .dot.robot { background: var(--blue); }
+
+  .task-card .recovery-strip {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    font-size: 11px;
+  }
+  .task-card .recovery-strip .rv { color: var(--green); font-weight: 600; }
+  .task-card .recovery-strip .zone { color: var(--teal); }
+
+  /* ── Primitives ── */
+  .prim-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;
+  }
+  .prim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    transition: all 0.2s;
+  }
+  .prim-card:hover { border-color: var(--orange); }
+  .prim-card .prim-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .prim-card .prim-id {
+    font-family: monospace; font-size: 13px; font-weight: 700; color: var(--orange);
+  }
+  .prim-card .prim-cat {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--elevated); color: var(--muted);
+  }
+  .prim-card .prim-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .prim-card .prim-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+  .prim-card .prim-meta { display: flex; gap: 16px; font-size: 11px; }
+  .prim-card .prim-meta span { color: var(--muted); }
+  .prim-card .prim-meta strong { color: var(--text); }
+  .bridge-tag {
+    display: inline-block; font-size: 10px; padding: 2px 6px;
+    border-radius: 3px; font-weight: 600;
+  }
+  .bridge-tag.bridged { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .bridge-tag.decon { background: rgba(249,115,22,0.15); color: var(--orange); }
+
+  .feasibility-bar {
+    display: flex; gap: 2px; align-items: center;
+  }
+  .feasibility-bar .seg {
+    width: 14px; height: 6px; border-radius: 2px;
+    background: var(--border);
+  }
+  .feasibility-bar .seg.filled { background: var(--blue); }
+
+  /* ── Materials ── */
+  .zone-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;
+  }
+  .zone-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .zone-card:hover { border-color: var(--teal); }
+  .zone-header {
+    padding: 16px;
+    background: linear-gradient(135deg, var(--elevated), var(--surface));
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .zone-header .zone-num {
+    font-size: 28px; font-weight: 900; color: var(--teal); opacity: 0.7;
+  }
+  .zone-header .zone-info h3 { font-size: 15px; font-weight: 700; }
+  .zone-header .zone-info .discount { font-size: 11px; color: var(--green); }
+  .zone-body { padding: 12px 16px; }
+  .mat-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .mat-item:last-child { border-bottom: none; }
+  .mat-item .mat-name { flex: 1; }
+  .mat-item .mat-rate { color: var(--muted); font-size: 11px; margin: 0 12px; }
+  .mat-item .mat-value { color: var(--green); font-weight: 600; font-size: 12px; text-align: right; }
+
+  /* ── Equipment ── */
+  .equip-section { margin-bottom: 32px; }
+  .equip-section h3 {
+    font-size: 14px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .equip-section h3::before {
+    content: ''; width: 3px; height: 16px; border-radius: 2px;
+    background: var(--orange);
+  }
+  .equip-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;
+  }
+  .equip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .equip-card .equip-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .equip-card .equip-cost { font-size: 12px; color: var(--green); margin-bottom: 4px; }
+  .equip-card .equip-note { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .equip-card .equip-phases {
+    display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap;
+  }
+  .equip-card .equip-phases span {
+    font-size: 10px; font-weight: 600; padding: 2px 6px;
+    background: var(--elevated); color: var(--muted); border-radius: 3px;
+  }
+
+  /* ── Crew ── */
+  .crew-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 800px) { .crew-layout { grid-template-columns: 1fr; } }
+
+  .crew-group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .crew-group h3 {
+    font-size: 14px; font-weight: 700; margin-bottom: 4px;
+  }
+  .crew-group .crew-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .role-card {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .role-card:last-child { margin-bottom: 0; }
+  .role-card .role-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--orange); }
+  .role-card .role-resp {
+    list-style: none; font-size: 12px; color: var(--muted); line-height: 1.6;
+  }
+  .role-card .role-resp li::before { content: '• '; color: var(--orange); }
+
+  .shift-timeline {
+    margin-top: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .shift-timeline h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+  .timeline-blocks { display: flex; gap: 8px; }
+  .timeline-block {
+    flex: 1;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .timeline-block .block-num {
+    font-size: 28px; font-weight: 900; color: var(--orange); opacity: 0.5;
+  }
+  .timeline-block .block-time { font-size: 13px; font-weight: 600; margin: 4px 0; }
+  .timeline-block .block-focus { font-size: 12px; color: var(--muted); }
+  .timeline-block .block-dur {
+    font-size: 10px; color: var(--orange); margin-top: 4px; font-weight: 600;
+  }
+
+  /* ── Summary Cards ── */
+  .summary-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 28px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .summary-card .num {
+    font-size: 32px; font-weight: 900; color: var(--orange);
+  }
+  .summary-card .label {
+    font-size: 12px; color: var(--muted); margin-top: 4px;
+  }
+
+  /* ── Shift Timeline Table ── */
+  .shift-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .shift-table th {
+    text-align: left; padding: 8px 10px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    color: var(--orange); letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .shift-table td {
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .shift-table tr:hover td { background: var(--elevated); }
+  .shift-table .shift-num {
+    font-weight: 800; color: var(--orange); font-size: 14px; text-align: center;
+  }
+  .shift-table .day-label {
+    font-size: 10px; font-weight: 600; color: var(--muted); text-align: center;
+  }
+  .shift-table .time-labor { color: var(--text); font-weight: 500; }
+  .shift-table .time-solve { color: var(--teal); font-weight: 500; }
+  .shift-table .phase-work { color: var(--text); font-weight: 500; }
+  .shift-table .crew-count {
+    font-weight: 700; color: var(--orange); text-align: center;
+  }
+  .shift-table .constants-col { color: var(--muted); font-size: 11px; }
+  .day-divider td {
+    background: var(--orange-glow) !important;
+    font-weight: 700; color: var(--orange); font-size: 12px;
+    text-align: center; padding: 6px;
+  }
+
+  .the45-box {
+    background: linear-gradient(135deg, rgba(20,184,166,0.08), rgba(249,115,22,0.08));
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-top: 20px;
+  }
+  .the45-box h4 { font-size: 13px; font-weight: 700; color: var(--teal); margin-bottom: 10px; }
+  .the45-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;
+  }
+  .the45-item {
+    background: var(--elevated); border-radius: 6px; padding: 8px 10px;
+    font-size: 11px;
+  }
+  .the45-item .platform { font-weight: 600; color: var(--orange); font-size: 10px; }
+  .the45-item .activity { color: var(--text); margin-top: 2px; }
+
+  .capacity-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px; margin-top: 16px;
+  }
+  .capacity-card {
+    background: var(--elevated); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px; text-align: center;
+  }
+  .capacity-card .cap-num { font-size: 24px; font-weight: 800; color: var(--green); }
+  .capacity-card .cap-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .header { padding: 12px 16px; }
+    .nav { padding: 0 16px; }
+    .panel { padding: 16px; }
+    .phase-card { min-width: 160px; }
+    .header-stats { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-mark">DL</div>
+  <h1><span>Deconstruction</span> Ontology</h1>
+  <div class="header-stats">
+    <span><strong>6</strong> Phases</span>
+    <span><strong>55</strong> Task Codes</span>
+    <span><strong>45</strong> Primitives</span>
+    <span><strong>8</strong> Material Zones</span>
+    <span><strong>v0.1.0</strong></span>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="active" onclick="showPanel('phases')">Phases</button>
+  <button onclick="showPanel('tasks')">Task Codes</button>
+  <button onclick="showPanel('primitives')">Primitives</button>
+  <button onclick="showPanel('materials')">Materials</button>
+  <button onclick="showPanel('equipment')">Equipment</button>
+  <button onclick="showPanel('crew')">Crew Model</button>
+</div>
+
+<!-- ═══════════ PHASES ═══════════ -->
+<div class="panel active" id="panel-phases">
+  <div class="summary-row">
+    <div class="summary-card"><div class="num">2</div><div class="label">Day Timeline</div></div>
+    <div class="summary-card"><div class="num">2,500</div><div class="label">SF Target Home</div></div>
+    <div class="summary-card"><div class="num">80–90%</div><div class="label">Material Recovery</div></div>
+    <div class="summary-card"><div class="num">51%</div><div class="label">Resale Value</div></div>
+    <div class="summary-card"><div class="num">5–8</div><div class="label">Crew Size</div></div>
+  </div>
+
+  <div class="phase-flow" id="phase-flow"></div>
+  <div class="phase-detail" id="phase-detail"></div>
+</div>
+
+<!-- ═══════════ TASK CODES ═══════════ -->
+<div class="panel" id="panel-tasks">
+  <div class="task-filters" id="task-filters"></div>
+  <div class="task-grid" id="task-grid"></div>
+</div>
+
+<!-- ═══════════ PRIMITIVES ═══════════ -->
+<div class="panel" id="panel-primitives">
+  <div class="task-filters" id="prim-filters"></div>
+  <div class="prim-grid" id="prim-grid"></div>
+</div>
+
+<!-- ═══════════ MATERIALS ═══════════ -->
+<div class="panel" id="panel-materials">
+  <div class="summary-row">
+    <div class="summary-card"><div class="num" style="color:var(--green)">$7.8K–$20.4K+</div><div class="label">BOH Revenue / Home</div></div>
+    <div class="summary-card"><div class="num" style="color:var(--green)">$32K–$91K</div><div class="label">Swing vs Conventional</div></div>
+  </div>
+  <div class="zone-grid" id="zone-grid"></div>
+</div>
+
+<!-- ═══════════ EQUIPMENT ═══════════ -->
+<div class="panel" id="panel-equipment">
+  <div id="equip-container"></div>
+</div>
+
+<!-- ═══════════ CREW ═══════════ -->
+<div class="panel" id="panel-crew">
+  <div class="crew-layout" id="crew-layout"></div>
+  <div class="shift-timeline" id="shift-timeline"></div>
+</div>
+
+<script>
+// ── DATA (embedded from ontology JSON) ──
+
+const phases = [
+  { code:"PRE", name:"Pre-Deconstruction", order:0, type:"logistics", duration:"2–4 hours", description:"Site preparation, utility isolation, hazmat survey, permits, crane setup, crew briefing.", safetyFocus:"LOTO, utility confirmation, hazmat sampling", taskCodes:["site_assess","util_isolate","haz_survey","haz_contain","crane_setup","crew_brief","brace_install"], crewRequired:["supervisor","crane_operator"], equipmentRequired:["crane"], materialOutput:{}, humanoidBridge:["DCN-UT","DCN-HZ"] },
+  { code:"ROOF", name:"Roof Deconstruction", order:1, type:"structural", duration:"6–9 hours (Day 1)", description:"Section-cut roof into 4–6 pieces, crane-lift to ground, disassemble in reverse order: shingles → underlayment → sheathing → rafters → hardware.", safetyFocus:"100% fall protection tie-off, crane lift plan, 20ft power-line clearance, <20mph wind", taskCodes:["roof_section_cut","roof_rig","roof_lift","rafter_remove","sheathing_remove","underlayment_remove","shingle_separate","hardware_collect","nail_sweep"], crewRequired:["supervisor","crane_operator","rigger","ground_lead","ground_support"], equipmentRequired:["crane","spreader_bar","reciprocating_saw","oscillating_tool","magnetic_sweeper"], materialOutput:{rafters:{recovery:"80–95%",value:"$280–645"},sheathing:{recovery:"40–70%",value:"$300–620"},underlayment:{recovery:"60%",value:"$40–60"},shingles:{recovery:"100%",value:"$53–400"},hardware:{recovery:"90%",value:"$20–30"}}, humanoidBridge:["DCN-RS"] },
+  { code:"WALLS", name:"Wall Deconstruction", order:2, type:"structural", duration:"8–12 hours (Day 1–2)", description:"Soft strip interiors (cabinets, fixtures, trim, windows) while crane works roof. Then crane-lift wall sections on sides for ground disassembly.", safetyFocus:"Dust control (drywall/insulation), load path awareness, PPE for fiberglass", taskCodes:["cabinet_remove","counter_remove","appliance_remove","electric_strip","plumb_strip","fixture_remove","trim_remove","door_remove","window_remove","hardwood_pull","wall_section_cut","wall_rig","wall_lift","drywall_remove","insulation_remove","ext_sheathing_remove","stud_remove","header_remove","siding_remove","shearwall_hardware_remove"], crewRequired:["supervisor","crane_operator","rigger","ground_lead","ground_support"], equipmentRequired:["crane","spreader_bar","reciprocating_saw","pry_bar","cordless_drill"], materialOutput:{studs:{recovery:"85–95%",value:"$200–500"},headers:{recovery:"80–90%",value:"$200–600"},drywall_intact:{recovery:"40–70%",value:"$200–770"},cabinets:{recovery:"70–90%",value:"$200–1000"},copper:{recovery:"95%",value:"$2–3/lb"}}, humanoidBridge:["DCN-FNC","DCN-TS","DCN-WS","DCN-FRM"] },
+  { code:"FLOORS", name:"Floor System", order:3, type:"structural", duration:"2.5–4.5 hours (Day 2)", description:"Brace lower walls, cut subfloor along joist lines, cut joists at bearing points, rig at 1/3 points, crane-lift. Ground disassembly: subfloor → bridging → joists → rim joist.", safetyFocus:"Diaphragm bracing BEFORE floor removal, depth-set circular saw", taskCodes:["floor_brace","subfloor_cut","joist_cut","floor_rig","floor_lift","subfloor_remove","bridging_remove","joist_remove","rim_joist_remove"], crewRequired:["supervisor","crane_operator","rigger","ground_lead"], equipmentRequired:["crane","spreader_bar","circular_saw","reciprocating_saw"], materialOutput:{joists:{recovery:"85–95%",value:"$340–1,140"},subfloor:{recovery:"50–70%",value:"$15–20/sheet"},hardwood:{recovery:"60–80%",value:"$1,700–4,300"}}, humanoidBridge:["DCN-DS"] },
+  { code:"FOUNDATION", name:"Foundation", order:4, type:"structural", duration:"2–4 days (bottleneck)", description:"Saw-cut wall panels into 4×8 sections, core-drill lifting holes, Brokk breaks bond at footing joint, crane lifts panels. Slab saw grid. Footing crush. Rebar bundle.", safetyFocus:"160–190 tons concrete, section weight, dust suppression, rebar exposure", taskCodes:["wall_panel_saw","core_drill_lift","brokk_break_base","panel_lift","slab_saw_grid","slab_lift","footing_crush","rebar_bundle","rca_process"], crewRequired:["supervisor","crane_operator","brokk_operator","ground_lead"], equipmentRequired:["crane","brokk_170","concrete_chain_saw","core_drill","slab_saw","magnetic_separator"], materialOutput:{wall_panels:{recovery:"60–80%",value:"$2,000–6,000"},rca:{recovery:"45–80%",value:"on-site reuse"},rebar:{recovery:"90%+",value:"$200–250/ton"}}, humanoidBridge:["DCN-SS","DCN-FND"], rdNote:"Track Breaker (V0–V3) targets this bottleneck" },
+  { code:"POST", name:"Post-Deconstruction", order:5, type:"logistics", duration:"4–8 hours", description:"Material staging into BOH zones, site cleanup, final magnetic sweep, grade/backfill, equipment breakdown, crew debrief, data capture.", safetyFocus:"Final nail sweep, site security, material inventory", taskCodes:["material_stage","zone_organize","site_cleanup","grade_backfill","equip_breakdown","crew_debrief","data_capture"], crewRequired:["supervisor","ground_lead","ground_support"], equipmentRequired:["magnetic_sweeper","skid_steer"], materialOutput:{}, humanoidBridge:["CLN"] }
+];
+
+const tasks = [
+  {code:"site_assess",name:"Site Assessment",phase:"PRE",dcn:"—",desc:"Walk site, assess structural condition, identify hazards, confirm scope.",primitives:["bipedal_transit","inspect_visual","measure","mark"],difficulty:{h:2,r:4},mins:60,crew:2,recovery:null},
+  {code:"util_isolate",name:"Utility Isolation",phase:"PRE",dcn:"ui",desc:"Shut down and disconnect all utilities. Verify dead with test equipment.",primitives:["disconnect_utility","lock_out_tag_out","inspect_visual"],difficulty:{h:3,r:5},mins:90,crew:2,recovery:null},
+  {code:"haz_survey",name:"Hazmat Survey",phase:"PRE",dcn:"hzs",desc:"Sample and test for asbestos, lead paint, mold, PCBs.",primitives:["bipedal_transit","inspect_visual","hazmat_sample"],difficulty:{h:3,r:4},mins:120,crew:1,recovery:null},
+  {code:"haz_contain",name:"Hazmat Containment",phase:"PRE",dcn:"hzc",desc:"Seal off areas with confirmed hazmat.",primitives:["contain_hazmat","fasten_staple","inspect_visual"],difficulty:{h:3,r:3},mins:60,crew:2,recovery:null},
+  {code:"crane_setup",name:"Crane Setup",phase:"PRE",dcn:"—",desc:"Position crane, outriggers, verify ground bearing, swing radius, power line clearance.",primitives:["inspect_visual","measure"],difficulty:{h:4,r:5},mins:90,crew:2,recovery:null},
+  {code:"crew_brief",name:"Crew Briefing",phase:"PRE",dcn:"—",desc:"Safety briefing, task assignments, emergency procedures.",primitives:["inspect_visual"],difficulty:{h:1,r:5},mins:15,crew:"all",recovery:null},
+  {code:"brace_install",name:"Temporary Bracing",phase:"PRE",dcn:"—",desc:"Install bracing to support walls before roof removal.",primitives:["measure","cut_power_saw","position_hold","fasten_nail_gun","brace_install"],difficulty:{h:3,r:4},mins:120,crew:3,recovery:null},
+  {code:"roof_section_cut",name:"Roof Section Cutting",phase:"ROOF",dcn:"—",desc:"Cut roof into 4–6 sections (800–1,200 lbs) at rafter lines.",primitives:["measure","mark","section_cut","cut_power_saw","inspect_visual"],difficulty:{h:4,r:5},mins:90,crew:2,recovery:null},
+  {code:"roof_rig",name:"Roof Section Rigging",phase:"ROOF",dcn:"—",desc:"Attach basket slings + spreader bar. Verify CG and weight.",primitives:["rig_crane","inspect_visual","measure"],difficulty:{h:4,r:5},mins:20,crew:2,recovery:null},
+  {code:"roof_lift",name:"Roof Crane Lift",phase:"ROOF",dcn:"—",desc:"Crane lifts section, flips rafters-up, sets on ground staging.",primitives:["signal_crane","inspect_visual"],difficulty:{h:4,r:5},mins:15,crew:3,recovery:null},
+  {code:"rafter_remove",name:"Rafter Removal",phase:"ROOF",dcn:"rafter_removal",desc:"Detach rafters on ground. Stack by size for BOH Zone 2.",primitives:["demo_pry","unfasten_nail","carry_bilateral","stack_organize"],difficulty:{h:2,r:3},mins:45,crew:2,recovery:{rate:"80–95%",value:"$280–645",zone:2}},
+  {code:"sheathing_remove",name:"Sheathing Removal",phase:"ROOF",dcn:"shr",desc:"Flush-cut ring-shank nails to preserve sheets. Stack on pallets.",primitives:["flush_cut_nail","demo_pry","carry_bilateral","stack_organize"],difficulty:{h:3,r:3},mins:60,crew:2,recovery:{rate:"40–70%",value:"$300–620",zone:4}},
+  {code:"underlayment_remove",name:"Underlayment Removal",phase:"ROOF",dcn:"—",desc:"Peel tar paper/synthetic. Roll for reuse where intact.",primitives:["demo_pry","roll_material","carry_bilateral"],difficulty:{h:1,r:3},mins:30,crew:1,recovery:{rate:"60%",value:"$40–60",zone:8}},
+  {code:"shingle_separate",name:"Shingle Separation",phase:"ROOF",dcn:"—",desc:"Separate shingles. Stage for on-site reuse or future grinding.",primitives:["demo_pry","carry_bilateral","stack_organize","sort_material"],difficulty:{h:2,r:3},mins:60,crew:2,recovery:{rate:"100%",value:"$53–400",zone:8}},
+  {code:"hardware_collect",name:"Hardware Collection",phase:"ROOF",dcn:"—",desc:"Collect hurricane ties, hangers, straps. Sort into bins.",primitives:["unfasten_screw","unfasten_nail","sort_material","stack_organize"],difficulty:{h:1,r:4},mins:30,crew:1,recovery:{rate:"90%",value:"$20–30",zone:6}},
+  {code:"nail_sweep",name:"Nail Sweep",phase:"ROOF",dcn:"—",desc:"Magnetic sweeper pass. Required after every phase.",primitives:["magnetic_sweep","bipedal_transit","dump_debris"],difficulty:{h:1,r:5},mins:15,crew:1,recovery:null},
+  {code:"cabinet_remove",name:"Cabinet Removal",phase:"WALLS",dcn:"cfr",desc:"Remove cabinets intact — keep upright for resale.",primitives:["unfasten_screw","demo_pry","disconnect_utility","carry_bilateral","stack_organize"],difficulty:{h:2,r:4},mins:60,crew:2,recovery:{rate:"70–90%",value:"$200–1000",zone:1}},
+  {code:"counter_remove",name:"Countertop Removal",phase:"WALLS",dcn:"—",desc:"Remove countertops. Stone/granite requires 2+ people.",primitives:["unfasten_screw","demo_pry","lift_floor","carry_bilateral"],difficulty:{h:3,r:4},mins:30,crew:2,recovery:{rate:"60–80%",value:"$100–500",zone:1}},
+  {code:"appliance_remove",name:"Appliance Removal",phase:"WALLS",dcn:"—",desc:"Disconnect and remove fridge, stove, dishwasher, W/D, water heater.",primitives:["disconnect_utility","carry_bilateral","lift_floor","bipedal_transit"],difficulty:{h:2,r:4},mins:45,crew:2,recovery:{rate:"80–95%",value:"$50–300/unit",zone:1}},
+  {code:"electric_strip",name:"Electrical Strip",phase:"WALLS",dcn:"—",desc:"Remove fixtures, outlets, panels, copper wire.",primitives:["unfasten_screw","demo_pry","carry_unilateral","sort_material"],difficulty:{h:2,r:5},mins:90,crew:1,recovery:{rate:"95%",value:"$2–3/lb",zone:6}},
+  {code:"plumb_strip",name:"Plumbing Strip",phase:"WALLS",dcn:"—",desc:"Remove sinks, toilets, faucets, tubs, copper pipe.",primitives:["unfasten_screw","disconnect_utility","carry_bilateral","sort_material"],difficulty:{h:2,r:5},mins:90,crew:1,recovery:{rate:"80–95%",value:"$100–500",zone:5}},
+  {code:"trim_remove",name:"Trim Removal",phase:"WALLS",dcn:"trmr",desc:"Remove baseboards, crown, casing. Preserve profiles.",primitives:["demo_pry","unfasten_nail","carry_bilateral","stack_organize"],difficulty:{h:2,r:3},mins:60,crew:2,recovery:{rate:"60–80%",value:"$100–400",zone:3}},
+  {code:"door_remove",name:"Door Removal",phase:"WALLS",dcn:"dwr",desc:"Pop hinge pins, keep knobs. Lean on A-frames.",primitives:["unfasten_nail","carry_bilateral","stack_organize"],difficulty:{h:1,r:3},mins:30,crew:1,recovery:{rate:"85–95%",value:"$10–50/door",zone:3}},
+  {code:"window_remove",name:"Window Removal",phase:"WALLS",dcn:"—",desc:"Pull from inside BEFORE wall lift. Cut sealant, extract frame.",primitives:["unfasten_screw","cut_hand","demo_pry","carry_bilateral","stack_organize"],difficulty:{h:3,r:4},mins:20,crew:2,recovery:{rate:"60–80%",value:"$20–100/ea",zone:3}},
+  {code:"hardwood_pull",name:"Hardwood Pull",phase:"WALLS",dcn:"—",desc:"Pull hardwood BEFORE crane touches floors. Premium recovery.",primitives:["demo_pry","unfasten_nail","carry_bilateral","stack_organize","sort_material"],difficulty:{h:3,r:3},mins:120,crew:2,recovery:{rate:"60–80%",value:"$1,700–4,300",zone:5}},
+  {code:"wall_section_cut",name:"Wall Section Cut",phase:"WALLS",dcn:"—",desc:"Cut walls into crane-liftable sections.",primitives:["measure","mark","section_cut","cut_power_saw"],difficulty:{h:4,r:5},mins:60,crew:2,recovery:null},
+  {code:"wall_rig",name:"Wall Rigging",phase:"WALLS",dcn:"—",desc:"Attach slings. Account for openings shifting CG.",primitives:["rig_crane","inspect_visual"],difficulty:{h:4,r:5},mins:15,crew:2,recovery:null},
+  {code:"wall_lift",name:"Wall Crane Lift",phase:"WALLS",dcn:"—",desc:"Crane lays wall on side for ground disassembly.",primitives:["signal_crane","inspect_visual"],difficulty:{h:4,r:5},mins:10,crew:3,recovery:null},
+  {code:"drywall_remove",name:"Drywall Removal",phase:"WALLS",dcn:"—",desc:"Preserve intact sheets ($3–8). Damaged → gypsum grinding.",primitives:["unfasten_screw","demo_pry","carry_bilateral","sort_material","stack_organize"],difficulty:{h:2,r:3},mins:45,crew:2,recovery:{rate:"40–70%",value:"$200–770",zone:4}},
+  {code:"insulation_remove",name:"Insulation Removal",phase:"WALLS",dcn:"inr",desc:"Pull batts, bag fiberglass. Full PPE.",primitives:["demo_pry","roll_material","carry_bilateral","sort_material"],difficulty:{h:1,r:3},mins:30,crew:1,recovery:{rate:"60–80%",value:"minimal",zone:8}},
+  {code:"ext_sheathing_remove",name:"Ext. Sheathing Removal",phase:"WALLS",dcn:"shr",desc:"Flush-cut technique, same as roof.",primitives:["flush_cut_nail","demo_pry","carry_bilateral","stack_organize"],difficulty:{h:2,r:3},mins:45,crew:2,recovery:{rate:"40–70%",value:"$15–20/sheet",zone:4}},
+  {code:"stud_remove",name:"Stud / Plate Removal",phase:"WALLS",dcn:"fd",desc:"Denail and stack by dimension for BOH Zone 2.",primitives:["demo_pry","unfasten_nail","carry_bilateral","stack_organize"],difficulty:{h:2,r:3},mins:60,crew:2,recovery:{rate:"85–95%",value:"$200–500",zone:2}},
+  {code:"header_remove",name:"Header / Beam Removal",phase:"WALLS",dcn:"—",desc:"Headers, beams, posts. Team lift. Premium lumber.",primitives:["demo_pry","unfasten_nail","lift_floor","carry_bilateral","stack_organize"],difficulty:{h:3,r:3},mins:30,crew:2,recovery:{rate:"80–90%",value:"$200–600",zone:2}},
+  {code:"siding_remove",name:"Siding Removal",phase:"WALLS",dcn:"—",desc:"Vinyl, clapboard, cedar. Method varies.",primitives:["demo_pry","unfasten_nail","carry_bilateral","sort_material","stack_organize"],difficulty:{h:2,r:3},mins:45,crew:2,recovery:{rate:"50–70%",value:"$100–400",zone:8}},
+  {code:"shearwall_hardware_remove",name:"Shearwall Hardware",phase:"WALLS",dcn:"—",desc:"Holddowns, straps, shear hardware. High-value steel.",primitives:["unfasten_screw","unfasten_nail","sort_material"],difficulty:{h:2,r:4},mins:20,crew:1,recovery:{rate:"90%+",value:"$50–150",zone:6}},
+  {code:"floor_brace",name:"Floor Bracing",phase:"FLOORS",dcn:"—",desc:"Brace lower walls BEFORE floor removal. Critical safety.",primitives:["brace_install","measure","cut_power_saw","fasten_nail_gun"],difficulty:{h:3,r:4},mins:60,crew:2,recovery:null},
+  {code:"subfloor_cut",name:"Subfloor Cutting",phase:"FLOORS",dcn:"—",desc:"Cut along joist lines. Depth = subfloor only.",primitives:["measure","mark","cut_power_saw","inspect_visual"],difficulty:{h:3,r:4},mins:45,crew:1,recovery:null},
+  {code:"joist_cut",name:"Joist Cutting",phase:"FLOORS",dcn:"—",desc:"Cut at bearing points with recip saw.",primitives:["section_cut","cut_power_saw","inspect_visual"],difficulty:{h:3,r:4},mins:30,crew:1,recovery:null},
+  {code:"floor_rig",name:"Floor Rigging",phase:"FLOORS",dcn:"—",desc:"Spreader bar at 1/3 points. Heavier than roof.",primitives:["rig_crane","inspect_visual","measure"],difficulty:{h:4,r:5},mins:20,crew:2,recovery:null},
+  {code:"floor_lift",name:"Floor Crane Lift",phase:"FLOORS",dcn:"—",desc:"Sets on side — subfloor down, joists hanging.",primitives:["signal_crane","inspect_visual"],difficulty:{h:4,r:5},mins:15,crew:3,recovery:null},
+  {code:"subfloor_remove",name:"Subfloor Removal",phase:"FLOORS",dcn:"dp_removal",desc:"Flush-cut nails to preserve sheets.",primitives:["flush_cut_nail","demo_pry","carry_bilateral","stack_organize"],difficulty:{h:2,r:3},mins:30,crew:2,recovery:{rate:"50–70%",value:"$15–20/sheet",zone:4}},
+  {code:"bridging_remove",name:"Bridging Removal",phase:"FLOORS",dcn:"—",desc:"Cross-bridging and blocking between joists.",primitives:["demo_pry","unfasten_nail","carry_unilateral"],difficulty:{h:1,r:3},mins:15,crew:1,recovery:{rate:"80%+",value:"minimal",zone:null}},
+  {code:"joist_remove",name:"Floor Joist Recovery",phase:"FLOORS",dcn:"joist_removal",desc:"Denail, grade, stack. 2×10/2×12 = premium lumber.",primitives:["demo_pry","unfasten_nail","carry_bilateral","inspect_visual","sort_material","stack_organize"],difficulty:{h:2,r:3},mins:60,crew:2,recovery:{rate:"85–95%",value:"$340–1,140",zone:2}},
+  {code:"rim_joist_remove",name:"Rim Joist & Hardware",phase:"FLOORS",dcn:"—",desc:"Rim joist + joist hangers/hardware.",primitives:["demo_pry","unfasten_nail","unfasten_screw","sort_material"],difficulty:{h:2,r:3},mins:20,crew:1,recovery:{rate:"70–85%",value:"$40–80",zone:6}},
+  {code:"wall_panel_saw",name:"Foundation Wall Sawing",phase:"FOUNDATION",dcn:"—",desc:"Saw 4×8 sections (3,200 lbs/panel). Concrete chain saw.",primitives:["measure","mark","cut_power_saw","inspect_visual"],difficulty:{h:4,r:4},mins:180,crew:2,recovery:null},
+  {code:"core_drill_lift",name:"Core Drill Lift Holes",phase:"FOUNDATION",dcn:"—",desc:"Diamond 2\" holes for through-bolt + shackle rigging.",primitives:["drill","core_drill_concrete","measure","mark"],difficulty:{h:3,r:4},mins:60,crew:1,recovery:null},
+  {code:"brokk_break_base",name:"Brokk Base Breaking",phase:"FOUNDATION",dcn:"bc",desc:"Hydraulic break at footing-to-wall joint. Brokk IS a robot.",primitives:["hydraulic_break","inspect_visual"],difficulty:{h:3,r:5},mins:120,crew:1,recovery:null},
+  {code:"panel_lift",name:"Foundation Panel Lift",phase:"FOUNDATION",dcn:"—",desc:"Through-bolt shackles, crane lifts. Stage for landscape reuse.",primitives:["rig_crane","signal_crane","inspect_visual"],difficulty:{h:4,r:5},mins:15,crew:3,recovery:{rate:"60–80%",value:"$2,000–6,000",zone:7}},
+  {code:"slab_saw_grid",name:"Slab Grid Cutting",phase:"FOUNDATION",dcn:"—",desc:"Walk-behind slab saw, 4×6 sections (1,200 lbs).",primitives:["measure","mark","cut_power_saw"],difficulty:{h:3,r:4},mins:120,crew:1,recovery:null},
+  {code:"footing_crush",name:"Footing Crushing",phase:"FOUNDATION",dcn:"—",desc:"Brokk crushes irregular footings. Can't saw below grade.",primitives:["hydraulic_break","inspect_visual"],difficulty:{h:3,r:5},mins:120,crew:1,recovery:null},
+  {code:"rebar_bundle",name:"Rebar Bundling",phase:"FOUNDATION",dcn:"—",desc:"Cut, straighten, bundle for scrap. Magnetic separator.",primitives:["cut_hand","carry_bilateral","stack_organize","sort_material"],difficulty:{h:2,r:4},mins:60,crew:2,recovery:{rate:"90%+",value:"$200–250/ton",zone:6}},
+  {code:"rca_process",name:"RCA Processing",phase:"FOUNDATION",dcn:"ag",desc:"Crushed concrete → aggregate. 45–80% reused on-site.",primitives:["sort_material","stack_organize","inspect_visual"],difficulty:{h:2,r:4},mins:90,crew:2,recovery:{rate:"45–80%",value:"on-site / $8–12/ton",zone:7}},
+  {code:"material_stage",name:"Material Staging",phase:"POST",dcn:"—",desc:"Move materials to BOH zone staging areas.",primitives:["carry_bilateral","lift_floor","stack_organize","sort_material","bipedal_transit"],difficulty:{h:2,r:3},mins:120,crew:3,recovery:null},
+  {code:"zone_organize",name:"Zone Organization",phase:"POST",dcn:"—",desc:"Final layout of 8 BOH zones. Signage, pricing.",primitives:["stack_organize","sort_material","carry_bilateral","inspect_visual"],difficulty:{h:1,r:3},mins:90,crew:2,recovery:null},
+  {code:"site_cleanup",name:"Site Cleanup",phase:"POST",dcn:"—",desc:"Final sweep, debris removal, waste stream disposal.",primitives:["sweep","dump_debris","magnetic_sweep","carry_bilateral"],difficulty:{h:1,r:4},mins:60,crew:2,recovery:null},
+  {code:"grade_backfill",name:"Grade & Backfill",phase:"POST",dcn:"—",desc:"Backfill with RCA + clean fill. Rough grade.",primitives:["dig","shovel_lift","pour","inspect_visual"],difficulty:{h:2,r:4},mins:120,crew:2,recovery:null},
+  {code:"crew_debrief",name:"Crew Debrief",phase:"POST",dcn:"—",desc:"Lessons learned, recovery metrics, crew feedback → ontology.",primitives:["inspect_visual"],difficulty:{h:1,r:5},mins:30,crew:"all",recovery:null},
+  {code:"data_capture",name:"Data Capture",phase:"POST",dcn:"—",desc:"Material quantities, recovery rates, time/task, equipment hours.",primitives:["inspect_visual","measure"],difficulty:{h:1,r:4},mins:60,crew:1,recovery:null}
+];
+
+const primitives = [
+  {id:"bipedal_transit",name:"Walk / Traverse",cat:"locomotion",desc:"Move on foot across uneven, debris-covered surfaces.",hid:"bipedal_transit",rf:3,rel:"high"},
+  {id:"climb_ladder",name:"Ladder Climb",cat:"locomotion",desc:"Ascend/descend with or without tools.",hid:"climb_ladder",rf:2,rel:"high"},
+  {id:"carry_bilateral",name:"Two-Hand Carry",cat:"material_handling",desc:"Carry with both hands (1–50 kg). Sheets, lumber, fixtures.",hid:"carry_bilateral",rf:3,rel:"critical"},
+  {id:"carry_unilateral",name:"One-Hand Carry",cat:"material_handling",desc:"Carry with one hand (0.5–15 kg). Tools, hardware.",hid:"carry_unilateral",rf:4,rel:"high"},
+  {id:"lift_floor",name:"Lift from Ground",cat:"material_handling",desc:"Deadlift from ground level (5–120 kg).",hid:"lift_floor",rf:4,rel:"critical"},
+  {id:"lift_overhead",name:"Overhead Lift",cat:"material_handling",desc:"Raise above shoulder (10–60 kg).",hid:"lift_overhead",rf:3,rel:"high"},
+  {id:"demo_strike",name:"Demolition Strike",cat:"demolition",desc:"Sledgehammer impact. Force-adaptive.",hid:"demo_strike",rf:2,rel:"critical"},
+  {id:"demo_pry",name:"Pry / Lever",cat:"demolition",desc:"Leverage-based separation. Pry bar, flat bar.",hid:"demo_pry",rf:2,rel:"critical"},
+  {id:"cut_power_saw",name:"Power Saw Cut",cat:"cutting",desc:"Circular, reciprocating, oscillating, or chain saw.",hid:"cut_power_saw",rf:2,rel:"critical"},
+  {id:"cut_hand",name:"Hand Cut",cat:"cutting",desc:"Hand saw, snips, utility knife.",hid:"cut_hand",rf:3,rel:"medium"},
+  {id:"fasten_nail_gun",name:"Nail Gun",cat:"fastening",desc:"Pneumatic/cordless nailer. Used in bracing.",hid:"fasten_nail_gun",rf:3,rel:"medium"},
+  {id:"fasten_screw",name:"Screw Drive",cat:"fastening",desc:"Impact driver or drill-driver.",hid:"fasten_screw",rf:4,rel:"high"},
+  {id:"unfasten_screw",name:"Screw Remove",cat:"unfastening",desc:"Reverse-drive screws. Preserves both materials.",hid:null,rf:4,rel:"critical"},
+  {id:"unfasten_nail",name:"Nail Extract",cat:"unfastening",desc:"Cat's paw, flat bar. Flush-cut when extraction damages.",hid:null,rf:3,rel:"critical"},
+  {id:"fasten_manual",name:"Manual Fasten",cat:"fastening",desc:"Hammer, wrench, hand tool.",hid:"fasten_manual",rf:3,rel:"medium"},
+  {id:"drill",name:"Drill",cat:"cutting",desc:"Create holes. Includes core drilling for concrete.",hid:"drill",rf:4,rel:"high"},
+  {id:"measure",name:"Measure",cat:"sensing",desc:"Tape measure, laser, ruler.",hid:"measure",rf:3,rel:"medium"},
+  {id:"mark",name:"Mark",cat:"sensing",desc:"Pencil, chalk line, spray paint.",hid:"mark",rf:4,rel:"high"},
+  {id:"inspect_visual",name:"Visual Inspection",cat:"sensing",desc:"Assess condition, quality, structural integrity.",hid:"inspect_visual",rf:3,rel:"critical"},
+  {id:"align_plumb",name:"Plumb Check",cat:"sensing",desc:"Vertical alignment.",hid:"align_plumb",rf:4,rel:"low"},
+  {id:"align_level",name:"Level Check",cat:"sensing",desc:"Horizontal alignment.",hid:"align_level",rf:5,rel:"low"},
+  {id:"position_hold",name:"Position Hold",cat:"support",desc:"Hold component during work. High robot value.",hid:"position_hold",rf:5,rel:"high"},
+  {id:"sweep",name:"Sweep",cat:"cleaning",desc:"Broom sweep debris, dust, nails.",hid:"sweep",rf:4,rel:"high"},
+  {id:"dump_debris",name:"Dump / Deposit",cat:"cleaning",desc:"Load debris, dump to staging or waste.",hid:"dump_debris",rf:4,rel:"high"},
+  {id:"stack_organize",name:"Stack / Organize",cat:"material_handling",desc:"Sort by type, size, or destination zone.",hid:"stack_organize",rf:3,rel:"critical"},
+  {id:"sort_material",name:"Material Sort",cat:"material_handling",desc:"Classify into recovery streams. Core decon skill.",hid:"sort_material",rf:3,rel:"critical"},
+  {id:"wipe",name:"Wipe / Clean",cat:"cleaning",desc:"Surface cleaning for resale prep.",hid:"wipe",rf:4,rel:"medium"},
+  {id:"roll_material",name:"Roll Material",cat:"material_handling",desc:"Deploy/retrieve roll goods.",hid:"roll_material",rf:3,rel:"medium"},
+  {id:"dig",name:"Dig / Excavate",cat:"earthwork",desc:"Shovel, post-hole digger.",hid:"dig",rf:3,rel:"medium"},
+  {id:"pour",name:"Pour",cat:"material_handling",desc:"Controlled liquid pour.",hid:"pour",rf:4,rel:"low"},
+  {id:"shovel_lift",name:"Shovel Lift",cat:"earthwork",desc:"Scoop and lift — gravel, soil, debris.",hid:"shovel_lift",rf:3,rel:"medium"},
+  {id:"hazmat_sample",name:"Hazmat Sample",cat:"safety",desc:"Controlled hazmat collection + sealing.",hid:"hazmat_sample",rf:4,rel:"critical"},
+  {id:"contain_hazmat",name:"Hazmat Containment",cat:"safety",desc:"Seal + maintain containment.",hid:"contain_hazmat",rf:3,rel:"critical"},
+  {id:"lock_out_tag_out",name:"Lockout / Tagout",cat:"safety",desc:"Energy isolation protocol.",hid:"lock_out_tag_out",rf:2,rel:"critical"},
+  {id:"fasten_staple",name:"Staple",cat:"fastening",desc:"Staple gun for barriers, sheeting.",hid:"fasten_staple",rf:4,rel:"low"},
+  {id:"push_sand",name:"Floor Sand / Push",cat:"material_handling",desc:"Floor sander or push-type movement.",hid:"push_sand",rf:4,rel:"low"},
+  {id:"rig_crane",name:"Crane Rigging",cat:"rigging",desc:"Slings, shackles, spreader bars. Weight + CG assessment.",hid:null,rf:1,rel:"critical"},
+  {id:"signal_crane",name:"Crane Signal",cat:"rigging",desc:"OSHA hand signals to crane operator.",hid:null,rf:2,rel:"critical"},
+  {id:"section_cut",name:"Section Cut",cat:"cutting",desc:"Strategic structural cuts for liftable sections.",hid:null,rf:2,rel:"critical"},
+  {id:"flush_cut_nail",name:"Flush-Cut Nail",cat:"unfastening",desc:"Oscillating tool cuts nail flush. Preserves sheet goods.",hid:null,rf:3,rel:"critical"},
+  {id:"core_drill_concrete",name:"Core Drill (Concrete)",cat:"cutting",desc:"Diamond core for lifting holes. 2\" min.",hid:null,rf:4,rel:"high"},
+  {id:"hydraulic_break",name:"Hydraulic Break",cat:"demolition",desc:"Brokk/Track Breaker. Bond-breaking, slab sectioning.",hid:null,rf:5,rel:"critical"},
+  {id:"magnetic_sweep",name:"Magnetic Sweep",cat:"cleaning",desc:"Collect loose nails, screws, metal debris.",hid:null,rf:5,rel:"high"},
+  {id:"brace_install",name:"Temporary Brace",cat:"support",desc:"Maintain structural integrity during removal.",hid:null,rf:2,rel:"critical"},
+  {id:"disconnect_utility",name:"Utility Disconnect",cat:"safety",desc:"Disconnect electrical, gas, water, sewer.",hid:null,rf:2,rel:"critical"}
+];
+
+const zoneColors = ['#EF4444','#F97316','#FFE500','#22C55E','#14B8A6','#60A5FA','#888','#A78BFA'];
+
+const materials = [
+  {zone:1,name:"Kitchen & Appliances",discount:"50%",items:[
+    {name:"Cabinets (Upper/Lower)",rate:"70–90%",value:"$100–500/set"},
+    {name:"Countertops",rate:"60–80%",value:"$100–500"},
+    {name:"Appliances",rate:"80–95%",value:"$50–300/unit"}
+  ]},
+  {zone:2,name:"Lumber Yard",discount:"50%",items:[
+    {name:"Wall Studs (2×4, 2×6)",rate:"85–95%",value:"$200–500"},
+    {name:"Rafters",rate:"80–95%",value:"$280–645"},
+    {name:"Floor Joists (2×10, 2×12)",rate:"85–95%",value:"$340–1,140"},
+    {name:"Headers, Beams & Posts",rate:"80–90%",value:"$200–600"}
+  ]},
+  {zone:3,name:"Doors, Windows & Trim",discount:"50–60%",items:[
+    {name:"Interior Doors",rate:"85–95%",value:"$10–50/ea"},
+    {name:"Exterior Doors",rate:"70–90%",value:"$50–200/ea"},
+    {name:"Windows",rate:"60–80%",value:"$20–100/ea"},
+    {name:"Trim (baseboard, crown, casing)",rate:"60–80%",value:"$0.50–4/lf"}
+  ]},
+  {zone:4,name:"Sheathing & Drywall",discount:"40–60%",items:[
+    {name:"Roof/Wall/Floor Sheathing",rate:"40–70%",value:"$15–20/sheet"},
+    {name:"Drywall (Intact)",rate:"40–70%",value:"$3–8/sheet"},
+    {name:"Drywall → Gypsum Powder",rate:"100%",value:"$450–1,500/ton"}
+  ]},
+  {zone:5,name:"Flooring & Fixtures",discount:"60%",items:[
+    {name:"Hardwood Flooring",rate:"60–80%",value:"$3–8/sf"},
+    {name:"Bathroom Fixtures",rate:"80–95%",value:"$20–100/ea"},
+    {name:"Light Fixtures / Fans",rate:"80–95%",value:"$5–50/ea"}
+  ]},
+  {zone:6,name:"Hardware & Metals",discount:"50%",items:[
+    {name:"Copper Wire",rate:"95%",value:"$2–3/lb"},
+    {name:"Copper Pipe",rate:"90%",value:"$2–4/lb"},
+    {name:"Structural Hardware",rate:"90%",value:"$20–150/home"},
+    {name:"Rebar",rate:"90%+",value:"$200–250/ton"},
+    {name:"Breaker Panels",rate:"70–90%",value:"$20–100"}
+  ]},
+  {zone:7,name:"Concrete",discount:"30–50%",items:[
+    {name:"Foundation Wall Panels (4×8)",rate:"60–80%",value:"$2,000–6,000"},
+    {name:"Slab Sections",rate:"70–90%",value:"$8–12/ton"},
+    {name:"RCA (Recycled Aggregate)",rate:"45–80%",value:"on-site / $8–12/ton"}
+  ]},
+  {zone:8,name:"Roofing, Siding & Insulation",discount:"low",items:[
+    {name:"Asphalt Shingles",rate:"100%",value:"$53–400/home"},
+    {name:"Siding (vinyl/wood)",rate:"40–70%",value:"$1–3/sf"},
+    {name:"Insulation",rate:"60–80%",value:"minimal"}
+  ]}
+];
+
+const equipment = {
+  core:[
+    {name:"Crane",cost:"Owned",phases:["ALL"],note:"Central to all structural phases"},
+    {name:"Brokk 170",cost:"$80K–130K (used)",phases:["FOUNDATION"],note:"Replaces excavator + breaker crew. IS a robot."},
+    {name:"Spreader Bar + Rigging Kit",cost:"Owned",phases:["ROOF","WALLS","FLOORS"],note:"Every crane lift"},
+    {name:"Skid Steer",cost:"$250–400/day",phases:["POST"],note:"Backfill, grading, heavy staging"}
+  ],
+  cutting:[
+    {name:"Reciprocating Saw",cost:"$100–300",phases:["ROOF","WALLS","FLOORS"],note:"Primary section-cutting tool"},
+    {name:"Circular Saw",cost:"$100–250",phases:["PRE","FLOORS"],note:"Subfloor cutting — depth control critical"},
+    {name:"Oscillating Multi-Tool",cost:"$100–200",phases:["ROOF","WALLS","FLOORS"],note:"THE decon preservation tool — flush-cut nails"},
+    {name:"Concrete Chain Saw",cost:"$3K–5K",phases:["FOUNDATION"],note:"Foundation wall sectioning"},
+    {name:"Slab Saw (walk-behind)",cost:"$200–400/day",phases:["FOUNDATION"],note:"Slab grid cutting"}
+  ],
+  safety:[
+    {name:"Magnetic Sweeper",cost:"$1.5K–3K",phases:["ALL"],note:"After every phase + end of day"},
+    {name:"Fall Harness Kit",cost:"$100–200/set",phases:["ROOF"],note:"100% tie-off until roof is off"},
+    {name:"LOTO Kit",cost:"$50–100",phases:["PRE"],note:"Energy isolation"},
+    {name:"Voltage Tester",cost:"$20–50",phases:["PRE","WALLS"],note:"Verify dead circuits"}
+  ],
+  rd:[
+    {name:"Track Breaker (V0–V1)",cost:"$10K–17K",phases:["FOUNDATION"],note:"No precedent. Patent scope. Solves Phase 4 bottleneck."},
+    {name:"Shingle Grinder (Morbark)",cost:"$60K–85K / $1.2K/mo",phases:["ROOF"],note:"Future — at 3+ homes/year. Winter grinding."}
+  ]
+};
+
+// ── RENDER ──
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Phases
+function renderPhases() {
+  const flow = document.getElementById('phase-flow');
+  phases.forEach((p, i) => {
+    if (i > 0) flow.innerHTML += '<div class="phase-arrow">→</div>';
+    flow.innerHTML += `
+      <div class="phase-card" onclick="selectPhase(${i})" id="pc-${i}">
+        <div class="order">${p.order}</div>
+        <div class="code">${p.code}</div>
+        <div class="name">${p.name}</div>
+        <div class="type-badge ${p.type}">${p.type}</div>
+        <div class="duration">${p.duration}</div>
+      </div>`;
+  });
+}
+
+function selectPhase(i) {
+  document.querySelectorAll('.phase-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('pc-' + i).classList.add('selected');
+  const p = phases[i];
+  const det = document.getElementById('phase-detail');
+  let matHtml = '';
+  if (Object.keys(p.materialOutput).length) {
+    matHtml = Object.entries(p.materialOutput).map(([k,v]) =>
+      `<div class="material-row"><span>${k.replace(/_/g,' ')}</span><span class="rate">${v.recovery}</span><span class="val">${v.value}</span></div>`
+    ).join('');
+  } else {
+    matHtml = '<div style="color:var(--muted);font-size:13px">Logistics phase — no direct material output</div>';
+  }
+  det.innerHTML = `
+    <h2><span>${p.code}</span> — ${p.name}</h2>
+    <div class="desc">${p.description}</div>
+    <div class="detail-grid">
+      <div class="detail-box"><h3>Task Codes (${p.taskCodes.length})</h3><ul>${p.taskCodes.map(t => `<li>${t}</li>`).join('')}</ul></div>
+      <div class="detail-box"><h3>Material Recovery</h3>${matHtml}</div>
+      <div class="detail-box"><h3>Safety Focus</h3><div style="font-size:13px;line-height:1.5">${p.safetyFocus}</div></div>
+      <div class="detail-box"><h3>Crew</h3><ul>${p.crewRequired.map(c => `<li>${c.replace(/_/g,' ')}</li>`).join('')}</ul></div>
+      <div class="detail-box"><h3>Equipment</h3><ul>${p.equipmentRequired.map(e => `<li>${e.replace(/_/g,' ')}</li>`).join('')}</ul></div>
+      <div class="detail-box"><h3>Humanoid Bridge</h3><ul>${p.humanoidBridge.map(h => `<li>${h}</li>`).join('')}</ul>${p.rdNote ? `<div style="margin-top:8px;font-size:12px;color:var(--yellow)">${p.rdNote}</div>` : ''}</div>
+    </div>`;
+  det.classList.add('visible');
+}
+
+// Tasks
+function renderTasks() {
+  const allPhases = [...new Set(tasks.map(t => t.phase))];
+  const filters = document.getElementById('task-filters');
+  filters.innerHTML = `<button class="active" onclick="filterTasks('ALL')">All (${tasks.length})</button>` +
+    allPhases.map(p => `<button onclick="filterTasks('${p}')">${p} (${tasks.filter(t=>t.phase===p).length})</button>`).join('');
+  filterTasks('ALL');
+}
+
+function filterTasks(phase) {
+  document.querySelectorAll('#task-filters button').forEach(b => {
+    b.classList.toggle('active', b.textContent.startsWith(phase === 'ALL' ? 'All' : phase));
+  });
+  const filtered = phase === 'ALL' ? tasks : tasks.filter(t => t.phase === phase);
+  const grid = document.getElementById('task-grid');
+  grid.innerHTML = filtered.map(t => {
+    const hDots = Array.from({length:5},(_,i) => `<div class="dot ${i < t.difficulty.h ? 'filled' : ''}"></div>`).join('');
+    const rDots = Array.from({length:5},(_,i) => `<div class="dot ${i < t.difficulty.r ? 'robot' : ''}"></div>`).join('');
+    const recHtml = t.recovery ? `<div class="recovery-strip"><span>${t.recovery.rate}</span><span class="rv">${t.recovery.value}</span>${t.recovery.zone ? `<span class="zone">Z${t.recovery.zone}</span>` : ''}</div>` : '';
+    return `
+      <div class="task-card">
+        <div class="task-header">
+          <span class="task-code">${t.code}</span>
+          <span class="task-phase">${t.phase}${t.dcn !== '—' ? ` · ${t.dcn}` : ''}</span>
+        </div>
+        <div class="task-name">${t.name}</div>
+        <div class="task-desc">${t.desc}</div>
+        <div class="primitives">${t.primitives.map(p => `<span class="prim-tag">${p}</span>`).join('')}</div>
+        <div class="task-meta">
+          <span>${t.mins}min</span>
+          <span>×${t.crew}</span>
+          <span>H:<span class="difficulty">${hDots}</span></span>
+          <span>R:<span class="difficulty">${rDots}</span></span>
+        </div>
+        ${recHtml}
+      </div>`;
+  }).join('');
+}
+
+// Primitives
+function renderPrimitives() {
+  const cats = [...new Set(primitives.map(p => p.cat))];
+  const filters = document.getElementById('prim-filters');
+  filters.innerHTML = `<button class="active" onclick="filterPrims('ALL')">All (${primitives.length})</button>` +
+    cats.map(c => `<button onclick="filterPrims('${c}')">${c.replace(/_/g,' ')} (${primitives.filter(p=>p.cat===c).length})</button>`).join('');
+  filterPrims('ALL');
+}
+
+function filterPrims(cat) {
+  document.querySelectorAll('#prim-filters button').forEach(b => {
+    b.classList.toggle('active', b.textContent.startsWith(cat === 'ALL' ? 'All' : cat.replace(/_/g,' ')));
+  });
+  const filtered = cat === 'ALL' ? primitives : primitives.filter(p => p.cat === cat);
+  const grid = document.getElementById('prim-grid');
+  grid.innerHTML = filtered.map(p => {
+    const segs = Array.from({length:5},(_,i) => `<div class="seg ${i < p.rf ? 'filled' : ''}"></div>`).join('');
+    const bridge = p.hid ? `<span class="bridge-tag bridged">bridged</span>` : `<span class="bridge-tag decon">decon-specific</span>`;
+    const relColor = p.rel === 'critical' ? 'var(--orange)' : p.rel === 'high' ? 'var(--text)' : 'var(--muted)';
+    return `
+      <div class="prim-card">
+        <div class="prim-header">
+          <span class="prim-id">${p.id}</span>
+          <span class="prim-cat">${p.cat.replace(/_/g,' ')}</span>
+        </div>
+        <div class="prim-name">${p.name}</div>
+        <div class="prim-desc">${p.desc}</div>
+        <div class="prim-meta">
+          ${bridge}
+          <span>Robot: <span class="feasibility-bar">${segs}</span></span>
+          <span style="color:${relColor};font-weight:600">${p.rel}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// Materials
+function renderMaterials() {
+  const grid = document.getElementById('zone-grid');
+  grid.innerHTML = materials.map((z,i) => `
+    <div class="zone-card">
+      <div class="zone-header">
+        <div class="zone-info">
+          <h3>${z.name}</h3>
+          <div class="discount">${z.discount} discount</div>
+        </div>
+        <div class="zone-num" style="color:${zoneColors[i]}">Z${z.zone}</div>
+      </div>
+      <div class="zone-body">
+        ${z.items.map(m => `
+          <div class="mat-item">
+            <span class="mat-name">${m.name}</span>
+            <span class="mat-rate">${m.rate}</span>
+            <span class="mat-value">${m.value}</span>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// Equipment
+function renderEquipment() {
+  const c = document.getElementById('equip-container');
+  const sections = [
+    {title:'Core Fleet (Owned / Major)',items:equipment.core},
+    {title:'Cutting Tools',items:equipment.cutting},
+    {title:'Safety Equipment',items:equipment.safety},
+    {title:'R&D Equipment',items:equipment.rd}
+  ];
+  c.innerHTML = sections.map(s => `
+    <div class="equip-section">
+      <h3>${s.title}</h3>
+      <div class="equip-grid">
+        ${s.items.map(e => `
+          <div class="equip-card">
+            <div class="equip-name">${e.name}</div>
+            <div class="equip-cost">${e.cost}</div>
+            <div class="equip-note">${e.note}</div>
+            <div class="equip-phases">${e.phases.map(p => `<span>${p}</span>`).join('')}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// Crew
+function renderCrew() {
+  const layout = document.getElementById('crew-layout');
+  layout.innerHTML = `
+    <div class="crew-group">
+      <h3 style="color:var(--orange)">Constants (5:30 AM – 7:00 PM)</h3>
+      <div class="crew-subtitle">On-site all day, both days. Break when they can — not on a fixed schedule.</div>
+      <div class="role-card">
+        <div class="role-name">Sal — Supervisor / Founder</div>
+        <ul class="role-resp">
+          <li>Full-site structural awareness</li>
+          <li>Safety authority — can halt any operation</li>
+          <li>Cross-shift synthesis — insights from one crew fed to next</li>
+          <li>Material recovery decisions (save vs discard)</li>
+          <li>During the 45: the person the crew thinks WITH</li>
+          <li>13.5 hrs/day × 2 days = 27 hrs</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Crane Operator</div>
+        <ul class="role-resp">
+          <li>All structural lifts (NCCCO certified)</li>
+          <li>Active Shifts 3–6 (Day 1) + 7–10 (Day 2)</li>
+          <li>Rests during rigging resets — natural pause rhythm</li>
+          <li>13.5 hrs/day × 2 days = 27 hrs</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Brokk 170 Operator</div>
+        <ul class="role-resp">
+          <li>Starts Shift 1 Day 1 — 28.5 hrs runway before first foundation lift</li>
+          <li>Foundation wall saw-cutting, core drilling, panel freeing, footing crush</li>
+          <li>Done by Shift 11. Cross-trains ground off-phase.</li>
+          <li>13.5 hrs Day 1 + 10 hrs Day 2 = 23.5 hrs</li>
+        </ul>
+      </div>
+    </div>
+    <div class="crew-group">
+      <h3 style="color:var(--teal)">Shift Workers (90/45 Cadence)</h3>
+      <div class="crew-subtitle">90 min sustained labor + 45 min problem-solving. Pick your shifts — nobody required to work consecutive.</div>
+      <div class="role-card">
+        <div class="role-name">Rigger / Signal Person</div>
+        <ul class="role-resp">
+          <li>Attach slings, shackles, spreader bars</li>
+          <li>Verify CG + load security</li>
+          <li>OSHA hand signals to crane operator</li>
+          <li>Active Shifts 3–6 (Day 1), 7–11 (Day 2)</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Ground Lead</div>
+        <ul class="role-resp">
+          <li>Lead ground disassembly (reverse order)</li>
+          <li>Material quality — flush-cut vs extract decisions</li>
+          <li>During the 45: photograph materials, log conditions, plan next block</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Ground Support</div>
+        <ul class="role-resp">
+          <li>Carry, sort, stage, sweep, soft strip</li>
+          <li>During the 45: photograph what you just pulled for BOH, log data</li>
+          <li>Entry-level → feeds into ground lead / rigger</li>
+        </ul>
+      </div>
+    </div>`;
+
+  // ── 12-Shift Timeline ──
+  const shifts = [
+    {s:1,d:1,time:'5:30–7:45',labor:'5:30–7:00',solve:'7:00–7:45',phase:'PRE + Kitchen soft strip',crew:3,constants:'Sal: supervise + lockout. Crane: setup. Brokk: saw-cutting foundation.'},
+    {s:2,d:1,time:'7:45–10:00',labor:'7:45–9:15',solve:'9:15–10:00',phase:'Trim + Electrical/Plumbing',crew:4,constants:'Sal: supervise. Crane: rigging. Brokk: foundation continues.'},
+    {s:3,d:1,time:'10:00–12:15',labor:'10:00–11:30',solve:'11:30–12:15',phase:'ROOF: cuts + first lifts',crew:4,constants:'Sal: on structure. Crane: in cab. Brokk: core drilling.'},
+    {s:4,d:1,time:'12:15–2:30',labor:'12:15–1:45',solve:'1:45–2:30',phase:'ROOF finish + WALLS: cuts start',crew:4,constants:'Crane: continuous. Brokk: freeing panels.'},
+    {s:5,d:1,time:'2:30–4:45',labor:'2:30–4:00',solve:'4:00–4:45',phase:'WALLS: lifts continue',crew:4,constants:'Crane: continuous. Brokk: foundation continues.'},
+    {s:6,d:1,time:'4:45–7:00',labor:'4:45–6:15',solve:'6:15–7:00',phase:'WALLS finish + ground catch-up',crew:3,constants:'Crane: wrapping. Brokk: may continue or wrap.'},
+    {s:7,d:2,time:'5:30–7:45',labor:'5:30–7:00',solve:'7:00–7:45',phase:'FLOORS: hardwood + brace + cuts',crew:4,constants:'Crane: in cab. Brokk: foundation continues.'},
+    {s:8,d:2,time:'7:45–10:00',labor:'7:45–9:15',solve:'9:15–10:00',phase:'FLOORS finish: lifts + disassembly',crew:4,constants:'Crane: lifts. Brokk: panels fully freed.'},
+    {s:9,d:2,time:'10:00–12:15',labor:'10:00–11:30',solve:'11:30–12:15',phase:'FOUNDATION: panel lifts (pre-freed)',crew:3,constants:'Crane: quick picks. Brokk: loosening slab.'},
+    {s:10,d:2,time:'12:15–2:30',labor:'12:15–1:45',solve:'1:45–2:30',phase:'FOUNDATION: slab lifts + footing crush',crew:3,constants:'Crane: lifts. Brokk: crushing footings.'},
+    {s:11,d:2,time:'2:30–4:45',labor:'2:30–4:00',solve:'4:00–4:45',phase:'FOUNDATION finish + zone staging',crew:3,constants:'Crane: last lifts. Brokk: done.'},
+    {s:12,d:2,time:'4:45–7:00',labor:'4:45–6:15',solve:'6:15–7:00',phase:'POST: merchandising + cleanup',crew:3,constants:'Sal: final walkthrough, BOH review.'}
+  ];
+
+  const timeline = document.getElementById('shift-timeline');
+  let tableRows = '';
+  let lastDay = 0;
+  shifts.forEach(sh => {
+    if (sh.d !== lastDay) {
+      tableRows += `<tr class="day-divider"><td colspan="6">DAY ${sh.d}</td></tr>`;
+      lastDay = sh.d;
+    }
+    tableRows += `
+      <tr>
+        <td class="shift-num">${sh.s}</td>
+        <td><span class="time-labor">${sh.labor}</span><br><span class="time-solve">${sh.solve}</span></td>
+        <td class="phase-work">${sh.phase}</td>
+        <td class="crew-count">${sh.crew}</td>
+        <td class="constants-col">${sh.constants}</td>
+      </tr>`;
+  });
+
+  timeline.innerHTML = `
+    <h3>12-Shift Schedule — 6 per Day × 2 Days</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">
+      Site day: 5:30 AM – 7:00 PM (13.5 hrs). Each shift = <strong style="color:var(--orange)">90 min labor</strong> + <strong style="color:var(--teal)">45 min solve</strong> = 2.25 hrs.
+    </div>
+    <div style="overflow-x:auto">
+      <table class="shift-table">
+        <thead>
+          <tr><th>#</th><th>Labor / Solve</th><th>Phase Work</th><th>Crew</th><th>Constants</th></tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+
+    <div class="the45-box">
+      <h4>The 45 Is Not a Break — It's the Other Half of the Job</h4>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+        You do 90 minutes of sustained physical work. Then you stop. Step back. Ask: <em>What took too long? What broke? What's the better way?</em> Then go back in with the insight. The labor is the body. The 45 is the brain. <strong style="color:var(--text)">Both are compensated.</strong>
+      </div>
+      <div class="the45-grid">
+        <div class="the45-item"><div class="platform">BOH</div><div class="activity">Photograph materials you just pulled — listings go live during decon</div></div>
+        <div class="the45-item"><div class="platform">BOH</div><div class="activity">Write descriptions, set prices — you touched it, you know its condition</div></div>
+        <div class="the45-item"><div class="platform">Decon Lab</div><div class="activity">Log material conditions, separation times — trains model for next house</div></div>
+        <div class="the45-item"><div class="platform">Design Studio</div><div class="activity">Record dimensions, species, grades — material reference library</div></div>
+        <div class="the45-item"><div class="platform">Social</div><div class="activity">Shoot video of process/progress — real content from real work</div></div>
+        <div class="the45-item"><div class="platform">Client App</div><div class="activity">Update project status, log hours — tracking, billing</div></div>
+        <div class="the45-item"><div class="platform">Internal</div><div class="activity">Help plan next shift's work — problem-solve with Sal and the constants</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:16px;background:var(--elevated);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--yellow)">Lucent Lens:</strong> When the shift crew stops to think, Sal is the person they think WITH. A Shift 2 crew member notices trim pulls faster from the bottom — Sal carries that to Shift 3. The operation gets smarter every 2.25 hours. This is "utilize the person, not the process" in practice.
+      </div>
+    </div>
+
+    <div class="capacity-grid">
+      <div class="capacity-card"><div class="cap-num">~140</div><div class="cap-label">Total Person-Hours</div></div>
+      <div class="capacity-card"><div class="cap-num">+42%</div><div class="cap-label">vs Conventional (98 hrs)</div></div>
+      <div class="capacity-card"><div class="cap-num">12</div><div class="cap-label">Crane Windows (hrs)</div></div>
+      <div class="capacity-card"><div class="cap-num">28.5</div><div class="cap-label">Brokk Runway (hrs)</div></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+      <div class="summary-card" style="flex:1;min-width:120px"><div class="num">5</div><div class="label">Min Crew</div></div>
+      <div class="summary-card" style="flex:1;min-width:120px"><div class="num">7</div><div class="label">Optimal Crew</div></div>
+      <div class="summary-card" style="flex:1;min-width:120px"><div class="num" style="color:var(--orange)">90</div><div class="label">Min Labor</div></div>
+      <div class="summary-card" style="flex:1;min-width:120px"><div class="num" style="color:var(--teal)">45</div><div class="label">Min Solve</div></div>
+      <div class="summary-card" style="flex:1;min-width:120px"><div class="num">6</div><div class="label">Shifts / Day</div></div>
+      <div class="summary-card" style="flex:1;min-width:120px"><div class="num">12</div><div class="label">Total Shifts</div></div>
+    </div>`;
+}
+
+// Init
+renderPhases();
+renderTasks();
+renderPrimitives();
+renderMaterials();
+renderEquipment();
+renderCrew();
+selectPhase(0);
+</script>
+</body>
+</html>

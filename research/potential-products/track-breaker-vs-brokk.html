@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Breaker vs Brokk — ML Systems LLC</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0A0A0A;
+  --surface: #141414;
+  --surface2: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #E5E5E5;
+  --text-dim: #999;
+  --orange: #F97316;
+  --orange-dim: rgba(249,115,22,0.15);
+  --orange-glow: rgba(249,115,22,0.4);
+  --green: #22C55E;
+  --red: #EF4444;
+  --blue: #60A5FA;
+  --teal: #14B8A6;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+nav .logo { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+nav .logo span { color: var(--orange); }
+nav .nav-links { display: flex; gap: 1.5rem; }
+nav .nav-links a {
+  color: var(--text-dim); text-decoration: none; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;
+}
+nav .nav-links a:hover { color: var(--orange); }
+
+/* ── SECTIONS ── */
+section {
+  padding: 7rem 2rem 4rem;
+  max-width: 1100px; margin: 0 auto;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+section.visible { opacity: 1; transform: translateY(0); }
+
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--orange); }
+h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+p { max-width: 720px; margin-bottom: 1rem; color: var(--text-dim); }
+.accent { color: var(--orange); }
+
+/* ── HERO ── */
+#hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+#hero h1 span { display: block; color: var(--orange); }
+.subtitle { font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2rem; max-width: 600px; }
+.badge {
+  display: inline-block; background: var(--orange-dim); color: var(--orange);
+  padding: 0.3rem 0.9rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  margin-bottom: 1.5rem; border: 1px solid rgba(249,115,22,0.3);
+}
+
+/* ── VS BADGE ── */
+.vs-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--orange); color: var(--bg);
+  font-size: 1.4rem; font-weight: 900; letter-spacing: 1px;
+  margin: 2rem auto; box-shadow: 0 0 30px var(--orange-glow);
+  animation: pulse-vs 2s ease-in-out infinite;
+}
+@keyframes pulse-vs {
+  0%, 100% { box-shadow: 0 0 20px var(--orange-glow); }
+  50% { box-shadow: 0 0 40px var(--orange-glow), 0 0 60px rgba(249,115,22,0.15); }
+}
+
+/* ── SPLIT CARDS ── */
+.vs-split {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5rem;
+  align-items: start; margin: 2rem 0;
+}
+.vs-split .divider {
+  width: 2px; background: var(--border); min-height: 100%;
+  position: relative;
+}
+.vs-split .divider::after {
+  content: 'VS'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: var(--orange); color: var(--bg);
+  font-size: 0.7rem; font-weight: 800; padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+}
+@media (max-width: 768px) {
+  .vs-split { grid-template-columns: 1fr; }
+  .vs-split .divider { width: 100%; height: 2px; min-height: auto; }
+  .vs-split .divider::after { top: 50%; left: 50%; }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: rgba(249,115,22,0.3); }
+.card.tb { border-top: 3px solid var(--orange); }
+.card.bk { border-top: 3px solid var(--blue); }
+.card h3 { margin-top: 0; }
+.card .card-label {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px;
+  color: var(--text-dim); margin-bottom: 0.5rem;
+}
+.card .card-title {
+  font-size: 1.4rem; font-weight: 800; margin-bottom: 0.75rem;
+}
+.card.tb .card-title { color: var(--orange); }
+.card.bk .card-title { color: var(--blue); }
+.card .stat { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+.card .stat:last-child { border-bottom: none; }
+.card .stat .label { color: var(--text-dim); }
+.card .stat .value { color: var(--text); font-weight: 600; }
+
+/* ── TABLES ── */
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { padding: 0.65rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; background: var(--surface); position: sticky; top: 0; }
+td { color: var(--text); }
+tr:hover td { background: var(--orange-dim); }
+td.win-tb { color: var(--orange); font-weight: 700; }
+td.win-bk { color: var(--blue); font-weight: 700; }
+td.win-tie { color: var(--teal); font-weight: 600; }
+
+/* ── WORKFLOW ── */
+.workflow {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem; margin: 2rem 0;
+}
+.workflow-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  position: relative;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.workflow-step:hover { border-color: rgba(249,115,22,0.4); transform: translateY(-2px); }
+.workflow-step .step-num {
+  position: absolute; top: -10px; left: 12px;
+  background: var(--orange); color: var(--bg);
+  font-size: 0.7rem; font-weight: 800;
+  padding: 0.15rem 0.5rem; border-radius: 4px;
+}
+.workflow-step .step-tool {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 0.4rem; font-weight: 700;
+}
+.workflow-step .step-tool.tb { color: var(--orange); }
+.workflow-step .step-tool.bk { color: var(--blue); }
+.workflow-step .step-tool.crane { color: var(--teal); }
+.workflow-step .step-task { font-size: 0.9rem; color: var(--text); margin-bottom: 0.3rem; }
+.workflow-step .step-time { font-size: 0.8rem; color: var(--text-dim); }
+
+/* ── BOTTOM LINE ── */
+.bottom-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0;
+}
+@media (max-width: 640px) { .bottom-grid { grid-template-columns: 1fr; } }
+.bottom-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+.bottom-card .role {
+  font-size: 2rem; font-weight: 900; margin-bottom: 0.25rem;
+}
+.bottom-card .role-sub {
+  font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1rem;
+}
+.bottom-card.tb { border-top: 3px solid var(--orange); }
+.bottom-card.tb .role { color: var(--orange); }
+.bottom-card.bk { border-top: 3px solid var(--blue); }
+.bottom-card.bk .role { color: var(--blue); }
+.bottom-card ul { list-style: none; text-align: left; }
+.bottom-card li { padding: 0.35rem 0; font-size: 0.88rem; color: var(--text-dim); border-bottom: 1px solid var(--border); }
+.bottom-card li:last-child { border-bottom: none; }
+.bottom-card li span { color: var(--text); font-weight: 600; }
+
+/* ── CALLOUT ── */
+.callout {
+  background: var(--orange-dim);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-left: 4px solid var(--orange);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+}
+.callout p { color: var(--text); margin: 0; max-width: none; }
+.callout strong { color: var(--orange); }
+
+/* ── DIAGRAM ── */
+.sequence-diagram {
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  margin: 2.5rem 0; flex-wrap: wrap;
+}
+.seq-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.25rem 1.5rem; text-align: center;
+  min-width: 180px; transition: transform 0.2s;
+}
+.seq-box:hover { transform: scale(1.03); }
+.seq-box.tb { border-top: 3px solid var(--orange); }
+.seq-box.bk { border-top: 3px solid var(--blue); }
+.seq-box.cr { border-top: 3px solid var(--teal); }
+.seq-box .seq-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); }
+.seq-box .seq-name { font-size: 1.1rem; font-weight: 700; margin: 0.25rem 0; }
+.seq-box.tb .seq-name { color: var(--orange); }
+.seq-box.bk .seq-name { color: var(--blue); }
+.seq-box.cr .seq-name { color: var(--teal); }
+.seq-box .seq-desc { font-size: 0.8rem; color: var(--text-dim); }
+.seq-arrow { font-size: 1.5rem; color: var(--text-dim); }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 3rem 2rem;
+  color: var(--text-dim); font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+  max-width: 1100px; margin: 0 auto;
+}
+footer a { color: var(--orange); text-decoration: none; }
+
+/* ── SCROLL FADE ── */
+.fade-in {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">ML <span>Systems</span> &middot; Deconstruction Lab</div>
+  <div class="nav-links">
+    <a href="#hero">Overview</a>
+    <a href="#specs">Specs</a>
+    <a href="#capability">Capability</a>
+    <a href="#costs">Costs</a>
+    <a href="#workflow">Workflow</a>
+    <a href="#strategy">Strategy</a>
+    <a href="#bottom-line">Bottom Line</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="badge">Equipment Comparison</div>
+  <h1>Track Breaker<span>vs Brokk 170</span></h1>
+  <p class="subtitle">Two tools, two jobs. The scalpel and the hammer &mdash; here's where each one wins and where they work together.</p>
+
+  <div class="sequence-diagram">
+    <div class="seq-box tb">
+      <div class="seq-label">Custom Built</div>
+      <div class="seq-name">Track Breaker</div>
+      <div class="seq-desc">Precision scoring tool<br>Wall-mounted, track-guided</div>
+    </div>
+    <div class="seq-arrow">&rarr;</div>
+    <div class="seq-box bk">
+      <div class="seq-label">Commercial</div>
+      <div class="seq-name">Brokk 170</div>
+      <div class="seq-desc">Demolition workhorse<br>Remote-controlled robot</div>
+    </div>
+    <div class="seq-arrow">&rarr;</div>
+    <div class="seq-box cr">
+      <div class="seq-label">Shared Asset</div>
+      <div class="seq-name">Crane</div>
+      <div class="seq-desc">Lifts panels out<br>Both tools enable it</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>They don't compete &mdash; they're sequential.</strong> The Track Breaker creates the conditions (scored, panel-ready walls) that make the Brokk's job faster and the crane's job possible.</p>
+  </div>
+</section>
+
+<!-- SPECS -->
+<section id="specs">
+  <h2>Spec Comparison</h2>
+  <p>The Track Breaker is a single-axis precision instrument. The Brokk is a multi-axis demolition platform. Different tools for different phases of the same job.</p>
+
+  <div class="vs-split">
+    <div class="card tb">
+      <div class="card-label">Custom &middot; ~$15K</div>
+      <div class="card-title">Track Breaker (V1)</div>
+      <div class="stat"><span class="label">System Weight</span><span class="value">362&ndash;402 lbs</span></div>
+      <div class="stat"><span class="label">Portable</span><span class="value">2 sections, crew carries</span></div>
+      <div class="stat"><span class="label">Breaker</span><span class="value">HYCON HH27</span></div>
+      <div class="stat"><span class="label">Impact Energy</span><span class="value">75 J / strike</span></div>
+      <div class="stat"><span class="label">BPM</span><span class="value">1,400</span></div>
+      <div class="stat"><span class="label">Power Delivered</span><span class="value">105 kJ/min</span></div>
+      <div class="stat"><span class="label">Power Source</span><span class="value">HYCON HPP09 gas/electric</span></div>
+      <div class="stat"><span class="label">Precision</span><span class="value">&plusmn; 1/8"</span></div>
+      <div class="stat"><span class="label">Axes of Motion</span><span class="value">1 (vertical on rail)</span></div>
+      <div class="stat"><span class="label">Setup Time</span><span class="value">~10 min</span></div>
+      <div class="stat"><span class="label">Reposition</span><span class="value">~10 min (unbolt, walk 4')</span></div>
+      <div class="stat"><span class="label">Crew</span><span class="value">2 setup, 1 to run</span></div>
+      <div class="stat"><span class="label">Autonomy Path</span><span class="value">V0 &rarr; V1 &rarr; V2 &rarr; V3</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card bk">
+      <div class="card-label">Commercial &middot; ~$100&ndash;200K</div>
+      <div class="card-title">Brokk 170</div>
+      <div class="stat"><span class="label">Machine Weight</span><span class="value">3,527 lbs</span></div>
+      <div class="stat"><span class="label">Portable</span><span class="value">Trailered, self-propelled</span></div>
+      <div class="stat"><span class="label">Breaker</span><span class="value">OEM hydraulic (multi-size)</span></div>
+      <div class="stat"><span class="label">Impact Energy</span><span class="value">~405 J / strike</span></div>
+      <div class="stat"><span class="label">BPM</span><span class="value">600&ndash;1,200</span></div>
+      <div class="stat"><span class="label">Power Delivered</span><span class="value">240&ndash;486 kJ/min</span></div>
+      <div class="stat"><span class="label">Power Source</span><span class="value">24 kW electric (32A)</span></div>
+      <div class="stat"><span class="label">Precision</span><span class="value">&plusmn; 2&ndash;4"</span></div>
+      <div class="stat"><span class="label">Axes of Motion</span><span class="value">6+ (boom, arm, tracks)</span></div>
+      <div class="stat"><span class="label">Setup Time</span><span class="value">30&ndash;60 min</span></div>
+      <div class="stat"><span class="label">Reposition</span><span class="value">Continuous (tracked)</span></div>
+      <div class="stat"><span class="label">Crew</span><span class="value">1 trained operator</span></div>
+      <div class="stat"><span class="label">Autonomy Path</span><span class="value">None (always operator)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITY -->
+<section id="capability">
+  <h2>Job Capability Matrix</h2>
+  <p>Green cells show which tool wins each task. The Track Breaker dominates precision wall work. The Brokk dominates everything after the walls are scored.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Track Breaker</th>
+          <th>Brokk 170</th>
+          <th>Winner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Vertical fracture lines in standing walls</td>
+          <td>Purpose-built. Clean, repeatable, &plusmn;1/8"</td>
+          <td>Can do it &mdash; imprecise, bashes rather than scores</td>
+          <td class="win-tb">Track Breaker</td>
+        </tr>
+        <tr>
+          <td>Section walls into liftable panels</td>
+          <td>Core use case &mdash; 4' spacing, crane-ready</td>
+          <td>Not designed for this &mdash; breaks, doesn't section</td>
+          <td class="win-tb">Track Breaker</td>
+        </tr>
+        <tr>
+          <td>Free panels at footing joint</td>
+          <td>No &mdash; can't reach base of wall</td>
+          <td>Yes &mdash; breaker tip into the joint</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Break footings below grade</td>
+          <td>No &mdash; needs a standing wall</td>
+          <td>Yes &mdash; climbs into hole, remote operated</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Break floor slab</td>
+          <td>No &mdash; horizontal surface</td>
+          <td>Yes &mdash; downward breaking</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Cut rebar</td>
+          <td>No</td>
+          <td>Yes &mdash; metal shear attachment</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Move debris / loose sections</td>
+          <td>No</td>
+          <td>Yes &mdash; grapple attachment</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Grade / clean foundation hole</td>
+          <td>No</td>
+          <td>Yes &mdash; bucket attachment</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Work near utilities</td>
+          <td>Limited &mdash; fixed position</td>
+          <td>Excellent &mdash; precise remote arm</td>
+          <td class="win-bk">Brokk</td>
+        </tr>
+        <tr>
+          <td>Confined space / inside basement</td>
+          <td>Yes &mdash; crew carries in</td>
+          <td>Yes &mdash; fits 31" doors</td>
+          <td class="win-tie">Tie</td>
+        </tr>
+        <tr>
+          <td>Concrete strength testing</td>
+          <td>Yes &mdash; V2 tap-and-rebound via accelerometer</td>
+          <td>No</td>
+          <td class="win-tb">Track Breaker</td>
+        </tr>
+        <tr>
+          <td>Ontology data collection</td>
+          <td>Yes &mdash; camera + fracture data every pass</td>
+          <td>No &mdash; no instrumentation</td>
+          <td class="win-tb">Track Breaker</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- COSTS -->
+<section id="costs">
+  <h2>Cost Comparison</h2>
+  <p>An order of magnitude apart in purchase price. But cost-per-project is where the Track Breaker shines &mdash; it pays for itself on the first job.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Cost Category</th>
+          <th>Track Breaker</th>
+          <th>Brokk 170</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Purchase (new)</td>
+          <td>$11K&ndash;$17K</td>
+          <td>$180K&ndash;$220K+</td>
+        </tr>
+        <tr>
+          <td>Purchase (used)</td>
+          <td>N/A (custom built)</td>
+          <td>~$80K&ndash;$120K</td>
+        </tr>
+        <tr>
+          <td>Rental / day</td>
+          <td>N/A (owned)</td>
+          <td>$1,200&ndash;$1,800/day</td>
+        </tr>
+        <tr>
+          <td>Cost per project (owned)</td>
+          <td>$0 marginal (consumables only)</td>
+          <td>$0 marginal (electricity + wear)</td>
+        </tr>
+        <tr>
+          <td>Cost per project (rented)</td>
+          <td>N/A</td>
+          <td>$2,400&ndash;$3,600 (2-day job)</td>
+        </tr>
+        <tr>
+          <td>Consumables / project</td>
+          <td>~$50&ndash;$100 (anchors, chisel tips)</td>
+          <td>~$200&ndash;$500 (points, fluid, wear parts)</td>
+        </tr>
+        <tr>
+          <td>Payback period</td>
+          <td>Immediate &mdash; replaces $2K&ndash;$4K handheld labor per job</td>
+          <td>~3&ndash;4 years at 1 home/month vs renting</td>
+        </tr>
+        <tr>
+          <td>Attachments</td>
+          <td>Chisel tips only (moil, flat, narrow)</td>
+          <td>Breaker, crusher, grapple, shears, bucket ($5K&ndash;$15K each)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>10x cheaper to build, pays back on Day 1.</strong> The Track Breaker costs ~$15K and replaces $2K&ndash;$4K in handheld labor every project. The Brokk costs ~$100K used and takes 3&ndash;4 years to justify ownership over rental.</p>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section id="workflow">
+  <h2>Combined Foundation Workflow</h2>
+  <p>Track Breaker handles the morning. Brokk takes over from there. Two days for a full residential foundation &mdash; walls out as reusable panels, not rubble.</p>
+
+  <div class="workflow">
+    <div class="workflow-step">
+      <div class="step-num">1</div>
+      <div class="step-tool tb">Track Breaker</div>
+      <div class="step-task">Score vertical lines every 4' around 200 LF perimeter</div>
+      <div class="step-time">~6 hrs (2 systems)</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">2</div>
+      <div class="step-tool tb">Track Breaker</div>
+      <div class="step-task">Horizontal score at footing line</div>
+      <div class="step-time">~2 hrs</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">3</div>
+      <div class="step-tool bk">Brokk 170</div>
+      <div class="step-task">Free panels at base &mdash; breaker tip along footing joint</div>
+      <div class="step-time">~2 hrs</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">4</div>
+      <div class="step-tool crane">Crane</div>
+      <div class="step-task">Lift 50 wall panels out (~15 min each)</div>
+      <div class="step-time">~4&ndash;6 hrs</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">5</div>
+      <div class="step-tool bk">Brokk 170</div>
+      <div class="step-task">Break floor slab into 4' &times; 6' sections</div>
+      <div class="step-time">~2&ndash;3 hrs</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">6</div>
+      <div class="step-tool crane">Crane</div>
+      <div class="step-task">Lift slab sections out</div>
+      <div class="step-time">~3&ndash;4 hrs</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">7</div>
+      <div class="step-tool bk">Brokk 170</div>
+      <div class="step-task">Break footings, cut rebar, clean hole</div>
+      <div class="step-time">~3 hrs</div>
+    </div>
+    <div class="workflow-step">
+      <div class="step-num">8</div>
+      <div class="step-tool crane">Crane</div>
+      <div class="step-task">Lift footing debris + Brokk out (last lift)</div>
+      <div class="step-time">~1 hr</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>~2 days total.</strong> Without the Track Breaker, the Brokk bashes walls into rubble &mdash; 3&ndash;5 days, zero panel recovery. With it, walls come out as inventory.</p>
+  </div>
+</section>
+
+<!-- STRATEGY -->
+<section id="strategy">
+  <h2>Strategic Value &mdash; The 4 Returns</h2>
+  <p>Every dollar through the MVE lens. The Track Breaker generates all four returns. The Brokk generates two.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Return</th>
+          <th>Track Breaker</th>
+          <th>Brokk 170</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Material Value</td>
+          <td>Enables intact panel reuse &mdash; retaining walls, landscape, resale</td>
+          <td>Enables footing/slab RCA + rebar recovery</td>
+        </tr>
+        <tr>
+          <td>Ontology Data</td>
+          <td class="win-tb">High &mdash; fracture patterns by concrete age/mix/rebar, every pass logged</td>
+          <td>Low &mdash; general demolition, no structured data capture</td>
+        </tr>
+        <tr>
+          <td>Robot Training Signal</td>
+          <td class="win-tb">High &mdash; camera frames + measurements = V3 training data</td>
+          <td>None &mdash; operator-controlled, no autonomy path</td>
+        </tr>
+        <tr>
+          <td>Market Intelligence</td>
+          <td class="win-tb">First-mover in empty category &mdash; patent, licensing, product sales</td>
+          <td>Commodity equipment &mdash; no IP, no moat</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>When You'd Use Only One</h3>
+
+  <div class="vs-split">
+    <div class="card tb">
+      <div class="card-title">Track Breaker Only</div>
+      <p style="color:var(--text-dim);font-size:0.9rem;">Small job, 1&ndash;2 walls, no full foundation removal. Cut an egress window opening, remove a single wall section. Use handheld breaker for base cleanup.</p>
+    </div>
+    <div class="divider"></div>
+    <div class="card bk">
+      <div class="card-title">Brokk Only</div>
+      <p style="color:var(--text-dim);font-size:0.9rem;">Full demolition where panel recovery doesn't matter. Commercial teardown, no material reuse goal. Walls become rubble &mdash; more haul-off, zero reuse value.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM LINE -->
+<section id="bottom-line">
+  <h2>Bottom Line</h2>
+
+  <div class="bottom-grid">
+    <div class="bottom-card tb">
+      <div class="role">The Product</div>
+      <div class="role-sub">Track Breaker</div>
+      <ul>
+        <li><span>Build or buy:</span> Build (no commercial equivalent)</li>
+        <li><span>When:</span> Now &mdash; V0 proves physics for ~$10K</li>
+        <li><span>Role:</span> Precision scoring (the scalpel)</li>
+        <li><span>IP value:</span> Patent-worthy, licensable, data-generating</li>
+        <li><span>Lucent Lens:</span> Crew-portable, 2 humans carry it</li>
+        <li><span>Revenue:</span> Product sales + software license + data</li>
+      </ul>
+    </div>
+    <div class="bottom-card bk">
+      <div class="role">The Tool</div>
+      <div class="role-sub">Brokk 170</div>
+      <ul>
+        <li><span>Build or buy:</span> Buy used (~$100K) or rent</li>
+        <li><span>When:</span> After 3&ndash;4 projects justify ownership</li>
+        <li><span>Role:</span> General demolition (the hammer)</li>
+        <li><span>IP value:</span> Zero &mdash; commodity</li>
+        <li><span>Lucent Lens:</span> Remote-operated, replaces 22 laborers</li>
+        <li><span>Revenue:</span> None &mdash; cost center only</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>The Track Breaker is the product. The Brokk is the tool.</strong> Without the Track Breaker, the Brokk just bashes walls into rubble &mdash; recoverable as RCA but not as panels. With the Track Breaker, every wall becomes inventory.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>ML Systems LLC &middot; Deconstruction Lab &middot; Lucent Lens</p>
+  <p style="margin-top:0.5rem;"><a href="track-breaker-pitch.html">Track Breaker Pitch</a> &middot; <a href="track-breaker-vs-brokk.md">Markdown Source</a></p>
+</footer>
+
+<!-- SCROLL ANIMATION -->
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('section, .fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

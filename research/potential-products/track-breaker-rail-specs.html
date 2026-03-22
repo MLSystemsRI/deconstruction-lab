@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Breaker — Rail & Drive System Specs | ML Systems</title>
+<style>
+  :root {
+    --orange: #F97316;
+    --orange-light: #FB923C;
+    --orange-dark: #EA580C;
+    --bg: #0A0A0A;
+    --surface: #111111;
+    --elevated: #1A1A1A;
+    --border: #262626;
+    --text: #E5E5E5;
+    --muted: #737373;
+    --green: #22C55E;
+    --blue: #60A5FA;
+    --yellow: #FFE500;
+    --teal: #14B8A6;
+    --red: #EF4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 { font-size: 2rem; font-weight: 700; color: var(--orange); margin-bottom: 0.25rem; }
+  h2 { font-size: 1.4rem; font-weight: 600; color: var(--text); margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--orange-light); margin-top: 1.5rem; margin-bottom: 0.75rem; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.6rem; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
+  .badge-orange { background: rgba(249,115,22,0.15); color: var(--orange); }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-blue { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .badge-yellow { background: rgba(255,229,0,0.15); color: var(--yellow); }
+  .badge-teal { background: rgba(20,184,166,0.15); color: var(--teal); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  p, li { color: var(--text); font-size: 0.95rem; }
+  p { margin-bottom: 0.75rem; }
+  ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+  li { margin-bottom: 0.35rem; }
+  a { color: var(--orange); text-decoration: none; }
+  a:hover { text-decoration: underline; color: var(--orange-light); }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; }
+  thead th { background: var(--elevated); color: var(--orange); font-weight: 600; text-align: left; padding: 0.6rem 0.8rem; border-bottom: 2px solid var(--orange-dark); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tbody td { padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: var(--surface); }
+  .highlight-row td { background: rgba(249,115,22,0.06); border-left: 3px solid var(--orange); }
+  .rejected-row td { background: rgba(239,68,68,0.04); color: var(--muted); text-decoration: line-through; }
+  .rejected-row td:last-child { text-decoration: none; }
+
+  code { font-family: 'JetBrains Mono', 'Fira Code', monospace; background: var(--elevated); color: var(--orange); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+  .card h3 { margin-top: 0; }
+
+  .diagram { background: var(--elevated); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin: 1rem 0 1.5rem; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.4; color: var(--muted); white-space: pre; overflow-x: auto; }
+  .diagram .label { color: var(--orange); font-weight: 600; }
+  .diagram .dim { color: var(--teal); }
+  .diagram .part { color: var(--green); }
+  .diagram .warn { color: var(--red); }
+
+  .price { color: var(--green); font-weight: 600; }
+  .source-link { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--elevated); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.8rem; font-size: 0.8rem; margin-right: 0.5rem; margin-bottom: 0.5rem; transition: border-color 0.2s; }
+  .source-link:hover { border-color: var(--orange); text-decoration: none; }
+
+  .mvp-callout { background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(249,115,22,0.02)); border: 1px solid rgba(249,115,22,0.3); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .mvp-callout h3 { color: var(--orange); margin-top: 0; }
+
+  .warning-callout { background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.02)); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .warning-callout h3 { color: var(--red); margin-top: 0; }
+
+  .total-row td { font-weight: 700; color: var(--orange); border-top: 2px solid var(--orange-dark); background: rgba(249,115,22,0.06); }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.8rem; }
+
+  @media (max-width: 768px) {
+    body { padding: 1rem; }
+    h1 { font-size: 1.5rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    table { font-size: 0.8rem; }
+    thead th, tbody td { padding: 0.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Track Breaker — Rail & Drive System</h1>
+<p class="subtitle">ML Systems | Deconstruction Lab | Component Specifications & Sourcing<br>Updated 2026-03-14 — V-groove wheel system replaces polymer pillow blocks</p>
+
+<!-- ================================================================== -->
+<h2>System Overview — How the Carriage Moves</h2>
+
+<p>Two independent systems work together: a <strong>guide rail</strong> constrains the carriage to a straight vertical path, and an <strong>Acme lead screw</strong> drives it up and down. The rail handles lateral loads (keeping the breaker aligned). The screw handles vertical motion and position hold.</p>
+
+<!-- ──── SVG: FULL SYSTEM FRONT VIEW ──── -->
+<div style="margin: 2rem 0; text-align: center;">
+<svg viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg" style="max-width: 700px; width: 100%;">
+  <defs>
+    <linearGradient id="wallGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3a3a3a"/>
+      <stop offset="100%" stop-color="#2a2a2a"/>
+    </linearGradient>
+    <linearGradient id="steelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#888"/>
+      <stop offset="100%" stop-color="#555"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- WALL BACKGROUND -->
+  <rect x="50" y="40" width="700" height="780" rx="4" fill="url(#wallGrad)" stroke="#444" stroke-width="1.5"/>
+  <text x="400" y="25" text-anchor="middle" fill="#737373" font-size="13" font-family="Inter, sans-serif">FOUNDATION WALL (8" poured concrete, below grade)</text>
+
+  <!-- Wall texture lines -->
+  <g stroke="#3e3e3e" stroke-width="0.5" opacity="0.5">
+    <line x1="60" y1="120" x2="740" y2="120"/><line x1="60" y1="200" x2="740" y2="200"/>
+    <line x1="60" y1="280" x2="740" y2="280"/><line x1="60" y1="360" x2="740" y2="360"/>
+    <line x1="60" y1="440" x2="740" y2="440"/><line x1="60" y1="520" x2="740" y2="520"/>
+    <line x1="60" y1="600" x2="740" y2="600"/><line x1="60" y1="680" x2="740" y2="680"/>
+    <line x1="60" y1="760" x2="740" y2="760"/>
+  </g>
+
+  <!-- TOP ANCHORS (adhesive) -->
+  <circle cx="240" cy="80" r="10" fill="#EA580C" stroke="#F97316" stroke-width="2"/>
+  <circle cx="560" cy="80" r="10" fill="#EA580C" stroke="#F97316" stroke-width="2"/>
+  <text x="240" y="112" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">ADHESIVE</text>
+  <text x="240" y="124" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">ANCHOR</text>
+  <text x="560" y="112" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">ADHESIVE</text>
+  <text x="560" y="124" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">ANCHOR</text>
+
+  <!-- TOP CROSS BRACE -->
+  <rect x="230" y="70" width="340" height="12" rx="2" fill="url(#steelGrad)" stroke="#999" stroke-width="1"/>
+
+  <!-- LEFT V-RAIL -->
+  <rect x="258" y="82" width="8" height="640" fill="#888" stroke="#aaa" stroke-width="0.5"/>
+  <line x1="258" y1="82" x2="258" y2="722" stroke="#aaa" stroke-width="1.5"/>
+  <line x1="266" y1="82" x2="266" y2="722" stroke="#666" stroke-width="1"/>
+  <text x="235" y="400" text-anchor="middle" fill="#14B8A6" font-size="11" font-family="Inter, sans-serif" font-weight="600" transform="rotate(-90,235,400)">V-RAIL (steel)</text>
+
+  <!-- RIGHT V-RAIL -->
+  <rect x="534" y="82" width="8" height="640" fill="#888" stroke="#aaa" stroke-width="0.5"/>
+  <line x1="534" y1="82" x2="534" y2="722" stroke="#aaa" stroke-width="1.5"/>
+  <line x1="542" y1="82" x2="542" y2="722" stroke="#666" stroke-width="1"/>
+  <text x="568" y="400" text-anchor="middle" fill="#14B8A6" font-size="11" font-family="Inter, sans-serif" font-weight="600" transform="rotate(90,568,400)">V-RAIL (steel)</text>
+
+  <!-- ACME LEAD SCREW (center) -->
+  <rect x="396" y="155" width="8" height="560" rx="4" fill="#B87333" stroke="#D4956A" stroke-width="1"/>
+  <!-- Thread marks on screw -->
+  <g stroke="#D4956A" stroke-width="0.5" opacity="0.6">
+    <line x1="396" y1="175" x2="404" y2="170"/><line x1="396" y1="195" x2="404" y2="190"/>
+    <line x1="396" y1="215" x2="404" y2="210"/><line x1="396" y1="235" x2="404" y2="230"/>
+    <line x1="396" y1="255" x2="404" y2="250"/><line x1="396" y1="275" x2="404" y2="270"/>
+    <line x1="396" y1="295" x2="404" y2="290"/><line x1="396" y1="315" x2="404" y2="310"/>
+    <line x1="396" y1="335" x2="404" y2="330"/><line x1="396" y1="355" x2="404" y2="350"/>
+    <line x1="396" y1="375" x2="404" y2="370"/><line x1="396" y1="395" x2="404" y2="390"/>
+    <line x1="396" y1="415" x2="404" y2="410"/><line x1="396" y1="435" x2="404" y2="430"/>
+    <line x1="396" y1="455" x2="404" y2="450"/><line x1="396" y1="475" x2="404" y2="470"/>
+    <line x1="396" y1="495" x2="404" y2="490"/><line x1="396" y1="515" x2="404" y2="510"/>
+    <line x1="396" y1="535" x2="404" y2="530"/><line x1="396" y1="555" x2="404" y2="550"/>
+    <line x1="396" y1="575" x2="404" y2="570"/><line x1="396" y1="595" x2="404" y2="590"/>
+    <line x1="396" y1="615" x2="404" y2="610"/><line x1="396" y1="635" x2="404" y2="630"/>
+    <line x1="396" y1="655" x2="404" y2="650"/><line x1="396" y1="675" x2="404" y2="670"/>
+    <line x1="396" y1="695" x2="404" y2="690"/>
+  </g>
+  <text x="420" y="175" fill="#D4956A" font-size="10" font-family="Inter, sans-serif">1"-5 ACME</text>
+  <text x="420" y="187" fill="#D4956A" font-size="10" font-family="Inter, sans-serif">LEAD SCREW</text>
+  <text x="420" y="199" fill="#737373" font-size="9" font-family="Inter, sans-serif">(C1045 steel)</text>
+
+  <!-- MOTOR at top -->
+  <rect x="370" y="135" width="60" height="45" rx="4" fill="#333" stroke="#F97316" stroke-width="2"/>
+  <rect x="395" y="120" width="10" height="18" rx="2" fill="#555" stroke="#888" stroke-width="1"/>
+  <text x="400" y="157" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="700">NEMA 34</text>
+  <text x="400" y="169" text-anchor="middle" fill="#F97316" font-size="9" font-family="Inter, sans-serif">12 Nm</text>
+
+  <!-- CARRIAGE ASSEMBLY -->
+  <g>
+    <!-- Carriage plate background -->
+    <rect x="245" y="380" width="310" height="160" rx="6" fill="#1a1a1a" stroke="#F97316" stroke-width="2" opacity="0.95"/>
+
+    <!-- Top V-wheels (left and right) -->
+    <circle cx="262" cy="395" r="14" fill="#555" stroke="#22C55E" stroke-width="2.5"/>
+    <circle cx="262" cy="395" r="5" fill="#333" stroke="#888" stroke-width="1"/>
+    <circle cx="538" cy="395" r="14" fill="#555" stroke="#22C55E" stroke-width="2.5"/>
+    <circle cx="538" cy="395" r="5" fill="#333" stroke="#888" stroke-width="1"/>
+
+    <!-- Bottom V-wheels -->
+    <circle cx="262" cy="525" r="14" fill="#555" stroke="#22C55E" stroke-width="2.5"/>
+    <circle cx="262" cy="525" r="5" fill="#333" stroke="#888" stroke-width="1"/>
+    <circle cx="538" cy="525" r="14" fill="#555" stroke="#22C55E" stroke-width="2.5"/>
+    <circle cx="538" cy="525" r="5" fill="#333" stroke="#888" stroke-width="1"/>
+
+    <!-- V-wheel labels -->
+    <text x="262" y="370" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+    <text x="538" y="370" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+    <text x="262" y="555" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+    <text x="538" y="555" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+
+    <!-- Bronze nut (on screw) -->
+    <rect x="385" y="435" width="30" height="25" rx="3" fill="#B87333" stroke="#D4956A" stroke-width="1.5"/>
+    <text x="400" y="450" text-anchor="middle" fill="#1a1a1a" font-size="8" font-family="Inter, sans-serif" font-weight="700">NUT</text>
+    <text x="400" y="475" text-anchor="middle" fill="#D4956A" font-size="9" font-family="Inter, sans-serif">Bronze (SAE 660)</text>
+
+    <!-- BREAKER BODY -->
+    <rect x="305" y="400" width="75" height="120" rx="4" fill="#2a2a2a" stroke="#F97316" stroke-width="2"/>
+    <text x="342" y="425" text-anchor="middle" fill="#F97316" font-size="12" font-family="Inter, sans-serif" font-weight="700">HH27</text>
+    <text x="342" y="440" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif">75 J</text>
+    <text x="342" y="455" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif">1,400 BPM</text>
+
+    <!-- CHISEL extending left toward wall -->
+    <rect x="270" y="450" width="35" height="8" rx="1" fill="#999" stroke="#bbb" stroke-width="1"/>
+    <polygon points="270,447 255,454 270,461" fill="#ccc" stroke="#999" stroke-width="0.5"/>
+
+    <!-- Impact arrow -->
+    <line x1="240" y1="454" x2="195" y2="454" stroke="#F97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+    <defs><marker id="arrowOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#F97316"/></marker></defs>
+
+    <!-- Impact label -->
+    <text x="165" y="445" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">IMPACT</text>
+    <text x="165" y="458" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">75 J &rarr;</text>
+
+    <!-- CARRIAGE PLATE label -->
+    <text x="480" y="510" text-anchor="middle" fill="#E5E5E5" font-size="10" font-family="Inter, sans-serif" font-weight="600">CARRIAGE</text>
+    <text x="480" y="522" text-anchor="middle" fill="#E5E5E5" font-size="10" font-family="Inter, sans-serif" font-weight="600">PLATE</text>
+  </g>
+
+  <!-- Carriage travel arrow -->
+  <line x1="590" y1="400" x2="590" y2="530" stroke="#FFE500" stroke-width="2" stroke-dasharray="6,4"/>
+  <polygon points="590,535 583,520 597,520" fill="#FFE500"/>
+  <text x="620" y="465" fill="#FFE500" font-size="10" font-family="Inter, sans-serif" font-weight="600">CARRIAGE</text>
+  <text x="620" y="478" fill="#FFE500" font-size="10" font-family="Inter, sans-serif" font-weight="600">TRAVELS</text>
+  <text x="620" y="491" fill="#FFE500" font-size="10" font-family="Inter, sans-serif" font-weight="600">DOWN</text>
+
+  <!-- BOTTOM ANCHORS (wedge) -->
+  <circle cx="240" cy="740" r="10" fill="#555" stroke="#888" stroke-width="2"/>
+  <circle cx="560" cy="740" r="10" fill="#555" stroke="#888" stroke-width="2"/>
+  <text x="240" y="770" text-anchor="middle" fill="#888" font-size="10" font-family="Inter, sans-serif">WEDGE</text>
+  <text x="240" y="782" text-anchor="middle" fill="#888" font-size="10" font-family="Inter, sans-serif">ANCHOR</text>
+  <text x="560" y="770" text-anchor="middle" fill="#888" font-size="10" font-family="Inter, sans-serif">WEDGE</text>
+  <text x="560" y="782" text-anchor="middle" fill="#888" font-size="10" font-family="Inter, sans-serif">ANCHOR</text>
+
+  <!-- BOTTOM CROSS BRACE -->
+  <rect x="230" y="730" width="340" height="12" rx="2" fill="url(#steelGrad)" stroke="#999" stroke-width="1"/>
+
+  <!-- FALLING DEBRIS -->
+  <g fill="#888" opacity="0.6">
+    <rect x="320" y="830" width="15" height="10" rx="2" transform="rotate(-15,327,835)"/>
+    <rect x="365" y="840" width="20" height="12" rx="2" transform="rotate(10,375,846)"/>
+    <rect x="410" y="825" width="12" height="8" rx="1" transform="rotate(-25,416,829)"/>
+    <rect x="345" y="850" width="18" height="9" rx="2" transform="rotate(5,354,854)"/>
+    <rect x="390" y="855" width="14" height="7" rx="1"/>
+  </g>
+  <text x="400" y="885" text-anchor="middle" fill="#737373" font-size="11" font-family="Inter, sans-serif">broken pieces fall &darr; &darr; &darr;  gravity clears</text>
+
+  <!-- Dimension: 8 ft height -->
+  <line x1="130" y1="82" x2="130" y2="730" stroke="#737373" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="120" y1="82" x2="140" y2="82" stroke="#737373" stroke-width="1"/>
+  <line x1="120" y1="730" x2="140" y2="730" stroke="#737373" stroke-width="1"/>
+  <text x="130" y="410" text-anchor="middle" fill="#737373" font-size="12" font-family="Inter, sans-serif" font-weight="600" transform="rotate(-90,130,410)">8 ft track length</text>
+
+  <!-- Reaction force arrows -->
+  <line x1="605" y1="454" x2="650" y2="454" stroke="#60A5FA" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <defs><marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#60A5FA"/></marker></defs>
+  <text x="670" y="445" fill="#60A5FA" font-size="9" font-family="Inter, sans-serif">&larr; REACTION</text>
+  <text x="670" y="457" fill="#60A5FA" font-size="9" font-family="Inter, sans-serif">  back through</text>
+  <text x="670" y="469" fill="#60A5FA" font-size="9" font-family="Inter, sans-serif">  anchors into wall</text>
+
+  <!-- Hydraulic hoses -->
+  <path d="M370,180 C340,190 330,220 330,260 C330,300 340,820 400,860" stroke="#F97316" stroke-width="2" fill="none" stroke-dasharray="8,4" opacity="0.4"/>
+  <text x="400" y="875" text-anchor="middle" fill="#737373" font-size="9" font-family="Inter, sans-serif">hydraulic hoses to power pack (on ground)</text>
+</svg>
+</div>
+
+<!-- ──── SVG: CROSS-SECTION VIEW ──── -->
+<div style="margin: 2rem 0; text-align: center;">
+<h3 style="text-align: center; color: var(--muted); margin-bottom: 1rem;">Cross-Section: V-Wheel on V-Rail (side view)</h3>
+<svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg" style="max-width: 500px; width: 100%;">
+  <!-- Wall -->
+  <rect x="0" y="0" width="120" height="360" fill="#3a3a3a" stroke="#444" stroke-width="1"/>
+  <text x="60" y="30" text-anchor="middle" fill="#737373" font-size="11" font-family="Inter, sans-serif">WALL</text>
+  <text x="60" y="45" text-anchor="middle" fill="#737373" font-size="10" font-family="Inter, sans-serif">(8" concrete)</text>
+
+  <!-- Standoff gap -->
+  <line x1="120" y1="100" x2="170" y2="100" stroke="#14B8A6" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="120" y1="260" x2="170" y2="260" stroke="#14B8A6" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="145" y="92" text-anchor="middle" fill="#14B8A6" font-size="9" font-family="Inter, sans-serif">3-4" standoff</text>
+
+  <!-- Frame / cross brace -->
+  <rect x="170" y="80" width="12" height="200" rx="2" fill="#888" stroke="#aaa" stroke-width="1"/>
+  <text x="176" y="175" text-anchor="middle" fill="#555" font-size="8" font-family="Inter, sans-serif" transform="rotate(-90,176,175)">FRAME</text>
+
+  <!-- V-Rail -->
+  <polygon points="210,100 230,100 230,300 210,300 210,290 220,290 220,110 210,110" fill="#888" stroke="#aaa" stroke-width="1"/>
+  <!-- V-groove profile on rail -->
+  <polygon points="215,115 225,115 220,130" fill="#666" stroke="#aaa" stroke-width="0.5"/>
+  <text x="220" y="325" text-anchor="middle" fill="#14B8A6" font-size="10" font-family="Inter, sans-serif" font-weight="600">V-RAIL</text>
+  <text x="220" y="340" text-anchor="middle" fill="#737373" font-size="9" font-family="Inter, sans-serif">hardened 1045 steel</text>
+
+  <!-- V-Wheel (large, detailed) -->
+  <circle cx="310" cy="180" r="40" fill="#444" stroke="#22C55E" stroke-width="3"/>
+  <!-- Inner bearing (sealed) -->
+  <circle cx="310" cy="180" r="22" fill="#333" stroke="#666" stroke-width="1.5"/>
+  <circle cx="310" cy="180" r="14" fill="#2a2a2a" stroke="#555" stroke-width="1"/>
+  <!-- Seal rings -->
+  <circle cx="310" cy="180" r="18" fill="none" stroke="#22C55E" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+  <!-- V-groove on wheel bottom -->
+  <path d="M280,210 L310,225 L340,210" fill="none" stroke="#22C55E" stroke-width="2.5"/>
+  <!-- Contact points -->
+  <circle cx="290" cy="215" r="3" fill="#F97316"/>
+  <circle cx="330" cy="215" r="3" fill="#F97316"/>
+
+  <!-- Labels -->
+  <text x="310" y="175" text-anchor="middle" fill="#22C55E" font-size="10" font-family="Inter, sans-serif" font-weight="700">SEALED</text>
+  <text x="310" y="188" text-anchor="middle" fill="#22C55E" font-size="10" font-family="Inter, sans-serif" font-weight="700">BEARING</text>
+
+  <!-- Axle / shoulder bolt -->
+  <rect x="350" y="174" width="40" height="12" rx="2" fill="#888" stroke="#aaa" stroke-width="1"/>
+  <text x="370" y="205" text-anchor="middle" fill="#737373" font-size="9" font-family="Inter, sans-serif">shoulder bolt</text>
+  <text x="370" y="217" text-anchor="middle" fill="#737373" font-size="9" font-family="Inter, sans-serif">(1/2" axle)</text>
+
+  <!-- Carriage plate -->
+  <rect x="390" y="110" width="12" height="160" rx="2" fill="#1a1a1a" stroke="#F97316" stroke-width="2"/>
+  <text x="450" y="175" fill="#F97316" font-size="11" font-family="Inter, sans-serif" font-weight="600">CARRIAGE</text>
+  <text x="450" y="190" fill="#F97316" font-size="11" font-family="Inter, sans-serif" font-weight="600">PLATE</text>
+
+  <!-- Chisel -->
+  <rect x="125" y="175" width="45" height="10" rx="1" fill="#999" stroke="#bbb" stroke-width="1"/>
+  <polygon points="125,173 110,180 125,187" fill="#ccc"/>
+  <!-- Impact into wall -->
+  <text x="80" y="170" text-anchor="middle" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">CHISEL</text>
+  <text x="80" y="195" text-anchor="middle" fill="#F97316" font-size="9" font-family="Inter, sans-serif">&larr; 75 J impact</text>
+
+  <!-- Dust annotation -->
+  <g opacity="0.5">
+    <circle cx="230" cy="255" r="2" fill="#888"/>
+    <circle cx="225" cy="270" r="1.5" fill="#888"/>
+    <circle cx="235" cy="280" r="2.5" fill="#888"/>
+    <circle cx="222" cy="290" r="1.5" fill="#888"/>
+    <circle cx="232" cy="300" r="2" fill="#888"/>
+  </g>
+  <text x="260" y="295" fill="#22C55E" font-size="9" font-family="Inter, sans-serif">dust falls</text>
+  <text x="260" y="307" fill="#22C55E" font-size="9" font-family="Inter, sans-serif">out of V</text>
+
+  <!-- Contact point callout -->
+  <line x1="290" y1="215" x2="260" y2="250" stroke="#F97316" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="195" y="253" fill="#F97316" font-size="9" font-family="Inter, sans-serif">contact lines</text>
+  <text x="195" y="265" fill="#F97316" font-size="9" font-family="Inter, sans-serif">(steel on steel)</text>
+</svg>
+</div>
+
+<!-- ──── SVG: V-WHEEL DETAIL ──── -->
+<div style="margin: 2rem 0; text-align: center;">
+<h3 style="text-align: center; color: var(--muted); margin-bottom: 1rem;">V-Wheel Detail: Why Dust Can't Get In</h3>
+<svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg" style="max-width: 420px; width: 100%;">
+  <!-- Wheel body -->
+  <circle cx="250" cy="130" r="80" fill="#3a3a3a" stroke="#22C55E" stroke-width="3"/>
+
+  <!-- Outer race (hardened) -->
+  <circle cx="250" cy="130" r="70" fill="none" stroke="#666" stroke-width="8"/>
+  <text x="250" y="55" text-anchor="middle" fill="#888" font-size="9" font-family="Inter, sans-serif">hardened outer race</text>
+
+  <!-- Seal (green ring) -->
+  <circle cx="250" cy="130" r="50" fill="none" stroke="#22C55E" stroke-width="3"/>
+  <text x="330" y="95" fill="#22C55E" font-size="10" font-family="Inter, sans-serif" font-weight="600">&larr; SEAL</text>
+  <text x="330" y="108" fill="#22C55E" font-size="9" font-family="Inter, sans-serif">keeps dust OUT</text>
+
+  <!-- Ball bearings (represented as circles) -->
+  <g fill="#888" stroke="#aaa" stroke-width="0.5">
+    <circle cx="215" cy="92" r="5"/><circle cx="285" cy="92" r="5"/>
+    <circle cx="200" cy="120" r="5"/><circle cx="300" cy="120" r="5"/>
+    <circle cx="200" cy="145" r="5"/><circle cx="300" cy="145" r="5"/>
+    <circle cx="215" cy="170" r="5"/><circle cx="285" cy="170" r="5"/>
+    <circle cx="235" cy="180" r="5"/><circle cx="265" cy="180" r="5"/>
+    <circle cx="235" cy="82" r="5"/><circle cx="265" cy="82" r="5"/>
+  </g>
+  <text x="250" y="135" text-anchor="middle" fill="#737373" font-size="10" font-family="Inter, sans-serif" font-weight="600">ROLLING</text>
+  <text x="250" y="148" text-anchor="middle" fill="#737373" font-size="10" font-family="Inter, sans-serif" font-weight="600">ELEMENTS</text>
+
+  <!-- Inner bore (axle hole) -->
+  <circle cx="250" cy="130" r="18" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
+  <text x="250" y="134" text-anchor="middle" fill="#555" font-size="9" font-family="Inter, sans-serif">axle</text>
+
+  <!-- V-groove at bottom -->
+  <path d="M190,195 L250,225 L310,195" fill="none" stroke="#F97316" stroke-width="3"/>
+
+  <!-- Rail below -->
+  <polygon points="195,230 250,260 305,230 305,285 195,285" fill="#555" stroke="#888" stroke-width="1.5"/>
+  <text x="250" y="275" text-anchor="middle" fill="#14B8A6" font-size="10" font-family="Inter, sans-serif" font-weight="600">V-RAIL</text>
+
+  <!-- Contact points -->
+  <circle cx="218" cy="212" r="4" fill="#F97316"/>
+  <circle cx="282" cy="212" r="4" fill="#F97316"/>
+
+  <!-- Dust particles falling away -->
+  <g fill="#888" opacity="0.4">
+    <circle cx="172" cy="245" r="2.5"/><circle cx="165" cy="260" r="2"/>
+    <circle cx="178" cy="272" r="3"/><circle cx="160" cy="283" r="1.5"/>
+    <circle cx="328" cy="248" r="2"/><circle cx="335" cy="262" r="2.5"/>
+    <circle cx="322" cy="275" r="2"/><circle cx="340" cy="285" r="1.5"/>
+  </g>
+
+  <!-- Annotations -->
+  <line x1="218" y1="212" x2="120" y2="240" stroke="#F97316" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="55" y="238" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">contact lines</text>
+  <text x="55" y="252" fill="#F97316" font-size="9" font-family="Inter, sans-serif">hardened steel</text>
+  <text x="55" y="264" fill="#F97316" font-size="9" font-family="Inter, sans-serif">on hardened steel</text>
+
+  <text x="160" y="295" fill="#22C55E" font-size="9" font-family="Inter, sans-serif">&darr; dust falls away</text>
+  <text x="310" y="295" fill="#22C55E" font-size="9" font-family="Inter, sans-serif">dust falls away &darr;</text>
+</svg>
+</div>
+
+<!-- ================================================================== -->
+<h2>Component 1: Acme Lead Screw <span class="badge badge-orange">Drive Rod</span></h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h3>Roton 59286 — 1"-5 Acme Lead Screw</h3>
+    <table>
+      <tbody>
+        <tr><td>Material</td><td><strong>C1045 medium-carbon steel</strong> (hardened, ground, rolled threads)</td></tr>
+        <tr><td>Diameter</td><td>1.000" (25.4 mm)</td></tr>
+        <tr><td>Threads per Inch</td><td>5 TPI</td></tr>
+        <tr><td>Lead (travel/rev)</td><td>0.200" per revolution</td></tr>
+        <tr><td>Thread Form</td><td>Acme 29-degree (ASME B1.5)</td></tr>
+        <tr><td>Hand</td><td>Right-hand</td></tr>
+        <tr><td>Weight</td><td>2.089 lbs/ft (3.11 kg/m)</td></tr>
+        <tr><td>Max Stock Length</td><td>12 ft (custom cut available)</td></tr>
+        <tr><td>Price</td><td class="price">$15.36/ft &rarr; ~$123 for 8 ft</td></tr>
+        <tr><td>Self-Locking?</td><td><strong>Yes</strong> — friction angle > lead angle. Carriage cannot backdrive (fall) under load.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Why C1045 Steel?</h3>
+    <ul>
+      <li><strong>0.45% carbon</strong> — harder than mild steel (C1018), better wear resistance under cyclic loading</li>
+      <li><strong>Tensile strength:</strong> ~82,000 PSI (565 MPa)</li>
+      <li><strong>Yield strength:</strong> ~60,000 PSI (414 MPa)</li>
+      <li>Ground and rolled threads = smooth surface finish, consistent pitch</li>
+      <li>Not stainless — will rust in wet environments. Acceptable for concrete demo (dry operation, oil film on threads from bronze nut wear)</li>
+    </ul>
+
+    <a href="https://www.roton.com/product/acme-steel-screw-right-59286/" class="source-link" target="_blank">Roton 59286 Product Page &rarr;</a>
+    <a href="https://www.roton.com/family/acme-right-screws-and-nuts-7059286/" class="source-link" target="_blank">1"-5 Family (Screws + Nuts) &rarr;</a>
+  </div>
+
+  <div class="card">
+    <h3>Why Acme, Not Ball Screw?</h3>
+    <table>
+      <thead>
+        <tr><th>Property</th><th>Acme Screw</th><th>Ball Screw</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Self-locking</td><td><strong>Yes</strong> (holds position, power off)</td><td>No (backdrives under gravity)</td></tr>
+        <tr><td>Dust tolerance</td><td>High (sliding contact, debris falls through)</td><td>Low (recirculating balls jam with grit)</td></tr>
+        <tr><td>Vibration tolerance</td><td>High (no ball bearings to unseat)</td><td>Medium</td></tr>
+        <tr><td>Efficiency</td><td>~35-65%</td><td>~85-95%</td></tr>
+        <tr><td>Cost (1" x 8 ft)</td><td class="price">~$123</td><td>~$400-800</td></tr>
+        <tr><td>Failure mode</td><td>Wears slowly (bronze nut replacement)</td><td>Sudden (ball jam/fracture)</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:0.75rem; color: var(--muted); font-size: 0.85rem;">For a vertical wall-mounted system carrying a 60 lb breaker under 1,400 BPM vibration, self-locking and dust tolerance are non-negotiable. Acme wins.</p>
+
+    <h3 style="margin-top: 1.5rem;">Mating Nut — Roton 90138</h3>
+    <table>
+      <tbody>
+        <tr><td>Material</td><td><strong>SAE 660 bronze</strong> (C93200 — bearing bronze)</td></tr>
+        <tr><td>Type</td><td>Sleeve nut, internally threaded</td></tr>
+        <tr><td>Thread</td><td>1"-5 Acme, right hand</td></tr>
+        <tr><td>Static Load Rating</td><td><strong>5,000 lbs</strong> (22.2 kN)</td></tr>
+        <tr><td>Wear</td><td>Bronze wears preferentially (sacrificial) — screw lasts, nut is replaceable</td></tr>
+        <tr><td>Lubrication</td><td>Self-lubricating (bronze-on-steel). Light oil optional.</td></tr>
+        <tr><td>Price</td><td class="price">~$51</td></tr>
+      </tbody>
+    </table>
+    <a href="https://www.roton.com/product/acme-bronze-sleeve-nut-right-89419/" class="source-link" target="_blank">Roton 90138 Nut &rarr;</a>
+    <a href="https://www.roton.com/products/acme-lead-screws-nuts/engineering-data/" class="source-link" target="_blank">Engineering Data &rarr;</a>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2>Component 2: Guide System <span class="badge badge-teal">Track</span></h2>
+
+<p>The guide constrains the carriage to a single axis. It handles all lateral loads — keeping the breaker chisel aligned with the fracture line. This is a <strong>concrete demolition environment</strong>: silica dust, flying debris, sustained 1,400 BPM vibration. The guide system must survive all three.</p>
+
+<!-- ──────────── REJECTED OPTION ──────────── -->
+<div class="warning-callout">
+  <h3>Rejected: Polymer Pillow Blocks (igus drylin W)</h3>
+  <p>The original design used igus drylin WS-20 aluminum rail with iglide J200 polymer-lined pillow blocks. While excellent for clean industrial automation, <strong>this system is wrong for concrete demolition</strong>:</p>
+  <ul>
+    <li><strong>Abrasive silica dust</strong> grinds polymer liners — concrete dust is essentially sandpaper</li>
+    <li><strong>Sliding contact</strong> (not rolling) means dust gets trapped between liner and shaft, accelerating wear</li>
+    <li><strong>1,400 BPM vibration</strong> cycles the liner under load thousands of times per minute, compounding abrasive wear</li>
+    <li><strong>Aluminum rail</strong> is softer than concrete aggregate — flying chunks can dent the running surface</li>
+    <li><strong>Maintenance annoyance</strong> — liner replacement on-site between every job, maybe mid-job</li>
+  </ul>
+  <p style="color: var(--red); font-weight: 600; margin-bottom: 0;">The right guide system for this environment uses hardened steel on hardened steel, with sealed bearings protected inside the wheel body.</p>
+</div>
+
+<!-- ──────────── GUIDE SYSTEM COMPARISON ──────────── -->
+<div class="card">
+  <h3>Guide System Comparison — Concrete Demo Environment</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>System</th>
+        <th>Contact Type</th>
+        <th>Dust Survival</th>
+        <th>Vibration</th>
+        <th>Maintenance</th>
+        <th>Cost (4 ft)</th>
+        <th>Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="rejected-row">
+        <td>igus drylin (polymer on aluminum)</td>
+        <td>Sliding</td>
+        <td>Poor</td>
+        <td>Good</td>
+        <td>High (liner replacement)</td>
+        <td>~$158</td>
+        <td style="color: var(--red);">Rejected</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>V-groove wheels on V-rail</strong></td>
+        <td><strong>Rolling</strong></td>
+        <td><strong>Excellent</strong></td>
+        <td><strong>Excellent</strong></td>
+        <td><strong>Near zero</strong></td>
+        <td><strong>~$75-175</strong></td>
+        <td style="color: var(--green); font-weight: 700;">Selected</td>
+      </tr>
+      <tr>
+        <td>Cam followers in C-channel</td>
+        <td>Rolling</td>
+        <td>Very good</td>
+        <td>Excellent</td>
+        <td>Low (grease)</td>
+        <td>~$70-130</td>
+        <td>Strong alt</td>
+      </tr>
+      <tr>
+        <td>Hevi-Rail (PBC Linear)</td>
+        <td>Rolling (cam)</td>
+        <td>Excellent</td>
+        <td>Excellent</td>
+        <td>Near zero</td>
+        <td>~$800-1,200</td>
+        <td>V1 product upgrade</td>
+      </tr>
+      <tr>
+        <td>Thomson sealed linear bearings</td>
+        <td>Rolling (balls)</td>
+        <td>Good (if seals hold)</td>
+        <td>Moderate</td>
+        <td>Medium</td>
+        <td>~$200-350</td>
+        <td>Seal failure = jam</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ──────────── SELECTED: V-GROOVE ──────────── -->
+<h2>Selected: V-Groove Wheels on Steel V-Rail <span class="badge badge-green">Winner</span></h2>
+
+<div class="card">
+  <h3>Why V-Groove Wins for Concrete Demo</h3>
+  <div class="card-grid" style="margin-top: 1rem;">
+    <div>
+      <ul>
+        <li><strong>Open geometry</strong> — dust, chips, and aggregate fall off the V-rail. Nothing to pack into. No enclosed bearing surface.</li>
+        <li><strong>Hardened steel on hardened steel</strong> — V-rail is induction-hardened 1045 carbon steel or 400-series stainless. V-wheels have hardened outer races. Concrete dust can't grind either surface.</li>
+        <li><strong>Sealed bearings inside the wheel</strong> — the rolling elements (balls or rollers) are inside the wheel body, behind seals. They never see the concrete dust. The dust only touches the wheel tread and the rail — both hardened steel.</li>
+        <li><strong>Self-centering</strong> — the V-groove on the wheel mates with the V-profile on the rail. The carriage naturally tracks center. Misalignment tolerance is built in.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong>Proven in concrete cutting</strong> — the Hilti DST 10-CA wall saw uses hardened steel rollers on a steel rail track. Same principle. Same environment. Proven.</li>
+        <li><strong>Zero maintenance</strong> — sealed bearings, no lubrication on running surfaces, no consumable liners</li>
+        <li><strong>Vibration tolerant</strong> — rolling contact absorbs vibration better than sliding contact. Wheels can't "chatter" off the rail like a pillow block can.</li>
+        <li><strong>Cheap DIY path</strong> — V-groove wheels on angle iron is a proven approach in CNC routers, rolling mills, and slide gates. Off-the-shelf at any industrial caster supplier.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────── OPTION A: PBC V-GUIDE ──────────── -->
+<div class="card">
+  <h3>Option A: PBC Linear V-Guide System <span class="badge badge-blue">Precision</span></h3>
+  <p>Purpose-built V-rail and V-wheel system from PBC Linear. Precision-ground, induction-hardened. This is the "buy it right" option — engineered for linear motion, not repurposed from gate hardware.</p>
+
+  <table>
+    <thead>
+      <tr><th>Size</th><th>Wheel &empty;</th><th>Rail Profile</th><th>Radial Load / Wheel</th><th>Axial Load / Wheel</th><th>Material</th><th>Rail (48")</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Size 1</code></td>
+        <td>20 mm</td>
+        <td>Small V</td>
+        <td>~560 lbs</td>
+        <td>~130 lbs</td>
+        <td>1045 steel / 400 SS</td>
+        <td>~$53 (carbon) / ~$105 (SS)</td>
+      </tr>
+      <tr>
+        <td><code>Size 2</code></td>
+        <td>30 mm</td>
+        <td>Medium V</td>
+        <td>~1,120 lbs</td>
+        <td>~260 lbs</td>
+        <td>1045 steel / 400 SS</td>
+        <td>~$56 (carbon) / ~$105 (SS)</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><code>Size 3</code></td>
+        <td><strong>45 mm</strong></td>
+        <td><strong>Large V</strong></td>
+        <td><strong>~2,246 lbs</strong></td>
+        <td><strong>~520 lbs</strong></td>
+        <td><strong>1045 steel / 400 SS</strong></td>
+        <td class="price"><strong>~$75 (carbon) / ~$145 (SS)</strong></td>
+      </tr>
+      <tr>
+        <td><code>Size 4</code></td>
+        <td>60 mm</td>
+        <td>XL V</td>
+        <td>~3,370 lbs</td>
+        <td>~780 lbs</td>
+        <td>1045 steel / 400 SS</td>
+        <td>~$165 (carbon)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>V-Wheel Specs (Size 3 — Recommended)</h3>
+  <table>
+    <tbody>
+      <tr><td>Wheel diameter</td><td>45 mm (1.77")</td></tr>
+      <tr><td>Bearing type</td><td>Dual-row angular contact roller bearing, <strong>sealed</strong></td></tr>
+      <tr><td>Outer race</td><td>Hardened steel, precision-ground V-groove</td></tr>
+      <tr><td>Radial capacity</td><td>~2,246 lbs (10 kN) per wheel</td></tr>
+      <tr><td>Axial capacity</td><td>~520 lbs (2.3 kN) per wheel</td></tr>
+      <tr><td>4 wheels total</td><td><strong>~8,984 lbs radial capacity</strong> (breaker is 60 lbs &mdash; 150x safety factor)</td></tr>
+      <tr><td>Sealing</td><td>Sealed &mdash; dust, moisture, debris kept out of rolling elements</td></tr>
+      <tr><td>Lubrication</td><td>Pre-greased, sealed for life. No field maintenance.</td></tr>
+      <tr><td>Price per wheel</td><td class="price">~$25-40</td></tr>
+    </tbody>
+  </table>
+
+  <h3>V-Rail Specs (Size 3)</h3>
+  <table>
+    <tbody>
+      <tr><td>Material</td><td>1045 carbon steel (or 400-series stainless)</td></tr>
+      <tr><td>Surface treatment</td><td>Precision-ground, <strong>induction-hardened</strong></td></tr>
+      <tr><td>Profile</td><td>90&deg; V-groove with alignment shoulders</td></tr>
+      <tr><td>Mounting</td><td>Pre-drilled holes (or undrilled &mdash; you drill your own)</td></tr>
+      <tr><td>Max length</td><td>72" (6 ft) standard stock &mdash; butt-join two for 8 ft</td></tr>
+      <tr><td>Dust behavior</td><td>Open V &mdash; debris rolls off. No cavity to pack into.</td></tr>
+    </tbody>
+  </table>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+    <a href="https://pbclinear.com/pages/vw-v-guide" class="source-link" target="_blank">PBC V-Guide Overview &rarr;</a>
+    <a href="https://pbclinear.com/collections/v-guide-wheel-roller-bearing-and-rail" class="source-link" target="_blank">V-Rail Shop (all sizes) &rarr;</a>
+    <a href="https://pbclinear.com/products/vrd3-0048" class="source-link" target="_blank">VRD3-048 Size 3 Rail, 48" drilled &rarr;</a>
+    <a href="https://pbclinear.com/products/vr3-0024" class="source-link" target="_blank">VR3-024 Size 3 Rail, 24" &rarr;</a>
+  </div>
+</div>
+
+<!-- ──────────── OPTION B: ANGLE IRON ──────────── -->
+<div class="card">
+  <h3>Option B: V-Groove Wheels on Angle Iron <span class="badge badge-yellow">Cheapest</span></h3>
+  <p>The DIY version. Standard V-groove industrial wheels riding on inverted angle iron. Used in slide gates, rolling mills, sawmills, and CNC routers. Available at any industrial caster supplier.</p>
+
+  <table>
+    <tbody>
+      <tr><td>Rail</td><td><strong>Angle iron</strong> &mdash; 1.5" x 1.5" x 1/4" or 2" x 2" x 1/4" steel angle, inverted to form a V-track</td></tr>
+      <tr><td>Material</td><td>A36 hot-rolled steel (commodity &mdash; any metal yard)</td></tr>
+      <tr><td>Surface</td><td>Mill finish (not hardened &mdash; will wear over time, but slowly under rolling contact)</td></tr>
+      <tr><td>Cost (8 ft)</td><td class="price">~$10-20 from metal yard / scrap</td></tr>
+      <tr><td>Wheels</td><td>Cast iron or forged steel V-groove wheels, 2-3" diameter, sealed bearings</td></tr>
+      <tr><td>Wheel capacity</td><td>1,000-5,000+ lbs per wheel depending on size</td></tr>
+      <tr><td>Wheel cost</td><td class="price">~$8-25 each</td></tr>
+      <tr><td>Total (rail + 4 wheels)</td><td class="price"><strong>~$42-120</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p style="color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem;"><strong>Trade-off:</strong> Less precise than PBC V-Guide (angle iron isn't ground to tolerance), but at 1/4 the cost. For V0 prototype testing, this is enough to validate the concept. Upgrade to precision rail for V1 product.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+    <a href="https://mappcaster.com/collections/wheels-v-grooved-wheels" class="source-link" target="_blank">Mapp Caster &mdash; V-Groove Wheels &rarr;</a>
+    <a href="https://groovedwheels.com/" class="source-link" target="_blank">GroovedWheels.com &rarr;</a>
+    <a href="https://www.sescasters.com/applications/angle-iron-rail-v-groove/" class="source-link" target="_blank">SES Casters &mdash; Angle Iron V-Groove &rarr;</a>
+    <a href="https://www.hamiltoncaster.com/Wheels/Track-Wheels/V-Grooved-Track-Wheels/Stainless-Steel-V-Grooved-Wheels" class="source-link" target="_blank">Hamilton &mdash; Stainless V-Groove &rarr;</a>
+  </div>
+</div>
+
+<!-- ──────────── OPTION C: CAM FOLLOWERS ──────────── -->
+<div class="card">
+  <h3>Option C: Cam Followers in C-Channel <span class="badge badge-teal">Alt</span></h3>
+  <p>Stud-mounted cam follower bearings riding inside a standard steel C-channel. The channel partially shields from debris. Cam followers are literally designed to take repeated impacts &mdash; used in stamping presses and engine valvetrains.</p>
+
+  <table>
+    <tbody>
+      <tr><td>Rail</td><td>Standard steel C-channel (C3x4.1 or C4x5.4) &mdash; commodity</td></tr>
+      <tr><td>Rollers</td><td>Sealed cam followers (McGill CF-1, IKO, Smith-Trax), stud-mounted, needle bearing internals</td></tr>
+      <tr><td>Load per roller</td><td>2,000-10,000+ lbs depending on size</td></tr>
+      <tr><td>Dust</td><td>Very good &mdash; sealed bearings, channel partially shields from falling debris</td></tr>
+      <tr><td>Vibration</td><td>Excellent &mdash; designed for high-speed cam impacts</td></tr>
+      <tr><td>Maintenance</td><td>Grease fitting on cam followers (periodic, not frequent)</td></tr>
+      <tr><td>Cost</td><td class="price">Cam followers ~$8-25 each + C-channel ~$15-25 for 4 ft</td></tr>
+      <tr><td>Total</td><td class="price"><strong>~$47-125</strong></td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--muted); font-size: 0.85rem;">Requires custom carriage plate to hold followers at correct spacing relative to channel width. More fab work than V-groove, but cheapest total cost and best debris shielding.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+    <a href="https://www.emersonbearing.com/cam-followers/" class="source-link" target="_blank">Emerson Bearing &mdash; Cam Followers &rarr;</a>
+    <a href="https://pbclinear.com/collections/cam-roller-linear-guides" class="source-link" target="_blank">PBC &mdash; Cam Roller Linear Guides &rarr;</a>
+    <a href="https://pbclinear.com/collections/hevi-rail-roller-bearings" class="source-link" target="_blank">PBC &mdash; Hevi-Rail (production version) &rarr;</a>
+  </div>
+</div>
+
+<!-- ──────────── HOW V-WHEELS MOUNT ──────────── -->
+<h2>How V-Wheels Mount to the Carriage</h2>
+
+<p>4 V-groove wheels (2 top, 2 bottom) ride on 2 parallel V-rails. The wider the spacing between top and bottom pairs, the more stable the carriage is against moment loads from breaker impact. Target: 12-18" vertical spacing between wheel pairs.</p>
+
+<div style="margin: 2rem 0; text-align: center;">
+<svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" style="max-width: 600px; width: 100%;">
+  <!-- Left V-rail -->
+  <rect x="85" y="30" width="10" height="420" fill="#888" stroke="#aaa" stroke-width="1"/>
+  <text x="60" y="240" text-anchor="middle" fill="#14B8A6" font-size="11" font-family="Inter, sans-serif" font-weight="600" transform="rotate(-90,60,240)">V-RAIL (left)</text>
+
+  <!-- Right V-rail -->
+  <rect x="605" y="30" width="10" height="420" fill="#888" stroke="#aaa" stroke-width="1"/>
+  <text x="645" y="240" text-anchor="middle" fill="#14B8A6" font-size="11" font-family="Inter, sans-serif" font-weight="600" transform="rotate(90,645,240)">V-RAIL (right)</text>
+
+  <!-- Carriage plate -->
+  <rect x="100" y="70" width="500" height="340" rx="8" fill="#141414" stroke="#F97316" stroke-width="2.5"/>
+  <text x="350" y="95" text-anchor="middle" fill="#E5E5E5" font-size="13" font-family="Inter, sans-serif" font-weight="700">CARRIAGE PLATE (1/4" steel)</text>
+
+  <!-- Top left wheel -->
+  <circle cx="100" cy="135" r="22" fill="#444" stroke="#22C55E" stroke-width="3"/>
+  <circle cx="100" cy="135" r="9" fill="#222" stroke="#666" stroke-width="1.5"/>
+  <text x="100" y="108" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+
+  <!-- Top right wheel -->
+  <circle cx="600" cy="135" r="22" fill="#444" stroke="#22C55E" stroke-width="3"/>
+  <circle cx="600" cy="135" r="9" fill="#222" stroke="#666" stroke-width="1.5"/>
+  <text x="600" y="108" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+
+  <!-- Bottom left wheel -->
+  <circle cx="100" cy="345" r="22" fill="#444" stroke="#22C55E" stroke-width="3"/>
+  <circle cx="100" cy="345" r="9" fill="#222" stroke="#666" stroke-width="1.5"/>
+  <text x="100" y="380" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+
+  <!-- Bottom right wheel -->
+  <circle cx="600" cy="345" r="22" fill="#444" stroke="#22C55E" stroke-width="3"/>
+  <circle cx="600" cy="345" r="9" fill="#222" stroke="#666" stroke-width="1.5"/>
+  <text x="600" y="380" text-anchor="middle" fill="#22C55E" font-size="9" font-family="Inter, sans-serif" font-weight="600">V-WHEEL</text>
+
+  <!-- Acme screw (vertical through center) -->
+  <rect x="346" y="20" width="8" height="440" rx="4" fill="#B87333" stroke="#D4956A" stroke-width="1"/>
+  <g stroke="#D4956A" stroke-width="0.5" opacity="0.5">
+    <line x1="346" y1="40" x2="354" y2="35"/><line x1="346" y1="60" x2="354" y2="55"/>
+    <line x1="346" y1="80" x2="354" y2="75"/><line x1="346" y1="100" x2="354" y2="95"/>
+    <line x1="346" y1="360" x2="354" y2="355"/><line x1="346" y1="380" x2="354" y2="375"/>
+    <line x1="346" y1="400" x2="354" y2="395"/><line x1="346" y1="420" x2="354" y2="415"/>
+    <line x1="346" y1="440" x2="354" y2="435"/>
+  </g>
+  <text x="370" y="52" fill="#D4956A" font-size="9" font-family="Inter, sans-serif">ACME SCREW</text>
+
+  <!-- Bronze nut -->
+  <rect x="330" y="220" width="40" height="40" rx="4" fill="#B87333" stroke="#D4956A" stroke-width="2"/>
+  <text x="350" y="237" text-anchor="middle" fill="#1a1a1a" font-size="9" font-family="Inter, sans-serif" font-weight="700">BRONZE</text>
+  <text x="350" y="250" text-anchor="middle" fill="#1a1a1a" font-size="9" font-family="Inter, sans-serif" font-weight="700">NUT</text>
+
+  <!-- BREAKER -->
+  <rect x="170" y="150" width="130" height="180" rx="6" fill="#1E1E1E" stroke="#F97316" stroke-width="2.5"/>
+  <text x="235" y="195" text-anchor="middle" fill="#F97316" font-size="16" font-family="Inter, sans-serif" font-weight="800">HH27</text>
+  <text x="235" y="215" text-anchor="middle" fill="#F97316" font-size="12" font-family="Inter, sans-serif">BREAKER</text>
+  <text x="235" y="235" text-anchor="middle" fill="#FB923C" font-size="11" font-family="Inter, sans-serif">75 J</text>
+  <text x="235" y="250" text-anchor="middle" fill="#FB923C" font-size="11" font-family="Inter, sans-serif">1,400 BPM</text>
+  <text x="235" y="270" text-anchor="middle" fill="#737373" font-size="10" font-family="Inter, sans-serif">60 lbs</text>
+
+  <!-- Chisel extending left -->
+  <rect x="135" y="233" width="35" height="12" rx="2" fill="#aaa" stroke="#ccc" stroke-width="1"/>
+  <polygon points="135,230 115,239 135,248" fill="#ccc"/>
+  <text x="110" y="225" text-anchor="end" fill="#F97316" font-size="10" font-family="Inter, sans-serif" font-weight="600">CHISEL &rarr;</text>
+
+  <!-- Spacing dimension -->
+  <line x1="30" y1="135" x2="30" y2="345" stroke="#FFE500" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="20" y1="135" x2="40" y2="135" stroke="#FFE500" stroke-width="1.5"/>
+  <line x1="20" y1="345" x2="40" y2="345" stroke="#FFE500" stroke-width="1.5"/>
+  <text x="30" y="245" text-anchor="middle" fill="#FFE500" font-size="10" font-family="Inter, sans-serif" font-weight="600" transform="rotate(-90,30,245)">12-18" spacing</text>
+
+  <!-- Labels for sealed bearings -->
+  <text x="350" y="470" text-anchor="middle" fill="#22C55E" font-size="11" font-family="Inter, sans-serif" font-weight="600">4 sealed V-wheels &bull; 2 parallel V-rails &bull; steel on steel &bull; zero maintenance</text>
+</svg>
+</div>
+
+<!-- ================================================================== -->
+<h2>Recommendation <span class="badge badge-orange">Final Pick</span></h2>
+
+<div class="card">
+  <h3>V0 Prototype: Angle Iron + V-Groove Wheels</h3>
+  <p>Cheapest path to validate the concept. Upgrade to PBC V-Guide for V1 product.</p>
+
+  <h3 style="margin-top: 1rem;">V1 Product: PBC V-Guide Size 3</h3>
+  <p>Precision-ground, induction-hardened, engineered for linear motion. Drop-in upgrade from angle iron &mdash; same wheel type, better rail.</p>
+
+  <table>
+    <thead>
+      <tr><th>Stage</th><th>Rail</th><th>Wheels</th><th>Rail Cost</th><th>Wheel Cost</th><th>Total Guide</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row">
+        <td><strong>V0 (test)</strong></td>
+        <td>Angle iron 2"x2"x1/4", 4 ft, inverted</td>
+        <td>4x cast iron V-groove, 2-3", sealed</td>
+        <td>~$15</td>
+        <td>~$50-80</td>
+        <td class="price"><strong>~$65-95</strong></td>
+      </tr>
+      <tr>
+        <td><strong>V1 (product)</strong></td>
+        <td>PBC VRD3, 1045 steel, 2x 48" drilled</td>
+        <td>4x PBC Size 3 V-wheels, 45mm, sealed</td>
+        <td>~$150</td>
+        <td>~$100-160</td>
+        <td class="price"><strong>~$250-310</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================================================================== -->
+<h2>MVE Prototype Shopping List <span class="badge badge-yellow">Buy Now</span></h2>
+
+<div class="mvp-callout">
+  <h3>Bench Test — Prove the Rail + Screw System</h3>
+  <p>Build a 4 ft vertical rail on a workbench or wall stud. Mount a weighted plate (simulate the 60 lb breaker with steel plate / sandbags). Run the motor. Prove: smooth travel, position hold, no binding, controllable feed rate. Throw concrete dust at it &mdash; does it still roll smooth?</p>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Item</th>
+      <th>Spec</th>
+      <th>Source</th>
+      <th>Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>Acme lead screw</strong></td>
+      <td>Roton 59286, 1"-5 RH, C1045 steel, 4 ft</td>
+      <td><a href="https://www.roton.com/product/acme-steel-screw-right-59286/" target="_blank">Roton</a></td>
+      <td class="price">~$62</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>Bronze nut</strong></td>
+      <td>Roton 90138, 1"-5 Acme, SAE 660 bronze, 5,000 lb</td>
+      <td><a href="https://www.roton.com/product/acme-bronze-sleeve-nut-right-89419/" target="_blank">Roton</a></td>
+      <td class="price">~$51</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>V-rail (x2)</strong></td>
+      <td>Steel angle iron 2"x2"x1/4", 4 ft, inverted as V-track</td>
+      <td>Local metal yard / scrap</td>
+      <td class="price">~$15</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>V-groove wheels (x4)</strong></td>
+      <td>2-3" cast iron or forged steel, sealed bearings, 1/2" bore</td>
+      <td><a href="https://mappcaster.com/collections/wheels-v-grooved-wheels" target="_blank">Mapp Caster</a> / <a href="https://groovedwheels.com/" target="_blank">GroovedWheels.com</a></td>
+      <td class="price">~$50-80</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><strong>NEMA 34 stepper motor</strong></td>
+      <td>StepperOnline 34E1KBK50-120, 12 Nm, brake, encoder</td>
+      <td><a href="https://www.omc-stepperonline.com" target="_blank">StepperOnline</a></td>
+      <td class="price">~$162</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><strong>Stepper driver</strong></td>
+      <td>CL86T V4.1, closed-loop, 24-110V</td>
+      <td><a href="https://www.omc-stepperonline.com" target="_blank">StepperOnline</a></td>
+      <td class="price">~$60</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><strong>48V power supply</strong></td>
+      <td>Mean Well 10A (480W)</td>
+      <td>Amazon / Digi-Key</td>
+      <td class="price">~$40</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><strong>Jaw coupling</strong></td>
+      <td>14mm (motor shaft) to 1" (screw), Lovejoy or Ruland</td>
+      <td>McMaster-Carr</td>
+      <td class="price">~$20</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><strong>Thrust bearings (pair)</strong></td>
+      <td>Angular contact, 1" bore, for screw top/bottom</td>
+      <td>McMaster-Carr</td>
+      <td class="price">~$30</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td><strong>Carriage plate</strong></td>
+      <td>1/4" steel plate, drill to mount nut + wheel axles</td>
+      <td>Local metal supply / scrap</td>
+      <td class="price">~$20-40</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td><strong>Wheel axles + hardware</strong></td>
+      <td>1/2" shoulder bolts (x4), nylock nuts, spacers, frame bolts</td>
+      <td>McMaster-Carr / Amazon</td>
+      <td class="price">~$25</td>
+    </tr>
+    <tr class="total-row">
+      <td></td>
+      <td><strong>TOTAL</strong></td>
+      <td colspan="2"><strong>Complete bench prototype (V-groove version)</strong></td>
+      <td><strong>~$535-$585</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="color: var(--muted); font-size: 0.85rem;">~$70-100 cheaper than the igus version, and survives the actual job site environment.</p>
+
+<!-- ================================================================== -->
+<h2>What the Prototype Proves</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h3>Pass / Fail Gates</h3>
+    <table>
+      <thead><tr><th>Gate</th><th>Test</th><th>Pass Criteria</th></tr></thead>
+      <tbody>
+        <tr><td>G1</td><td>Smooth vertical travel</td><td>No binding over full 4 ft, loaded to 60 lbs</td></tr>
+        <tr><td>G2</td><td>Self-locking hold</td><td>Power off &rarr; carriage stays put with 60 lbs hanging</td></tr>
+        <tr><td>G3</td><td>Feed rate control</td><td>Can dial 0.1 to 2.0 ft/min reliably</td></tr>
+        <tr><td>G4</td><td>Reversibility</td><td>Motor returns carriage to top smoothly</td></tr>
+        <tr><td>G5</td><td>Position accuracy</td><td>Encoder reads &plusmn;0.1" over 4 ft travel</td></tr>
+        <tr><td>G6</td><td>Dust tolerance</td><td>Dump concrete dust on rail + wheels, run 50 cycles. No binding, no speed degradation.</td></tr>
+        <tr><td>G7</td><td>Vibration tolerance</td><td>Simulate breaker vibration (rubber mallet at carriage), wheels stay on track</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>MVE 4-Return Check</h3>
+    <table>
+      <thead><tr><th>Return</th><th>Delivers?</th></tr></thead>
+      <tbody>
+        <tr><td>Material value</td><td>Not yet (no breaking)</td></tr>
+        <tr><td>Ontology data</td><td><strong>Yes</strong> — feed rates, motor loads, travel accuracy, dust impact on performance</td></tr>
+        <tr><td>Robot training signal</td><td><strong>Yes</strong> — encoder data + motor current = baseline for V1 software</td></tr>
+        <tr><td>Market intelligence</td><td><strong>Yes</strong> — proves the drive mechanism works in real-world conditions &rarr; de-risks full prototype</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2>Speed & Travel Math</h2>
+
+<div class="card">
+  <table>
+    <tbody>
+      <tr><td>Screw lead</td><td>0.200"/rev (1"-5 TPI)</td></tr>
+      <tr><td>Motor max RPM</td><td>~200 RPM (NEMA 34 at 48V, loaded)</td></tr>
+      <tr><td>Max linear speed</td><td>200 RPM &times; 0.200"/rev = <strong>40 in/min = 3.33 ft/min</strong></td></tr>
+      <tr><td>Target breaking speed</td><td>0.1 - 2.0 ft/min (6 - 120 RPM on motor)</td></tr>
+      <tr><td>Full 8 ft travel time (max speed)</td><td>~2.4 min</td></tr>
+      <tr><td>Full 8 ft travel time (1 ft/min breaking speed)</td><td>~8 min</td></tr>
+      <tr><td>Holding torque needed</td><td>60 lbs &times; 0.200" lead / (2&pi; &times; 0.35 eff) = <strong>~5.5 Nm</strong></td></tr>
+      <tr><td>Motor holding torque</td><td>12 Nm (2.2&times; safety factor)</td></tr>
+      <tr><td>Self-lock torque (Acme)</td><td>&infin; — screw friction holds without motor power</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================================================================== -->
+<h2>Sources</h2>
+
+<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+  <a href="https://www.roton.com/product/acme-steel-screw-right-59286/" class="source-link" target="_blank">Roton &mdash; 1"-5 Acme Screw</a>
+  <a href="https://www.roton.com/product/acme-bronze-sleeve-nut-right-89419/" class="source-link" target="_blank">Roton &mdash; Bronze Nut</a>
+  <a href="https://www.roton.com/products/acme-lead-screws-nuts/engineering-data/" class="source-link" target="_blank">Roton &mdash; Engineering Data</a>
+  <a href="https://pbclinear.com/pages/vw-v-guide" class="source-link" target="_blank">PBC Linear &mdash; V-Guide Overview</a>
+  <a href="https://pbclinear.com/collections/v-guide-wheel-roller-bearing-and-rail" class="source-link" target="_blank">PBC Linear &mdash; V-Rail Shop</a>
+  <a href="https://pbclinear.com/collections/hevi-rail-roller-bearings" class="source-link" target="_blank">PBC Linear &mdash; Hevi-Rail</a>
+  <a href="https://pbclinear.com/collections/cam-roller-linear-guides" class="source-link" target="_blank">PBC Linear &mdash; Cam Roller Guides</a>
+  <a href="https://mappcaster.com/collections/wheels-v-grooved-wheels" class="source-link" target="_blank">Mapp Caster &mdash; V-Groove Wheels</a>
+  <a href="https://groovedwheels.com/" class="source-link" target="_blank">GroovedWheels.com</a>
+  <a href="https://www.sescasters.com/applications/angle-iron-rail-v-groove/" class="source-link" target="_blank">SES &mdash; Angle Iron V-Groove</a>
+  <a href="https://www.hamiltoncaster.com/Wheels/Track-Wheels/V-Grooved-Track-Wheels/Stainless-Steel-V-Grooved-Wheels" class="source-link" target="_blank">Hamilton &mdash; SS V-Groove Wheels</a>
+  <a href="https://www.emersonbearing.com/cam-followers/" class="source-link" target="_blank">Emerson &mdash; Cam Followers</a>
+  <a href="https://www.manualslib.com/manual/2613710/Hilti-Dst-10-Ca.html" class="source-link" target="_blank">Hilti DST 10-CA Manual</a>
+  <a href="https://www.cnczone.com/forums/linear-and-rotary-motion/36018-quot-home-made-quot-v-groove-rollers.html" class="source-link" target="_blank">CNC Zone &mdash; DIY V-Groove</a>
+</div>
+
+<footer>
+  <p>ML Systems LLC | Deconstruction Lab | Track Breaker R&D</p>
+  <p>Updated 2026-03-14 | V-groove wheel system selected over polymer pillow blocks for concrete environment durability</p>
+  <p>Prices subject to change &mdash; verify at source before ordering</p>
+</footer>
+
+</body>
+</html>

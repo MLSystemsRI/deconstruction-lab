@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RI Optimized Operations Plan — ML Systems</title>
+<style>
+  :root {
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface2: #1E1E1E;
+    --border: #2A2A2A;
+    --orange: #F97316;
+    --orange-dim: rgba(249,115,22,0.15);
+    --green: #22C55E;
+    --green-dim: rgba(34,197,94,0.12);
+    --teal: #14B8A6;
+    --teal-dim: rgba(20,184,166,0.12);
+    --text: #E5E5E5;
+    --text-dim: #999;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* — Nav — */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,10,0.75);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 1.5rem;
+    height: 56px; overflow-x: auto;
+  }
+  nav a {
+    color: var(--text-dim); text-decoration: none; font-size: 0.82rem;
+    white-space: nowrap; transition: color 0.2s;
+  }
+  nav a:hover, nav a.active { color: var(--orange); }
+  nav .brand { color: var(--orange); font-weight: 700; font-size: 0.9rem; margin-right: auto; }
+
+  /* — Sections — */
+  .section {
+    max-width: 960px; margin: 0 auto;
+    padding: 5rem 1.5rem 2rem;
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .section.visible { opacity: 1; transform: translateY(0); }
+
+  h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.3rem; }
+  h2 {
+    font-size: 1.5rem; font-weight: 700; margin-bottom: 1.2rem;
+    color: var(--orange); border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+  }
+  h3 { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 0.8rem; }
+  p { margin-bottom: 1rem; }
+  strong { color: #fff; }
+  code { background: var(--surface2); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.88rem; }
+
+  .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .tagline { color: var(--orange); font-style: italic; margin-bottom: 2rem; font-size: 1rem; }
+
+  /* — Stat Grid — */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem; margin: 1.5rem 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .stat-card:hover { border-color: var(--orange); }
+  .stat-card .number {
+    font-size: 2rem; font-weight: 800; color: var(--orange);
+    display: block; margin-bottom: 0.2rem;
+  }
+  .stat-card .label { font-size: 0.85rem; color: var(--text-dim); }
+
+  /* — Tables — */
+  .table-wrap {
+    overflow-x: auto; margin: 1.2rem 0; border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.88rem;
+  }
+  th {
+    background: var(--surface2); color: var(--orange);
+    text-align: left; padding: 0.75rem 1rem;
+    font-weight: 600; white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+
+  /* — Callout — */
+  .callout {
+    border-left: 4px solid var(--orange);
+    background: var(--orange-dim);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.2rem; margin: 1.2rem 0;
+  }
+  .callout.green {
+    border-left-color: var(--green);
+    background: var(--green-dim);
+  }
+  .callout.teal {
+    border-left-color: var(--teal);
+    background: var(--teal-dim);
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* — Badge — */
+  .badge {
+    display: inline-block; font-size: 0.75rem; font-weight: 600;
+    padding: 0.15rem 0.55rem; border-radius: 999px;
+    background: var(--orange-dim); color: var(--orange);
+  }
+  .badge.green { background: var(--green-dim); color: var(--green); }
+  .badge.teal { background: var(--teal-dim); color: var(--teal); }
+
+  /* — Flow Diagram — */
+  .flow {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem; margin: 1.5rem 0;
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem; text-align: center;
+    min-width: 240px; max-width: 360px; width: 100%;
+    transition: border-color 0.3s;
+  }
+  .flow-node:hover { border-color: var(--orange); }
+  .flow-node.highlight {
+    border-color: var(--orange);
+    background: var(--orange-dim);
+  }
+  .flow-node.teal-highlight {
+    border-color: var(--teal);
+    background: var(--teal-dim);
+  }
+  .flow-node .flow-title {
+    font-weight: 700; color: var(--orange); font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  .flow-node.teal-highlight .flow-title { color: var(--teal); }
+  .flow-node .flow-detail { font-size: 0.82rem; color: var(--text-dim); }
+  .flow-arrow {
+    font-size: 1.5rem; color: var(--orange); line-height: 1;
+    padding: 0.3rem 0;
+  }
+  .flow-label {
+    font-size: 0.78rem; color: var(--text-dim); font-style: italic;
+    padding: 0.1rem 0;
+  }
+  .flow-branch {
+    display: flex; gap: 1.5rem; width: 100%; justify-content: center;
+    flex-wrap: wrap;
+  }
+  .flow-branch .flow-node { min-width: 200px; max-width: 280px; flex: 1; }
+  .flow-converge {
+    font-size: 0.82rem; color: var(--text-dim);
+    text-align: center; padding: 0.5rem 0; max-width: 320px;
+  }
+
+  /* — Compare Grid — */
+  .compare-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; margin: 1.2rem 0;
+  }
+  .compare-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+  }
+  .compare-card h4 {
+    color: var(--orange); font-size: 0.95rem; margin-bottom: 0.7rem;
+  }
+  .compare-card ul { list-style: none; padding: 0; }
+  .compare-card li {
+    font-size: 0.85rem; padding: 0.3rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-card li:last-child { border-bottom: none; }
+  .compare-card li::before { content: "\2022"; color: var(--orange); margin-right: 0.5rem; }
+
+  /* — Ordered Lists — */
+  ol.insights { padding-left: 1.5rem; margin: 1rem 0; }
+  ol.insights li { margin-bottom: 0.6rem; font-size: 0.92rem; }
+
+  /* — Phase Blocks — */
+  .phase-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem; margin: 1.2rem 0;
+  }
+  .phase-block h3 { margin-top: 0; color: var(--orange); }
+  .phase-block .goal {
+    font-size: 0.88rem; color: var(--text-dim); font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  /* — Month Timeline — */
+  .month-timeline {
+    margin: 1.2rem 0; padding-left: 1.5rem;
+    border-left: 2px solid var(--orange);
+  }
+  .month-entry { margin-bottom: 1.2rem; position: relative; }
+  .month-entry::before {
+    content: ''; width: 10px; height: 10px;
+    background: var(--orange); border-radius: 50%;
+    position: absolute; left: -1.85rem; top: 0.45rem;
+  }
+  .month-entry .month-label {
+    font-weight: 700; color: var(--orange); font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+  }
+  .month-entry .month-detail {
+    font-size: 0.85rem; color: var(--text-dim); line-height: 1.6;
+  }
+
+  /* — Footer — */
+  footer {
+    max-width: 960px; margin: 0 auto;
+    padding: 3rem 1.5rem 2rem;
+    border-top: 1px solid var(--border);
+    text-align: center; font-size: 0.82rem; color: var(--text-dim);
+  }
+  footer a { color: var(--orange); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* — Responsive — */
+  @media (max-width: 640px) {
+    h1 { font-size: 1.7rem; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .flow-branch { flex-direction: column; align-items: center; }
+    nav { gap: 1rem; padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <span class="brand">ML Systems</span>
+  <a href="#hero">Plan</a>
+  <a href="#boh-integration">BOH</a>
+  <a href="#channels">Channels</a>
+  <a href="#municipalities">Municipalities</a>
+  <a href="#financing">Financing</a>
+  <a href="#competitors">Competitors</a>
+  <a href="#sequence">Sequence</a>
+  <a href="#flywheel">Flywheel</a>
+  <a href="#providence">Providence</a>
+  <a href="#naca-bridge">NACA Bridge</a>
+  <a href="#portal">Portal</a>
+  <a href="#work-immersion">Interns</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#sources">Sources</a>
+</nav>
+
+<!-- Hero -->
+<section class="section" id="hero">
+  <h1>RI Optimized Operations Plan</h1>
+  <p class="subtitle">Dual-Track Housing Pipeline</p>
+  <p class="tagline">"The old house funds the new one &mdash; and the Builder's Open House is how it flows."</p>
+  <p>A comprehensive operations plan integrating deconstruction, the Builder's Open House marketplace, and Rhode Island's affordable housing programs into a single closed-loop pipeline. BOH is the integration layer &mdash; the documented procurement channel that sits between decon supply and housing program demand.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <span class="number">7</span>
+      <span class="label">Property Channels</span>
+    </div>
+    <div class="stat-card">
+      <span class="number">5</span>
+      <span class="label">Target Municipalities</span>
+    </div>
+    <div class="stat-card">
+      <span class="number">$0</span>
+      <span class="label">Effective Land Cost (PRA)</span>
+    </div>
+    <div class="stat-card">
+      <span class="number">0</span>
+      <span class="label">Competitors</span>
+    </div>
+    <div class="stat-card">
+      <span class="number">$146K&ndash;$225K</span>
+      <span class="label">TDC per Unit (PRA lots)</span>
+    </div>
+    <div class="stat-card">
+      <span class="number">1,600 hrs</span>
+      <span class="label">Intern Labor at $5/hr</span>
+    </div>
+  </div>
+</section>
+
+<!-- BOH Integration -->
+<section class="section" id="boh-integration">
+  <h2>BOH as the Integration Layer</h2>
+  <p>The Builder's Open House isn't just a marketplace &mdash; it's the <strong>documented procurement channel</strong> that sits between decon (supply) and housing programs (demand). Every material gets an ML Material ID, grade, and provenance record. Government programs get traceable materials. BOH gets institutional volume that proves the model.</p>
+
+  <div class="flow">
+    <div class="flow-node highlight">
+      <div class="flow-title">DECON OPERATIONS</div>
+      <div class="flow-detail">Phase 1: Roof &bull; Phase 2: Walls &bull; Phase 3: Floor &bull; Phase 4: Foundation</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-label">ML Material IDs assigned &bull; Grade + provenance logged</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-node teal-highlight">
+      <div class="flow-title">BUILDER'S OPEN HOUSE</div>
+      <div class="flow-detail">mlsystemsri.store &bull; 10 zone-based categories &bull; Provenance tracking &bull; /program/housing-2030 portal</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-branch">
+      <div class="flow-node">
+        <div class="flow-title">EOH 2030 PROJECTS</div>
+        <div class="flow-detail">ML Systems = developer &bull; Grant-funded &bull; 5+ unit minimum &bull; April 10 deadline</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-title">NACA / LAND BANK PROJECTS</div>
+        <div class="flow-detail">ML Systems = contractor &bull; $1 lots (PRA) &bull; Land bank parcels &bull; NACA mortgage</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Why BOH Is the Integration Point</h3>
+  <ol class="insights">
+    <li><strong>Provenance documentation.</strong> Government programs want accountability. Every board, panel, and sheet that goes into a grant-funded or NACA-financed home has an ML Material ID traceable to the source property.</li>
+    <li><strong>The hidden route already exists.</strong> <code>/program/housing-2030</code> is built for exactly this &mdash; an institutional materials portal for state program negotiations.</li>
+    <li><strong>Dual demand signal.</strong> Internal projects (EOH) pull materials FROM BOH. External buyers (contractors, DIYers, Habitat) also buy from BOH. Both streams build volume and prove the model.</li>
+    <li><strong>Pricing transparency.</strong> BOH establishes market-rate pricing for recovered materials. When the grant pro forma shows "recovered lumber: $X," that price is documented in a live marketplace &mdash; not a guess.</li>
+    <li><strong>Attention engine.</strong> Every EOH/NACA project IS a Builder's Open House event. The decon produces materials. The materials go through BOH. The community sees it happen. The next buyer comes from the crowd.</li>
+  </ol>
+</section>
+
+<!-- Property Channels -->
+<section class="section" id="channels">
+  <h2>Property Acquisition Channels</h2>
+  <p>Seven verified pathways to acquire properties at minimal or zero cost across Rhode Island.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th>Operator</th>
+          <th>Mechanism</th>
+          <th>Status</th>
+          <th>ML Systems Path</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Providence Land Bank</strong></td>
+          <td>PRA (Providence Redevelopment Agency)</td>
+          <td>ARPA-funded ($8.5M), acquires tax-reverted/vacant properties, transfers to developers via RFP</td>
+          <td><span class="badge green">Active</span> Pre-approved plans + permitted lots</td>
+          <td>Apply as qualified developer via PRA RFP. Contact: Darcy Charleson, 401.680.8501</td>
+        </tr>
+        <tr>
+          <td><strong>RI Statewide Housing Land Bank</strong></td>
+          <td>RIHousing</td>
+          <td>New 2025 legislation. Acquires, holds, transfers properties for affordable housing</td>
+          <td><span class="badge green">Active</span> Rolling applications</td>
+          <td>Apply as developer or partner with non-profit. 90-day review. Up to 97% LTV loans</td>
+        </tr>
+        <tr>
+          <td><strong>NACA One-Dollar Program</strong></td>
+          <td>NACA (Boston HQ)</td>
+          <td>City-owned vacant properties sold for $1, NACA finances buyer</td>
+          <td><span class="badge">No RI office</span> Covers PVD-Warwick MSA</td>
+          <td>Contact NACA Boston to explore RI city partnership. May need to bring the city to NACA</td>
+        </tr>
+        <tr>
+          <td><strong>Community Housing Land Trust</strong></td>
+          <td>CHLT of RI (Pawtucket)</td>
+          <td>Statewide CLT, 100+ homes, ground leases, deed restrictions</td>
+          <td><span class="badge green">Active</span></td>
+          <td>Partner as developer/contractor. CHLT provides land trust structure, ML Systems builds</td>
+        </tr>
+        <tr>
+          <td><strong>Tax Sale / Lien</strong></td>
+          <td>Municipal tax collectors</td>
+          <td>RI Title 44 Ch. 9 &mdash; cities sell tax-delinquent properties</td>
+          <td><span class="badge green">Ongoing</span></td>
+          <td>Monitor tax sales in target municipalities</td>
+        </tr>
+        <tr>
+          <td><strong>Governor's Blight Program</strong></td>
+          <td>Governor's office</td>
+          <td>$5M to revitalize blighted/vacant properties statewide</td>
+          <td><span class="badge green">Active</span></td>
+          <td>Align with municipalities receiving blight funding</td>
+        </tr>
+        <tr>
+          <td><strong>Non-Utilization Tax</strong></td>
+          <td>Providence</td>
+          <td>Tax on vacant/abandoned property citywide (2018)</td>
+          <td><span class="badge green">Active</span></td>
+          <td>Owners under tax pressure may donate/sell cheap to avoid penalties</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Target Municipalities -->
+<section class="section" id="municipalities">
+  <h2>Target Municipalities &mdash; Ranked by Opportunity</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Municipality</th>
+          <th>Vacancy Rate</th>
+          <th>Pre-1939 Housing</th>
+          <th>Land Bank Access</th>
+          <th>Programs Active</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge">#1</span></td>
+          <td><strong>Providence</strong></td>
+          <td>11.31% (~7,950 vacant)</td>
+          <td>55.61%</td>
+          <td>PRA Land Bank ($8.5M) + Non-Utilization Tax</td>
+          <td>EOH, Land Bank, Blight, NACA (MSA)</td>
+        </tr>
+        <tr>
+          <td><span class="badge">#2</span></td>
+          <td><strong>Central Falls</strong></td>
+          <td>10.24% (~767 vacant)</td>
+          <td>High (densest city in RI)</td>
+          <td>Receivership program for nuisance properties</td>
+          <td>EOH, Receivership, Heavy dev activity</td>
+        </tr>
+        <tr>
+          <td><span class="badge">#3</span></td>
+          <td><strong>Woonsocket</strong></td>
+          <td>10.14% (~1,771 vacant)</td>
+          <td>High (mill city)</td>
+          <td>State Land Bank</td>
+          <td>EOH, State programs</td>
+        </tr>
+        <tr>
+          <td><span class="badge">#4</span></td>
+          <td><strong>Pawtucket</strong></td>
+          <td>6.9% (~2,141 vacant)</td>
+          <td>High (mill city)</td>
+          <td>CHLT of RI headquartered here</td>
+          <td>EOH, CHLT, State Land Bank</td>
+        </tr>
+        <tr>
+          <td><span class="badge">#5</span></td>
+          <td><strong>West Warwick</strong></td>
+          <td>5.0%</td>
+          <td>Moderate</td>
+          <td>State Land Bank</td>
+          <td>EOH</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>All five municipalities are below the 10% affordable housing threshold</strong>, making them eligible for EOH 2030 grants. Providence leads with the deepest infrastructure: $8.5M ARPA-funded land bank, Non-Utilization Tax creating seller pressure, and the largest inventory of pre-1939 housing (high salvage-value lumber).</p>
+  </div>
+</section>
+
+<!-- Financing Stack -->
+<section class="section" id="financing">
+  <h2>Financing Stack &mdash; What the Buyer Gets</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Program</th>
+          <th>Rate</th>
+          <th>Down Payment</th>
+          <th>Closing Costs</th>
+          <th>PMI</th>
+          <th>Terms</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>NACA Priority</strong></td>
+          <td>5.000% (15yr) / 5.375% (30yr)</td>
+          <td>$0</td>
+          <td>$0</td>
+          <td>$0</td>
+          <td>Below MSA median income</td>
+        </tr>
+        <tr>
+          <td><strong>NACA Non-Priority</strong></td>
+          <td>6.000% (15yr) / 6.375% (30yr)</td>
+          <td>$0</td>
+          <td>$0</td>
+          <td>$0</td>
+          <td>Above MSA median, buying in low-income area</td>
+        </tr>
+        <tr>
+          <td><strong>EOH 2030 Grant</strong></td>
+          <td>N/A (grant, not loan)</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>Up to $100K/unit subsidy to developer</td>
+        </tr>
+        <tr>
+          <td><strong>RIHousing Land Bank Loan</strong></td>
+          <td>LIBOR+3% (floor 4%, ceiling 7%)</td>
+          <td>Varies</td>
+          <td>Varies</td>
+          <td>Varies</td>
+          <td>12-month acquisition/pre-dev loans</td>
+        </tr>
+        <tr>
+          <td><strong>CHLT Ground Lease</strong></td>
+          <td>N/A (99-year lease, land stays in trust)</td>
+          <td>Varies</td>
+          <td>Varies</td>
+          <td>Varies</td>
+          <td>Buyer owns improvements, CHLT owns land</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>The financing stack without NACA:</strong> PRA lot ($0&ndash;$5K) + EOH grant ($25K&ndash;$40K) + RIHousing mortgage + decon materials via BOH = same outcome, different plumbing.</p>
+  </div>
+</section>
+
+<!-- Competitors -->
+<section class="section" id="competitors">
+  <h2>Competitor Landscape &mdash; Effectively Zero</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Entity</th>
+          <th>What They Do</th>
+          <th>Scale</th>
+          <th>Threat Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Casa Buena Builders</strong> (Providence)</td>
+          <td>Opportunistic deconstruction</td>
+          <td>Occasional, not systematic</td>
+          <td>None &mdash; potential subcontractor</td>
+        </tr>
+        <tr>
+          <td><strong>Providence Revolving Fund</strong></td>
+          <td>Small salvage room, by appointment</td>
+          <td>Tiny &mdash; preservation focus</td>
+          <td>None &mdash; potential partner</td>
+        </tr>
+        <tr>
+          <td><strong>Habitat ReStore</strong></td>
+          <td colspan="3"><span class="badge">No ReStore in Providence metro</span> &mdash; Gap = opportunity</td>
+        </tr>
+        <tr>
+          <td><strong>Deconstruction Ordinance</strong></td>
+          <td colspan="3"><span class="badge">None anywhere in RI</span> &mdash; Policy shaping opportunity</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>There is no dedicated commercial deconstruction operator in Rhode Island.</strong> No Habitat ReStore in the Providence metro. No deconstruction ordinance anywhere in the state. ML Systems enters an uncontested market with an integrated decon-to-build pipeline.</p>
+  </div>
+</section>
+
+<!-- Optimized Sequence -->
+<section class="section" id="sequence">
+  <h2>The Optimized Sequence</h2>
+
+  <!-- Phase A -->
+  <div class="phase-block">
+    <h3>Phase A: Pre-Revenue (NOW &rarr; Insurance Activation)</h3>
+    <p class="goal">Position for both pipelines while waiting for capital raise / insurance.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Action</th><th>Dependency</th><th>BOH Integration</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Register on eCivis/EUNA portal</strong> (housing.ri.gov)</td><td>None</td><td>&mdash;</td></tr>
+          <tr><td>2</td><td><strong>Contact PRA</strong> (Darcy Charleson, 401.680.8501) &mdash; request available lots list, understand RFP process</td><td>None</td><td>PRA lots = decon feedstock &rarr; BOH inventory</td></tr>
+          <tr><td>3</td><td><strong>Contact CHLT of RI</strong> (Melina Lodge, 401.721.5680 x104) &mdash; explore developer partnership</td><td>None</td><td>CHLT homes pull materials from BOH</td></tr>
+          <tr><td>4</td><td><strong>Submit inquiry to RIHousing Land Bank</strong> (rihousing.com/rfps-rfqs)</td><td>None</td><td>Land bank parcels = decon sites</td></tr>
+          <tr><td>5</td><td><strong>Contact NACA Boston office</strong> &mdash; explore Providence-Warwick MSA coverage, discuss city partnership model</td><td>None</td><td>NACA buyers = construction demand for BOH materials</td></tr>
+          <tr><td>6</td><td><strong>Map vacant properties</strong> across Providence, Central Falls, Woonsocket, Pawtucket using PRA database + tax records</td><td>None</td><td>Each vacant property = potential decon + BOH event</td></tr>
+          <tr><td>7</td><td><strong>Build EOH 2030 pro forma</strong> with BOH materials pricing as the documented cost basis</td><td>None</td><td>BOH pricing = pro forma line item evidence</td></tr>
+          <tr><td>8</td><td><strong>Draft EOH application narrative</strong> incorporating dual-track (EOH + land bank/NACA)</td><td>None</td><td>&mdash;</td></tr>
+          <tr><td>9</td><td><strong>Activate <code>/program/housing-2030</code> portal on BOH</strong> with institutional pricing tiers for program-qualified buyers</td><td>None</td><td>BOH becomes the procurement interface</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Phase B -->
+  <div class="phase-block">
+    <h3>Phase B: Activation (Insurance &rarr; GC Registration &rarr; First Decon)</h3>
+    <p class="goal">First decon produces materials that flow through BOH into the first program-funded build.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Action</th><th>Trigger</th><th>BOH Integration</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>10</td><td><strong>Purchase liability insurance</strong></td><td>Capital raise closes</td><td>&mdash;</td></tr>
+          <tr><td>11</td><td><strong>Activate GC registration</strong></td><td>Insurance in hand</td><td>&mdash;</td></tr>
+          <tr><td>12</td><td><strong>Submit EOH 2030 Round 1</strong> (April 10, 2026) or <strong>Round 2</strong> (late spring 2026)</td><td>GC registration active</td><td>Application references BOH as materials channel</td></tr>
+          <tr><td>13</td><td><strong>Acquire first PRA lot</strong> (via RFP) or <strong>first land bank parcel</strong></td><td>GC registration active</td><td>Existing structure on lot = decon feedstock</td></tr>
+          <tr><td>14</td><td><strong>First decon</strong> &mdash; full 4-phase (roof, walls, floor, foundation)</td><td>Lot acquired, crew ready</td><td><strong>Every material &rarr; BOH with ML Material ID</strong></td></tr>
+          <tr><td>15</td><td><strong>First Builder's Open House event</strong> at the decon site</td><td>During/after decon</td><td>Community sees materials, buys surplus, learns about program</td></tr>
+          <tr><td>16</td><td><strong>Internal material pull</strong> &mdash; BOH inventory goes into new build on same lot</td><td>EOH or NACA project starts</td><td><strong>BOH documents the transfer with provenance</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Phase C -->
+  <div class="phase-block">
+    <h3>Phase C: Dual-Track Operations (Ongoing)</h3>
+    <p class="goal">Both pipelines running, BOH as the hub, materials flowing in both directions.</p>
+
+    <div class="month-timeline">
+      <div class="month-entry">
+        <div class="month-label">Month 1&ndash;2: Decon House A (PRA lot, Providence)</div>
+        <div class="month-detail">Materials &rarr; BOH inventory (ML Material IDs, graded, photographed)<br>BOH event at site (community engagement, surplus sales)<br>Structural lumber, sheathing, hardware reserved for House A rebuild</div>
+      </div>
+      <div class="month-entry">
+        <div class="month-label">Month 2&ndash;4: Build House A (factory module + decon site work)</div>
+        <div class="month-detail">Factory module arrives<br>Foundation: RCA base + hybrid panel reuse (from House A decon)<br>Framing supplements: recovered joists, studs from BOH<br>BOH documents every material transfer (provenance &rarr; pro forma)</div>
+      </div>
+      <div class="month-entry">
+        <div class="month-label">Month 3&ndash;4: Decon House B (CHLT parcel, Pawtucket)</div>
+        <div class="month-detail">Materials &rarr; BOH inventory<br>BOH event at site<br>Surplus from House A + new materials from House B = growing inventory</div>
+      </div>
+      <div class="month-entry">
+        <div class="month-label">Month 4&ndash;6: Build House B + Decon House C</div>
+        <div class="month-detail">Parallel operations: build crew on B, decon crew on C<br>BOH inventory accumulates &mdash; external buyers start purchasing<br>NACA buyer for House A closes (NACA mortgage, materials from BOH documented)</div>
+      </div>
+      <div class="month-entry">
+        <div class="month-label">Month 6+: Pipeline Steady State</div>
+        <div class="month-detail">1 decon + 1 build per month<br>BOH inventory = 3&ndash;6 months of accumulated materials<br>External sales growing (contractors, DIYers, Habitat)<br>Winter: shingle grinding arm activates (same crew, same site)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOH Demand Flywheel -->
+<section class="section" id="flywheel">
+  <h2>The BOH Demand Flywheel</h2>
+  <p>The housing programs don't just use BOH &mdash; they <strong>create the demand that makes BOH work.</strong></p>
+
+  <div class="flow">
+    <div class="flow-node highlight">
+      <div class="flow-title">DECON PRODUCES MATERIALS</div>
+      <div class="flow-detail">4-phase reverse engineering &bull; ML Material IDs &bull; Graded &bull; Photographed</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-node teal-highlight">
+      <div class="flow-title">BOH INVENTORY (Growing)</div>
+      <div class="flow-detail">mlsystemsri.store &bull; 10 categories &bull; Provenance tracked</div>
+    </div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-branch">
+      <div class="flow-node">
+        <div class="flow-title">INTERNAL USE</div>
+        <div class="flow-detail">EOH projects &bull; NACA projects &bull; Land bank builds<br><strong>(guaranteed demand)</strong></div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-title">EXTERNAL SALES</div>
+        <div class="flow-detail">Contractors &bull; DIYers &bull; Habitat RI &bull; Other programs<br><strong>(grows with awareness)</strong></div>
+      </div>
+    </div>
+    <div class="flow-converge">Both generate: community visibility, price data, provenance records, referrals</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-node highlight">
+      <div class="flow-title">MORE DECON DEMAND</div>
+      <div class="flow-detail">The flywheel spins &mdash; programs bootstrap the marketplace</div>
+    </div>
+  </div>
+
+  <h3>Key Insights</h3>
+  <div class="callout">
+    <p>You don't need to wait for BOH to grow organically. The housing programs ARE the initial demand. Every EOH/NACA/land bank project pulls materials from BOH. That volume:</p>
+  </div>
+  <ol class="insights">
+    <li><strong>Proves the pricing model</strong> &mdash; real transactions at documented prices</li>
+    <li><strong>Builds the inventory</strong> &mdash; surplus from each decon accumulates</li>
+    <li><strong>Creates community visibility</strong> &mdash; each BOH event is marketing</li>
+    <li><strong>Generates referrals</strong> &mdash; every buyer who saves money tells others</li>
+    <li><strong>Attracts external buyers</strong> &mdash; contractors see the prices, come for more</li>
+  </ol>
+  <div class="callout green">
+    <p><strong>The programs bootstrap the marketplace. The marketplace then grows beyond the programs.</strong></p>
+  </div>
+</section>
+
+<!-- Providence Deep Dive -->
+<section class="section" id="providence">
+  <h2>Providence Deep Dive &mdash; The #1 Target</h2>
+
+  <h3>Why Providence First</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Factor</th><th>Data</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Vacant units</td><td><strong>~7,950</strong> (11.31% vacancy rate)</td></tr>
+        <tr><td>Pre-1939 housing</td><td><strong>55.61%</strong> &mdash; high salvage value lumber (old growth, larger dimensions)</td></tr>
+        <tr><td>PRA Land Bank</td><td><strong>$8.5M ARPA</strong> funded, pre-approved home plans, fully permitted lots</td></tr>
+        <tr><td>Non-Utilization Tax</td><td>Financial pressure on vacant property owners since 2018</td></tr>
+        <tr><td>Population</td><td>~190,000 &mdash; largest RI city, most program-eligible buyers</td></tr>
+        <tr><td>Median household income</td><td><strong>$68,119</strong> &mdash; well below MSA median (~$110K) = NACA priority eligible</td></tr>
+        <tr><td>Decon competitors</td><td><strong>Zero</strong> dedicated commercial operators</td></tr>
+        <tr><td>CLT access</td><td>ONE Neighborhood Builders, SWAP &mdash; both active in Providence</td></tr>
+        <tr><td>Developer ecosystem</td><td>Active but no one doing decon-to-build</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>First 5 Properties &mdash; EOH 2030 Scattered-Site Application</h3>
+  <p>Target: 5 PRA land bank lots with existing structures in neighborhoods below 10% affordable threshold.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Property</th><th>Source</th><th>Decon</th><th>Build</th><th>BOH Flow</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Lot 1</strong></td>
+          <td>PRA land bank (RFP)</td>
+          <td>Full 4-phase &rarr; BOH</td>
+          <td>Factory module on decon foundation</td>
+          <td>Materials documented, surplus sold at open house</td>
+        </tr>
+        <tr>
+          <td><strong>Lot 2</strong></td>
+          <td>PRA land bank (RFP)</td>
+          <td>Full 4-phase &rarr; BOH</td>
+          <td>Factory module, pulls lumber from Lot 1 surplus</td>
+          <td>Cross-project material reuse via BOH</td>
+        </tr>
+        <tr>
+          <td><strong>Lot 3</strong></td>
+          <td>Tax sale acquisition</td>
+          <td>Full 4-phase &rarr; BOH</td>
+          <td>Stick-built with recovered framing</td>
+          <td>External buyers start coming to BOH for Lot 1&ndash;2 surplus</td>
+        </tr>
+        <tr>
+          <td><strong>Lot 4</strong></td>
+          <td>CHLT ground lease</td>
+          <td>Full 4-phase &rarr; BOH</td>
+          <td>Factory module</td>
+          <td>CHLT monitors deed restriction, ML Systems builds</td>
+        </tr>
+        <tr>
+          <td><strong>Lot 5</strong></td>
+          <td>Non-utilization tax pressure (owner donation)</td>
+          <td>Full 4-phase &rarr; BOH</td>
+          <td>Factory module</td>
+          <td>BOH inventory now has 5 houses of materials in system</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>EOH Grant Application Math (5 units, Providence scattered-site)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Line Item</th><th>Per Unit</th><th>5 Units</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Land (PRA lots &mdash; minimal or $0)</td><td>$0&ndash;$5,000</td><td>$0&ndash;$25,000</td></tr>
+        <tr><td>Decon (self-performed)</td><td>$0</td><td>$0</td></tr>
+        <tr><td>Factory module</td><td>$100K&ndash;$150K</td><td>$500K&ndash;$750K</td></tr>
+        <tr><td>Site work (decon materials via BOH)</td><td>$21K&ndash;$35K</td><td>$105K&ndash;$175K</td></tr>
+        <tr><td>Soft costs</td><td>$25K&ndash;$35K</td><td>$125K&ndash;$175K</td></tr>
+        <tr><td style="color: var(--orange); font-weight: 700;">TDC</td><td style="color: var(--orange); font-weight: 700;">$146K&ndash;$225K</td><td style="color: var(--orange); font-weight: 700;">$730K&ndash;$1,125K</td></tr>
+        <tr><td>Grant ask ($25K&ndash;$40K/unit = 9&ndash;12 pts)</td><td>$25K&ndash;$40K</td><td>$125K&ndash;$200K</td></tr>
+        <tr><td>Sale price</td><td>$300K&ndash;$350K</td><td>$1,500K&ndash;$1,750K</td></tr>
+        <tr><td style="color: var(--green); font-weight: 700;">Developer profit/unit</td><td style="color: var(--green); font-weight: 700;">$60K&ndash;$165K</td><td style="color: var(--green); font-weight: 700;">$300K&ndash;$825K</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>With PRA $0 lots + decon materials, TDC drops to $146K&ndash;$225K.</strong> That's firmly in the &lt;$350K tier = <strong>12 points on Category 3.</strong> Grant ask of $25K&ndash;$40K/unit = <strong>9&ndash;12 points on Category 4.</strong> Combined: <strong>21&ndash;24 points</strong> on the two biggest scoring categories.</p>
+  </div>
+</section>
+
+<!-- NACA Bridge -->
+<section class="section" id="naca-bridge">
+  <h2>The NACA Bridge &mdash; Getting RI into the Program</h2>
+  <p>NACA doesn't have an RI office, but the model is replicable. Three paths forward:</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>Path 1: Bring NACA to RI</h4>
+      <ul>
+        <li>Contact NACA Boston (headquarters)</li>
+        <li>Propose Providence as new city partnership</li>
+        <li>Providence has the vacancy (~7,950), the land bank ($8.5M), and the political will</li>
+        <li>ML Systems = construction partner (decon + build + BOH)</li>
+        <li>NACA provides mortgage ($0 down, 5.375%)</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4>Path 2: Replicate Without NACA</h4>
+      <ul>
+        <li>PRA land bank already provides lots at minimal cost</li>
+        <li>RIHousing provides below-market mortgages</li>
+        <li>CHLT provides 99-year ground leases</li>
+        <li>EOH grant covers the gap</li>
+        <li>Same outcome, different plumbing</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4>Path 3: Boston/MA Expansion (Future)</h4>
+      <ul>
+        <li>NACA Boston is the headquarters &mdash; strongest city partnership</li>
+        <li>MA Gateway Cities: Fall River, New Bedford</li>
+        <li>New Bedford "Neighborhoods First Initiative" &mdash; lottery for first-time buyers</li>
+        <li>Same decon ops, same BOH channel, different state</li>
+        <li>Trigger: After 5 RI projects prove the model</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Pitch to NACA:</strong> "We provide the properties (PRA land bank), the construction (decon + factory module at $146K&ndash;$225K TDC), and the community engagement (Builder's Open House). You provide the mortgage ($0 down, 5.375%). Together we produce homes that a 25&ndash;50% AMI family can actually afford."</p>
+  </div>
+</section>
+
+<!-- Portal Enhancement -->
+<section class="section" id="portal">
+  <h2>/program/housing-2030 Portal Enhancement</h2>
+  <p>The hidden BOH route needs to become the institutional procurement interface.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>Current State</h4>
+      <ul>
+        <li>Unlisted route, direct URL only</li>
+        <li>Materials portal for state program negotiations</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4>Proposed Enhancement</h4>
+      <ul>
+        <li><strong>Tiered pricing:</strong> Program-qualified buyers get cost + 10% vs retail cost + 40&ndash;60%</li>
+        <li><strong>Provenance view:</strong> ML Material ID, source property, decon date, grade, photos</li>
+        <li><strong>Program tagging:</strong> Materials tagged to EOH, NACA, land bank for pro forma docs</li>
+        <li><strong>Bulk ordering:</strong> Project-level material packages (e.g., "Foundation Package")</li>
+        <li><strong>Export:</strong> CSV/PDF for grant application pro formas with provenance</li>
+        <li><strong>Access:</strong> Program administrators get login, can browse/reserve materials</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Work Immersion -->
+<section class="section" id="work-immersion">
+  <h2>Work Immersion Program Integration</h2>
+  <p>RI's Work Immersion Program (75% wage reimbursement, $5/hr effective cost) amplifies every phase:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Role</th><th>Rate</th><th>Reimbursement</th><th>Net Cost</th><th>Where They Work</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Decon laborer</strong> (intern)</td>
+          <td>$20/hr</td>
+          <td>75% ($15/hr)</td>
+          <td style="color: var(--green); font-weight: 700;">$5/hr</td>
+          <td>Decon sites, material sorting</td>
+        </tr>
+        <tr>
+          <td><strong>BOH inventory clerk</strong> (intern)</td>
+          <td>$20/hr</td>
+          <td>75% ($15/hr)</td>
+          <td style="color: var(--green); font-weight: 700;">$5/hr</td>
+          <td>BOH &mdash; photographing, grading, listing materials</td>
+        </tr>
+        <tr>
+          <td><strong>Construction helper</strong> (intern)</td>
+          <td>$20/hr</td>
+          <td>75% ($15/hr)</td>
+          <td style="color: var(--green); font-weight: 700;">$5/hr</td>
+          <td>Build sites, factory module set</td>
+        </tr>
+        <tr>
+          <td><strong>Data entry / ontology</strong> (intern)</td>
+          <td>$20/hr</td>
+          <td>75% ($15/hr)</td>
+          <td style="color: var(--green); font-weight: 700;">$5/hr</td>
+          <td>ML Material ID assignment, provenance logging</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <p><strong>4 interns x 400 hrs each = 1,600 hrs/year at $5/hr effective = $8,000 total labor cost.</strong> These interns run the BOH inventory pipeline &mdash; they photograph materials, assign ML Material IDs, update listings, and learn the trade.</p>
+  </div>
+</section>
+
+<!-- Timeline -->
+<section class="section" id="timeline">
+  <h2>Timeline &mdash; Optimized Sequence</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>When</th><th>What</th><th>Pipeline</th><th>BOH Role</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge">NOW</span></td>
+          <td>Contact PRA, CHLT, RIHousing Land Bank, NACA Boston</td>
+          <td>Setup</td>
+          <td>Activate <code>/program/housing-2030</code> portal</td>
+        </tr>
+        <tr>
+          <td><span class="badge">NOW</span></td>
+          <td>Build EOH pro forma with BOH pricing</td>
+          <td>EOH</td>
+          <td>BOH pricing = pro forma evidence</td>
+        </tr>
+        <tr>
+          <td><span class="badge">NOW</span></td>
+          <td>Map vacant properties across 5 target municipalities</td>
+          <td>Both</td>
+          <td>Each property = potential decon &rarr; BOH event</td>
+        </tr>
+        <tr>
+          <td><span class="badge">NOW</span></td>
+          <td>Register on eCivis, apply for Work Immersion Program</td>
+          <td>Both</td>
+          <td>Interns will staff BOH inventory</td>
+        </tr>
+        <tr>
+          <td><span class="badge">On insurance</span></td>
+          <td>Activate GC registration</td>
+          <td>Both</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><span class="badge">April 10</span></td>
+          <td>Submit EOH Round 1 (or Round 2 late spring)</td>
+          <td>EOH</td>
+          <td>Application references BOH as materials channel</td>
+        </tr>
+        <tr>
+          <td><span class="badge">Post-registration</span></td>
+          <td>Acquire first PRA lot</td>
+          <td>EOH/NACA</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><span class="badge">Month 1</span></td>
+          <td>First decon &rarr; materials &rarr; BOH</td>
+          <td>Both</td>
+          <td><strong>First BOH inventory from institutional project</strong></td>
+        </tr>
+        <tr>
+          <td><span class="badge">Month 1</span></td>
+          <td>First Builder's Open House event</td>
+          <td>Both</td>
+          <td>Community engagement, surplus sales</td>
+        </tr>
+        <tr>
+          <td><span class="badge">Month 2&ndash;4</span></td>
+          <td>First build (factory module on decon foundation)</td>
+          <td>EOH</td>
+          <td>BOH documents material transfers</td>
+        </tr>
+        <tr>
+          <td><span class="badge">Month 3+</span></td>
+          <td>Decon #2 &rarr; BOH &rarr; Build #2</td>
+          <td>Both</td>
+          <td>Flywheel starts</td>
+        </tr>
+        <tr>
+          <td><span class="badge">Month 6</span></td>
+          <td>3&ndash;5 projects in pipeline, BOH inventory growing</td>
+          <td>Both</td>
+          <td>External buyers arriving</td>
+        </tr>
+        <tr>
+          <td><span class="badge">Winter</span></td>
+          <td>Shingle grinding arm activates</td>
+          <td>Revenue</td>
+          <td>Same crew, same site</td>
+        </tr>
+        <tr>
+          <td><span class="badge green">Year 1 end</span></td>
+          <td><strong>5&ndash;10 homes, BOH proven, model documented</strong></td>
+          <td>Both</td>
+          <td>Ready for NACA pitch / MA expansion</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Sources -->
+<section class="section" id="sources">
+  <h2>Sources</h2>
+
+  <h3>RI Programs (Verified Active)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Program</th><th>Contact / URL</th></tr></thead>
+      <tbody>
+        <tr><td>Providence Redevelopment Agency (PRA) Land Bank</td><td>$8.5M ARPA &mdash; Darcy Charleson, 401.680.8501</td></tr>
+        <tr><td>RI Statewide Housing Land Bank</td><td>RIHousing &mdash; rihousing.com/rfps-rfqs, rolling applications</td></tr>
+        <tr><td>Community Housing Land Trust of RI</td><td>Melina Lodge, 401.721.5680 x104, Pawtucket</td></tr>
+        <tr><td>NACA</td><td>naca.com &mdash; Boston HQ, PVD-Warwick MSA eligible, 5.375% (30yr priority)</td></tr>
+        <tr><td>EOH 2030</td><td>housing.ri.gov &mdash; $20M ($10M Round 1), April 10, 2026</td></tr>
+        <tr><td>Work Immersion Program</td><td>GWB/DLT &mdash; 75% wage reimbursement, &sect;42-102-11</td></tr>
+        <tr><td>Governor's Blight Program</td><td>$5M statewide</td></tr>
+        <tr><td>Providence Non-Utilization Tax</td><td>Active since 2018</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>RI Market Data</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Municipality</th><th>Data</th></tr></thead>
+      <tbody>
+        <tr><td>Providence vacancy</td><td>11.31% (~7,950 units), 55.61% pre-1939</td></tr>
+        <tr><td>Central Falls vacancy</td><td>10.24% (~767 units)</td></tr>
+        <tr><td>Woonsocket vacancy</td><td>10.14% (~1,771 units)</td></tr>
+        <tr><td>Pawtucket vacancy</td><td>6.9% (~2,141 units)</td></tr>
+        <tr><td>Decon competitors</td><td>Effectively zero (Casa Buena occasional, PRF salvage room only)</td></tr>
+        <tr><td>Providence median household income</td><td>$68,119</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Cross-References</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Document</th><th>Topic</th></tr></thead>
+      <tbody>
+        <tr><td><code>research/housing-2030-grant.md</code></td><td>EOH grant strategy (70-pt rubric, factory-built pricing)</td></tr>
+        <tr><td><code>research/processed/naca-one-dollar-program.md</code></td><td>NACA program analysis</td></tr>
+        <tr><td><code>research/master-pitch.md</code></td><td>Master pitch (updated with NACA)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p><strong style="color: var(--orange);">ML Systems</strong> &mdash; Deconstruction Lab</p>
+  <p style="margin-top: 0.5rem;">
+    <a href="ri-optimized-plan.md">Markdown Source</a> &nbsp;&bull;&nbsp;
+    <a href="../../research/master-pitch.md">Master Pitch</a> &nbsp;&bull;&nbsp;
+    <a href="naca-one-dollar-program.html">NACA Analysis</a>
+  </p>
+  <p style="margin-top: 0.5rem;">Processed 2026-03-16 &nbsp;&bull;&nbsp; Lucent Lens</p>
+</footer>
+
+<!-- Scroll Animation -->
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // Nav active state
+  const sections = document.querySelectorAll('.section[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+
+</body>
+</html>

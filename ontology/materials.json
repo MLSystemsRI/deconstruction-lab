@@ -1,0 +1,111 @@
+{
+  "description": "Material taxonomy for residential deconstruction. Maps recovered materials to BOH zones, recovery rates, resale values, and downstream channels. Per 2,500 SF single-story home baseline.",
+  "categories": [
+    {
+      "bohZone": 1,
+      "name": "Kitchen & Appliances",
+      "discountRange": "50%",
+      "materials": [
+        { "id": "cabinets_upper", "name": "Upper Cabinets", "unit": "set", "recoveryRate": "70–90%", "resaleValue": "$100–500", "condition": "Keep upright, hardware attached", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "cabinets_lower", "name": "Lower/Base Cabinets", "unit": "set", "recoveryRate": "70–90%", "resaleValue": "$100–500", "condition": "Keep upright, disconnect plumbing first", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "countertops", "name": "Countertops", "unit": "each", "recoveryRate": "60–80%", "resaleValue": "$100–500", "condition": "Granite/stone requires 2+ people, laminate lower value", "channel": ["boh", "marketplace"] },
+        { "id": "appliances", "name": "Appliances", "unit": "each", "recoveryRate": "80–95%", "resaleValue": "$50–300/unit", "condition": "Working preferred, cosmetic damage OK", "channel": ["boh", "marketplace", "appliance_dealers"] }
+      ]
+    },
+    {
+      "bohZone": 2,
+      "name": "Lumber Yard",
+      "discountRange": "50%",
+      "materials": [
+        { "id": "studs", "name": "Wall Studs (2x4, 2x6)", "unit": "piece", "qty": "~200/home", "recoveryRate": "85–95%", "resaleValue": "$1–2.50/ea", "totalValue": "$200–500", "condition": "Denailed, stacked by dimension", "channel": ["boh", "marketplace"] },
+        { "id": "rafters", "name": "Rafters", "unit": "piece", "qty": "28–43/home", "recoveryRate": "80–95%", "resaleValue": "$7–15/ea", "totalValue": "$280–645", "condition": "Denailed, stacked", "channel": ["boh", "marketplace"] },
+        { "id": "joists", "name": "Floor Joists (2x10, 2x12)", "unit": "piece", "qty": "42–57/home", "recoveryRate": "85–95%", "resaleValue": "$8–20/ea", "totalValue": "$340–1140", "condition": "Premium lumber — denailed, graded, stacked by dimension", "channel": ["boh", "marketplace", "contractors"] },
+        { "id": "headers_beams", "name": "Headers, Beams & Posts", "unit": "piece", "recoveryRate": "80–90%", "resaleValue": "$200–600/home", "condition": "Heavy — team lift, stack separately", "channel": ["boh", "marketplace", "contractors"] },
+        { "id": "plates", "name": "Top/Bottom Plates", "unit": "piece", "recoveryRate": "80–90%", "resaleValue": "included in studs", "condition": "Denailed, bundled", "channel": ["boh"] },
+        { "id": "bridging", "name": "Bridging & Blocking", "unit": "piece", "recoveryRate": "80%+", "resaleValue": "minimal", "condition": "Short pieces, bundle by size", "channel": ["boh"] }
+      ]
+    },
+    {
+      "bohZone": 3,
+      "name": "Doors, Windows & Trim",
+      "discountRange": "50–60%",
+      "materials": [
+        { "id": "doors_interior", "name": "Interior Doors", "unit": "each", "recoveryRate": "85–95%", "resaleValue": "$10–50/door", "condition": "Hardware attached, lean on A-frames", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "doors_exterior", "name": "Exterior Doors", "unit": "each", "recoveryRate": "70–90%", "resaleValue": "$50–200/door", "condition": "Weatherstrip intact, hardware attached", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "windows", "name": "Windows", "unit": "each", "recoveryRate": "60–80%", "resaleValue": "$20–100/window", "condition": "Frame intact, glass unbroken, pull from inside before wall lift", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "trim_baseboard", "name": "Baseboards", "unit": "lf", "recoveryRate": "60–80%", "resaleValue": "$0.50–2/lf", "condition": "Pry carefully to preserve profile", "channel": ["boh", "marketplace"] },
+        { "id": "trim_crown", "name": "Crown Molding", "unit": "lf", "recoveryRate": "50–70%", "resaleValue": "$1–4/lf", "condition": "Fragile — careful pry, denail immediately", "channel": ["boh", "marketplace"] },
+        { "id": "trim_casing", "name": "Door/Window Casing", "unit": "lf", "recoveryRate": "60–80%", "resaleValue": "$0.50–2/lf", "condition": "Bundle by profile type", "channel": ["boh", "marketplace"] }
+      ]
+    },
+    {
+      "bohZone": 4,
+      "name": "Sheathing & Drywall",
+      "discountRange": "40–60%",
+      "materials": [
+        { "id": "sheathing_roof", "name": "Roof Sheathing (OSB/Plywood)", "unit": "sheet", "qty": "20–31/home", "recoveryRate": "40–70%", "resaleValue": "$15–20/sheet", "totalValue": "$300–620", "condition": "Flush-cut ring-shank nails — extraction damages sheet", "channel": ["boh", "marketplace"] },
+        { "id": "sheathing_wall", "name": "Wall Sheathing", "unit": "sheet", "recoveryRate": "40–70%", "resaleValue": "$15–20/sheet", "condition": "Same flush-cut technique", "channel": ["boh", "marketplace"] },
+        { "id": "subfloor", "name": "Subfloor Sheets", "unit": "sheet", "recoveryRate": "50–70%", "resaleValue": "$15–20/sheet", "condition": "Flush-cut nails, check for water damage", "channel": ["boh", "marketplace"] },
+        { "id": "drywall_intact", "name": "Drywall (Intact Sheets)", "unit": "sheet", "qty": "66–128/home", "recoveryRate": "40–70%", "resaleValue": "$3–8/sheet", "totalValue": "$200–770", "condition": "Nail holes OK, no cracks or water damage", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "drywall_damaged", "name": "Drywall (Damaged → Powder)", "unit": "ton", "qty": "1.5–3 tons/home", "recoveryRate": "100%", "resaleValue": "$450–1500/ton", "condition": "Grind to powder, bag for garden centers. Need grinder ($15–20K) at 3+ homes/year.", "channel": ["garden_centers", "composting_facilities"], "scaleThreshold": "3 homes/year" }
+      ]
+    },
+    {
+      "bohZone": 5,
+      "name": "Flooring & Fixtures",
+      "discountRange": "60%",
+      "materials": [
+        { "id": "hardwood_flooring", "name": "Hardwood Flooring", "unit": "sf", "qty": "560–720 sf/home", "recoveryRate": "60–80%", "resaleValue": "$3–8/sf", "totalValue": "$1700–4300", "condition": "Pull BEFORE crane touches floors. Denail, bundle by length. Premium item.", "channel": ["boh", "marketplace", "flooring_dealers"] },
+        { "id": "fixtures_bath", "name": "Bathroom Fixtures (Sinks, Toilets, Tubs)", "unit": "each", "recoveryRate": "80–95%", "resaleValue": "$20–100/ea", "condition": "Disconnect plumbing, cap lines", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "fixtures_light", "name": "Light Fixtures & Ceiling Fans", "unit": "each", "recoveryRate": "80–95%", "resaleValue": "$5–50/ea", "condition": "Complete with mounting hardware", "channel": ["boh", "habitat_restore", "marketplace"] },
+        { "id": "water_heater", "name": "Water Heater", "unit": "each", "recoveryRate": "70–90%", "resaleValue": "$50–150", "condition": "Age matters — newer units resale, older units scrap", "channel": ["boh", "marketplace", "scrap"] }
+      ]
+    },
+    {
+      "bohZone": 6,
+      "name": "Hardware & Metals",
+      "discountRange": "50%",
+      "materials": [
+        { "id": "copper_wire", "name": "Copper Wire", "unit": "lb", "recoveryRate": "95%", "resaleValue": "$2–3/lb", "condition": "Strip insulation for higher scrap value", "channel": ["scrap_dealers"] },
+        { "id": "copper_pipe", "name": "Copper Pipe", "unit": "lb", "recoveryRate": "90%", "resaleValue": "$2–4/lb", "condition": "Cut at accessible points, bundle", "channel": ["scrap_dealers"] },
+        { "id": "hardware_structural", "name": "Joist Hangers, Hurricane Ties, Straps", "unit": "piece", "qty": "40–60/home", "recoveryRate": "90%", "resaleValue": "$20–30/home", "condition": "Sort by type into bins", "channel": ["boh"] },
+        { "id": "hardware_shearwall", "name": "Holddowns & Shear Hardware", "unit": "piece", "recoveryRate": "90%+", "resaleValue": "$50–150/home", "condition": "High-value steel connectors", "channel": ["boh", "contractors"] },
+        { "id": "rebar", "name": "Rebar", "unit": "ton", "qty": "2–4 tons/home", "recoveryRate": "90%+", "resaleValue": "$200–250/ton", "totalValue": "$600–750", "condition": "Cut, straighten, bundle", "channel": ["scrap_dealers"] },
+        { "id": "breaker_panel", "name": "Breaker Panels & Breakers", "unit": "each", "recoveryRate": "70–90%", "resaleValue": "$20–100", "condition": "Age and brand matter — Square D, Siemens hold value", "channel": ["boh", "marketplace", "electrical_supply"] }
+      ]
+    },
+    {
+      "bohZone": 7,
+      "name": "Concrete",
+      "discountRange": "30–50%",
+      "materials": [
+        { "id": "wall_panels", "name": "Foundation Wall Panels (4x8)", "unit": "each", "qty": "varies", "recoveryRate": "60–80%", "resaleValue": "$2000–6000/home", "condition": "Saw-cut, core-drilled, crane-lifted. Lean in rows.", "channel": ["landscape_yards", "retaining_wall_contractors", "boh"] },
+        { "id": "slab_sections", "name": "Slab Sections (4x6)", "unit": "each", "recoveryRate": "70–90%", "resaleValue": "$8–12/ton", "condition": "Patios, walkways, urbanite projects", "channel": ["landscape_yards", "boh"] },
+        { "id": "rca", "name": "Recycled Concrete Aggregate (RCA)", "unit": "ton", "qty": "45–80% of foundation", "recoveryRate": "on-site reuse", "resaleValue": "$0 (on-site) / $8–12/ton (excess)", "condition": "RIDOT 703.09 compliant for base course, fill, roads, drains", "channel": ["on_site", "landscape_yards"] }
+      ]
+    },
+    {
+      "bohZone": 8,
+      "name": "Roofing, Siding & Insulation",
+      "discountRange": "low value — move to next channel",
+      "materials": [
+        { "id": "shingles", "name": "Asphalt Shingles", "unit": "ton", "qty": "1.5–2.25 tons/home", "recoveryRate": "100%", "resaleValue": "$53–79/ton (RAS) or $200–400 on-site reuse", "condition": "On-site: temp roads, equipment pads, dust control. Future: grind to RAS for HMA plants.", "channel": ["on_site_reuse", "roofer_diversion", "hma_plants"], "scaleNote": "RI has ZERO shingle recyclers. 45K–50K tons/year to landfill. Market creation opportunity." },
+        { "id": "siding_vinyl", "name": "Vinyl Siding", "unit": "sf", "recoveryRate": "50–70%", "resaleValue": "minimal", "condition": "Zip tool removal, bundle by color", "channel": ["boh", "habitat_restore"] },
+        { "id": "siding_wood", "name": "Wood Siding / Cedar Shingles", "unit": "sf", "recoveryRate": "40–60%", "resaleValue": "$1–3/sf", "condition": "Higher value than vinyl — careful removal", "channel": ["boh", "marketplace"] },
+        { "id": "underlayment", "name": "Roofing Underlayment", "unit": "roll", "recoveryRate": "60%", "resaleValue": "$40–60/home", "condition": "Roll intact sections", "channel": ["boh"] },
+        { "id": "insulation_fiberglass", "name": "Fiberglass Batt Insulation", "unit": "bag", "recoveryRate": "60–80%", "resaleValue": "minimal — free/cheap", "condition": "Bag in contractor bags, full PPE for handling", "channel": ["boh", "habitat_restore"] },
+        { "id": "housewrap", "name": "Housewrap / Weather Barrier", "unit": "roll", "recoveryRate": "40–60%", "resaleValue": "minimal", "condition": "Roll intact sections if possible", "channel": ["boh"] }
+      ]
+    }
+  ],
+  "totalRecoveryPerHome": {
+    "low": "$7850",
+    "high": "$20400+",
+    "note": "Single BOH open-house day revenue. Remainder flows to Habitat ReStore, Facebook Marketplace, landscape yards, scrap dealers."
+  },
+  "swingVsConventional": {
+    "low": "$32000",
+    "high": "$91000",
+    "note": "Avoids dumpster, landfill tipping, and new material purchases — plus captures resale value."
+  }
+}

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NACA One-Dollar Program — ML Systems Analysis</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0A0A0A;
+  --surface: #141414;
+  --surface2: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #E5E5E5;
+  --text-dim: #999;
+  --orange: #F97316;
+  --orange-dim: rgba(249,115,22,0.15);
+  --orange-glow: rgba(249,115,22,0.4);
+  --green: #22C55E;
+  --green-dim: rgba(34,197,94,0.15);
+  --blue: #60A5FA;
+  --teal: #14B8A6;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+nav .logo { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+nav .logo span { color: var(--orange); }
+nav .nav-links { display: flex; gap: 1.5rem; }
+nav .nav-links a {
+  color: var(--text-dim); text-decoration: none; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s;
+}
+nav .nav-links a:hover { color: var(--orange); }
+
+section {
+  padding: 7rem 2rem 4rem;
+  max-width: 1100px; margin: 0 auto;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+section.visible { opacity: 1; transform: translateY(0); }
+
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--orange); }
+h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+p { max-width: 720px; margin-bottom: 1rem; color: var(--text-dim); }
+
+#hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+#hero h1 span { display: block; color: var(--orange); }
+.subtitle { font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2rem; max-width: 600px; }
+.badge {
+  display: inline-block; background: var(--orange-dim); color: var(--orange);
+  padding: 0.3rem 0.9rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  margin-bottom: 1.5rem; border: 1px solid rgba(249,115,22,0.3);
+}
+
+/* DOLLAR HERO */
+.dollar-hero {
+  display: flex; align-items: center; gap: 2rem; margin: 2.5rem 0; flex-wrap: wrap;
+}
+.dollar-sign {
+  font-size: 6rem; font-weight: 900; color: var(--green);
+  text-shadow: 0 0 40px rgba(34,197,94,0.3);
+  line-height: 1;
+}
+.dollar-details { flex: 1; min-width: 250px; }
+.dollar-details .big-num { font-size: 2rem; font-weight: 800; color: var(--text); }
+.dollar-details .big-label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+
+/* STAT GRID */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem; margin: 2rem 0;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.stat-card:hover { border-color: rgba(249,115,22,0.4); transform: translateY(-2px); }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--orange); }
+.stat-card .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.25rem; }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.blue .stat-value { color: var(--blue); }
+.stat-card.teal .stat-value { color: var(--teal); }
+
+/* TABLES */
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { padding: 0.65rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; background: var(--surface); }
+td { color: var(--text); }
+tr:hover td { background: var(--orange-dim); }
+td.highlight { color: var(--orange); font-weight: 700; }
+td.green { color: var(--green); font-weight: 700; }
+
+/* CALLOUT */
+.callout {
+  background: var(--orange-dim);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-left: 4px solid var(--orange);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+}
+.callout.green {
+  background: var(--green-dim);
+  border-color: rgba(34,197,94,0.3);
+  border-left-color: var(--green);
+}
+.callout p { color: var(--text); margin: 0; max-width: none; }
+.callout strong { color: var(--orange); }
+.callout.green strong { color: var(--green); }
+
+/* FLOW */
+.flow {
+  display: flex; align-items: stretch; gap: 0; margin: 2.5rem 0;
+  flex-wrap: wrap; justify-content: center;
+}
+.flow-step {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.25rem 1.5rem; text-align: center;
+  min-width: 160px; flex: 1; max-width: 220px;
+  transition: transform 0.2s;
+}
+.flow-step:hover { transform: translateY(-3px); }
+.flow-step .flow-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.flow-step .flow-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+.flow-step .flow-sub { font-size: 0.78rem; color: var(--text-dim); }
+.flow-step.orange { border-top: 3px solid var(--orange); }
+.flow-step.green { border-top: 3px solid var(--green); }
+.flow-step.blue { border-top: 3px solid var(--blue); }
+.flow-step.teal { border-top: 3px solid var(--teal); }
+.flow-arrow {
+  display: flex; align-items: center; font-size: 1.3rem; color: var(--text-dim);
+  padding: 0 0.3rem;
+}
+@media (max-width: 768px) {
+  .flow { flex-direction: column; align-items: center; }
+  .flow-arrow { transform: rotate(90deg); padding: 0.3rem 0; }
+}
+
+/* COMPARISON */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0;
+}
+@media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.compare-card h3 { margin-top: 0; }
+.compare-card .cc-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 0.5rem; }
+.compare-card .cc-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 1rem; }
+.compare-card.eoh { border-top: 3px solid var(--teal); }
+.compare-card.eoh .cc-title { color: var(--teal); }
+.compare-card.naca { border-top: 3px solid var(--green); }
+.compare-card.naca .cc-title { color: var(--green); }
+.compare-card .cc-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.compare-card .cc-row:last-child { border-bottom: none; }
+.compare-card .cc-row .label { color: var(--text-dim); }
+.compare-card .cc-row .value { color: var(--text); font-weight: 600; }
+
+footer {
+  text-align: center; padding: 3rem 2rem;
+  color: var(--text-dim); font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+  max-width: 1100px; margin: 0 auto;
+}
+footer a { color: var(--orange); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">ML <span>Systems</span> &middot; Deconstruction Lab</div>
+  <div class="nav-links">
+    <a href="#hero">Overview</a>
+    <a href="#terms">Terms</a>
+    <a href="#integration">Integration</a>
+    <a href="#tdc">TDC Impact</a>
+    <a href="#dual-track">Dual Track</a>
+    <a href="#actions">Actions</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="badge">Research Pull &middot; 2026-03-16</div>
+  <h1>NACA One-Dollar<span>Homeownership Program</span></h1>
+  <p class="subtitle">Cities sell vacant properties for $1. NACA finances the buyer at below-market rates with no down payment, no closing costs, no fees. $20 billion committed.</p>
+
+  <div class="dollar-hero">
+    <div class="dollar-sign">$1</div>
+    <div class="dollar-details">
+      <div class="big-label">Purchase Price for City-Owned Vacant Homes &amp; Lots</div>
+      <div class="big-num">$20B committed funding</div>
+      <div class="big-label">$15B from Bank of America alone</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card green">
+      <div class="stat-value">$0</div>
+      <div class="stat-label">Down Payment</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value">$0</div>
+      <div class="stat-label">Closing Costs</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value">$0</div>
+      <div class="stat-label">Fees</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value">$0</div>
+      <div class="stat-label">Mortgage Insurance</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">Below Mkt</div>
+      <div class="stat-label">Fixed Interest Rate</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-value">50 States</div>
+      <div class="stat-label">Coverage</div>
+    </div>
+  </div>
+</section>
+
+<!-- TERMS -->
+<section id="terms">
+  <h2>Program Terms</h2>
+
+  <h3>Eligible Properties</h3>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-value" style="font-size:1.1rem;">Single-Family</div><div class="stat-label">Homes</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:1.1rem;">Multi-Family</div><div class="stat-label">Units</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:1.1rem;">Mixed-Use</div><div class="stat-label">Properties</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:1.1rem;">Modular</div><div class="stat-label">New Construction</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:1.1rem;">Condos</div><div class="stat-label">&amp; Co-ops</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:1.1rem;">Vacant Lots</div><div class="stat-label">City-Owned</div></div>
+  </div>
+
+  <h3>Income Priority (Lottery Key System)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Income Band</th><th>% of City Median</th><th>Keys</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>Lowest income</td><td class="green">25&ndash;50%</td><td class="green">3 keys</td><td>Highest</td></tr>
+        <tr><td>Low-moderate</td><td>51&ndash;80%</td><td>1 key</td><td>Medium</td></tr>
+        <tr><td>Moderate</td><td>81&ndash;100%</td><td>&mdash;</td><td>Standard</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong style="color:var(--green);">Bonus keys:</strong> +3 for living in the property's community, +3 for Section 8/HCV holder.</p>
+
+  <h3>Buyer Eligibility</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Requirement</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Residency</td><td>City resident OR lived in city 5 consecutive years within last 10</td></tr>
+        <tr><td>Homeownership</td><td>Cannot currently own a home</td></tr>
+        <tr><td>First-time buyer</td><td class="green">NOT required</td></tr>
+        <tr><td>Counseling</td><td>Must complete NACA counseling + become "NACA Qualified"</td></tr>
+        <tr><td>Rehab timeline</td><td>6-month completion from closing (mortgage forbearance during)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- INTEGRATION -->
+<section id="integration">
+  <h2>Why This Matters for ML Systems</h2>
+
+  <div class="flow">
+    <div class="flow-step green">
+      <div class="flow-icon">&#127968;</div>
+      <div class="flow-title">$1 Property</div>
+      <div class="flow-sub">City-owned vacant home or lot</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step orange">
+      <div class="flow-icon">&#128296;</div>
+      <div class="flow-title">ML Systems Decon</div>
+      <div class="flow-sub">Recover 80&ndash;90% of materials</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step blue">
+      <div class="flow-icon">&#127975;</div>
+      <div class="flow-title">New Build</div>
+      <div class="flow-sub">Factory module + decon site work</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step teal">
+      <div class="flow-icon">&#127969;</div>
+      <div class="flow-title">NACA Mortgage</div>
+      <div class="flow-sub">Below-market, $0 down, $0 closing</div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <p><strong>Land acquisition cost: $1.</strong> That's the single biggest variable in TDC &mdash; and this program eliminates it. Combined with decon materials reducing site work by $12K&ndash;$22K, the total development cost drops to $146K&ndash;$286K per unit.</p>
+  </div>
+
+  <h3>Five Reasons This Fits</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Reason</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="highlight">Properties are our feedstock</td><td>City-owned vacant houses = exactly what we decon. The program hands us the input for $1.</td></tr>
+        <tr><td>2</td><td class="highlight">Modular homes explicitly eligible</td><td>Same factory-built strategy as EOH 2030. Coastal Modular or Mod-Tech on a $1 lot.</td></tr>
+        <tr><td>3</td><td class="highlight">Multi-family eligible</td><td>Multiple revenue units from one $1 acquisition. Mixed-use also eligible.</td></tr>
+        <tr><td>4</td><td class="highlight">Rehab path = decon materials</td><td>Existing structures that need renovation &mdash; we decon the bad, recover materials, use in rehab. Buyer's budget is smaller.</td></tr>
+        <tr><td>5</td><td class="highlight">$20B committed funding</td><td>Not a $20M state bond. $20 billion. $15B from Bank of America. Orders of magnitude larger than EOH.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TDC -->
+<section id="tdc">
+  <h2>TDC Impact &mdash; $1 Land Changes Everything</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Line Item</th><th>EOH 2030 (Market Land)</th><th>NACA ($1 Lot)</th><th>Difference</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Land</td><td>$40K&ndash;$80K</td><td class="green">$1</td><td class="green">&minus;$40K&ndash;$80K</td></tr>
+        <tr><td>Decon (self-performed)</td><td>$0</td><td>$0</td><td>&mdash;</td></tr>
+        <tr><td>New construction (factory module)</td><td>$100K&ndash;$200K</td><td>$100K&ndash;$200K</td><td>&mdash;</td></tr>
+        <tr><td>Site work (decon materials)</td><td>$21K&ndash;$46K</td><td>$21K&ndash;$46K</td><td>&mdash;</td></tr>
+        <tr><td>Soft costs</td><td>$25K&ndash;$40K</td><td>$25K&ndash;$40K</td><td>&mdash;</td></tr>
+        <tr><td><strong>TDC</strong></td><td><strong>$186K&ndash;$366K</strong></td><td class="green"><strong>$146K&ndash;$286K</strong></td><td class="green"><strong>&minus;$40K&ndash;$80K</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>A $146K home financed at below-market rate with $0 down</strong> = genuinely affordable homeownership for 25&ndash;50% AMI buyers. The old house on the lot becomes the materials for the new one. The buyer's mortgage covers construction only &mdash; not land.</p>
+  </div>
+</section>
+
+<!-- DUAL TRACK -->
+<section id="dual-track">
+  <h2>Dual-Track Pipeline</h2>
+  <p>EOH 2030 and NACA are complementary, not competing. ML Systems operates in both pipelines with the same crew, equipment, and materials channel.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card eoh">
+      <div class="cc-label">RI Housing Bond</div>
+      <div class="cc-title">EOH 2030</div>
+      <div class="cc-row"><span class="label">Funding</span><span class="value">$20M state bond</span></div>
+      <div class="cc-row"><span class="label">Land cost</span><span class="value">Market rate</span></div>
+      <div class="cc-row"><span class="label">Subsidy</span><span class="value">Per-unit grant ($100K max)</span></div>
+      <div class="cc-row"><span class="label">ML Systems role</span><span class="value">Developer (build + sell)</span></div>
+      <div class="cc-row"><span class="label">Scale</span><span class="value">5+ units per project</span></div>
+      <div class="cc-row"><span class="label">Geography</span><span class="value">Rhode Island only</span></div>
+      <div class="cc-row"><span class="label">Deadline</span><span class="value">April 10, 2026 (Round 1)</span></div>
+    </div>
+    <div class="compare-card naca">
+      <div class="cc-label">Bank of America + NACA</div>
+      <div class="cc-title">One-Dollar Program</div>
+      <div class="cc-row"><span class="label">Funding</span><span class="value">$20B committed</span></div>
+      <div class="cc-row"><span class="label">Land cost</span><span class="value">$1 (city-owned)</span></div>
+      <div class="cc-row"><span class="label">Subsidy</span><span class="value">Below-market mortgage</span></div>
+      <div class="cc-row"><span class="label">ML Systems role</span><span class="value">Contractor / partner</span></div>
+      <div class="cc-row"><span class="label">Scale</span><span class="value">1 property at a time</span></div>
+      <div class="cc-row"><span class="label">Geography</span><span class="value">All 50 states</span></div>
+      <div class="cc-row"><span class="label">Deadline</span><span class="value">Rolling (city partnerships)</span></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Same operations, two pipelines.</strong> The decon crew, Track Breaker, Brokk, crane, BOH channel, and ontology are shared assets. EOH gives us developer-led scale in RI. NACA gives us contractor-led reach across 50 states with $1 land acquisition.</p>
+  </div>
+</section>
+
+<!-- ACTIONS -->
+<section id="actions">
+  <h2>Action Items</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Action</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><strong>Research RI cities with NACA partnerships</strong> &mdash; Providence, Pawtucket, Woonsocket, Central Falls (highest vacancy)</td><td class="highlight">High</td></tr>
+        <tr><td>2</td><td><strong>Contact NACA New England office</strong> &mdash; understand current city partnerships in RI/MA</td><td class="highlight">High</td></tr>
+        <tr><td>3</td><td><strong>Explore dual-track pipeline</strong> &mdash; EOH for developer-led + NACA for buyer-led with ML Systems as contractor</td><td>Medium</td></tr>
+        <tr><td>4</td><td><strong>Map city-owned vacant properties</strong> in target RI municipalities &mdash; feedstock for both programs</td><td>Medium</td></tr>
+        <tr><td>5</td><td><strong>Model NACA path in Financial Architect</strong> &mdash; $1 lot + decon + factory module + below-market mortgage = monthly payment</td><td>Medium</td></tr>
+        <tr><td>6</td><td><strong>Explore Boston/MA expansion</strong> &mdash; Gateway Cities (Springfield, Worcester, Holyoke, New Bedford) have high vacancy</td><td>Future</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <p>ML Systems LLC &middot; Deconstruction Lab &middot; Lucent Lens</p>
+  <p style="margin-top:0.5rem;">Source: <a href="https://www.naca.com/city-one-dollar-homeownership-program/" target="_blank">naca.com</a> &middot; <a href="naca-one-dollar-program.md">Markdown</a> &middot; <a href="../master-pitch.md">Master Pitch</a></p>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('section').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
