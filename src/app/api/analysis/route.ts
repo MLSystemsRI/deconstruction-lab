@@ -52,13 +52,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { buildingType, yearBuilt, description } = await req.json();
+  // ── Input validation ──────────────────────────────────────────────
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
-  if (!buildingType || !yearBuilt) {
-    return NextResponse.json(
-      { error: "buildingType and yearBuilt are required" },
-      { status: 400 }
-    );
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const { buildingType, yearBuilt, description } = body as Record<string, unknown>;
+
+  if (typeof buildingType !== "string" || buildingType.length === 0 || buildingType.length > 200) {
+    return NextResponse.json({ error: "buildingType must be a non-empty string (max 200 chars)" }, { status: 400 });
+  }
+
+  if (typeof yearBuilt !== "number" || !Number.isInteger(yearBuilt) || yearBuilt < 1600 || yearBuilt > new Date().getFullYear()) {
+    return NextResponse.json({ error: `yearBuilt must be an integer between 1600 and ${new Date().getFullYear()}` }, { status: 400 });
+  }
+
+  if (description !== undefined && (typeof description !== "string" || description.length > 2000)) {
+    return NextResponse.json({ error: "description must be a string (max 2000 chars)" }, { status: 400 });
   }
 
   const anthropic = new Anthropic();
