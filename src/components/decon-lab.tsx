@@ -19,24 +19,50 @@ interface MaterialWithProvenance {
   }>;
 }
 
+interface ConstructionData {
+  materials: string[];
+  tools: string[];
+  sequence: string[];
+  laborEstimate: string;
+  difficultyScore: number;
+}
+
+interface QuoteData {
+  deconEstimateLow: number;
+  deconEstimateHigh: number;
+  constructionEstimateLow: number;
+  constructionEstimateHigh: number;
+  currency: string;
+  notes: string;
+}
+
 interface AnalysisResult {
   materials: string[];
   separationNotes: string;
   recoveryScore: number;
+  recoveryEstimate?: string;
   sequence: string[];
   materialsWithProvenance?: MaterialWithProvenance[];
+  construction?: ConstructionData;
+  quote?: QuoteData;
+  tier?: string;
 }
+
+type ResultTab = "decon" | "construction" | "quote";
 
 export function DeconLab() {
   const [buildingType, setBuildingType] = useState("");
   const [yearBuilt, setYearBuilt] = useState("");
   const [description, setDescription] = useState("");
+  const [tier, setTier] = useState("scout");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [activeTab, setActiveTab] = useState<ResultTab>("decon");
 
   async function handleAnalyze() {
     if (!buildingType || !yearBuilt) return;
     setLoading(true);
+    setActiveTab("decon");
     try {
       const res = await fetch("/api/analysis", {
         method: "POST",
@@ -45,6 +71,7 @@ export function DeconLab() {
           buildingType,
           yearBuilt: parseInt(yearBuilt),
           description,
+          tier,
         }),
       });
       const data = await res.json();
@@ -179,27 +206,57 @@ export function DeconLab() {
                 />
               </div>
 
+              {/* Tier selector */}
+              <div>
+                <label className="mb-1 block text-sm text-dl-muted">
+                  Analysis Tier
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: "scout", label: "Scout", price: "Free", desc: "Decon + Build + Quote" },
+                    { value: "analysis", label: "Analysis", price: "$25", desc: "Per assembly + ML IDs" },
+                    { value: "full", label: "Full Structure", price: "$200", desc: "All assemblies mapped" },
+                    { value: "dem", label: "Full + DEM", price: "$350", desc: "Regulatory export" },
+                  ].map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => setTier(t.value)}
+                      className={`rounded-lg border px-3 py-2 text-left transition-all ${
+                        tier === t.value
+                          ? "border-dl-orange bg-dl-orange/10 text-dl-text"
+                          : "border-dl-border bg-dl-elevated text-dl-muted hover:border-dl-orange/40"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold">{t.label}</span>
+                        <span className={`text-[10px] font-bold ${t.value === "scout" ? "text-green-400" : "text-dl-orange"}`}>
+                          {t.price}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-dl-muted mt-0.5">{t.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <button
                 onClick={handleAnalyze}
                 disabled={loading || !buildingType || !yearBuilt}
                 className="w-full rounded-lg bg-dl-orange px-6 py-3 font-semibold text-white transition-colors hover:bg-dl-orange-dark disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {loading ? "Analyzing Assembly..." : "Analyze Deconstruction"}
+                {loading ? "Analyzing Assembly..." : tier === "scout" ? "Analyze Free — Decon + Build" : "Analyze Deconstruction"}
               </button>
             </div>
           </div>
 
           {/* Results Panel */}
           <div className="rounded-xl border border-dl-border bg-dl-surface p-6">
-            <h3 className="mb-4 text-lg font-semibold text-dl-text">
-              Analysis Results
-            </h3>
-
             {!result && !loading && (
               <div className="flex h-64 items-center justify-center text-dl-muted">
                 <p className="text-center text-sm">
-                  Submit a building profile to generate a<br />
-                  deconstruction analysis with AI.
+                  Submit a building profile to generate<br />
+                  deconstruction + construction analysis with AI.
                 </p>
               </div>
             )}
@@ -217,7 +274,30 @@ export function DeconLab() {
 
             {result && (
               <div className="space-y-4">
-                {/* Recovery Score */}
+                {/* Tab Navigation */}
+                <div className="flex gap-1 rounded-lg bg-dl-black p-1">
+                  {(
+                    [
+                      { key: "decon" as ResultTab, label: "Deconstruction", color: "text-dl-orange" },
+                      { key: "construction" as ResultTab, label: "Construction", color: "text-[#60A5FA]" },
+                      { key: "quote" as ResultTab, label: "Free Quote", color: "text-[#22C55E]" },
+                    ] as const
+                  ).map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+                        activeTab === tab.key
+                          ? `bg-dl-surface ${tab.color}`
+                          : "text-dl-muted hover:text-dl-text"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Recovery Score (always visible) */}
                 <div className="rounded-lg bg-dl-elevated p-4">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="text-sm text-dl-muted">
@@ -235,95 +315,220 @@ export function DeconLab() {
                   </div>
                 </div>
 
-                {/* Detected Materials with ML IDs */}
-                <div>
-                  <h4 className="mb-2 text-sm font-medium text-dl-muted">
-                    Recovered Materials
-                    {result.materialsWithProvenance && (
-                      <span className="ml-2 text-xs text-dl-orange font-normal">
-                        {result.materialsWithProvenance.length} items tracked
-                      </span>
-                    )}
-                  </h4>
-                  {result.materialsWithProvenance ? (
-                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                      {result.materialsWithProvenance.map((m, i) => (
-                        <div
-                          key={i}
-                          className="rounded-lg bg-dl-black/50 border border-dl-border px-3 py-2 flex items-start justify-between gap-2"
-                        >
-                          <div className="min-w-0">
-                            <p className="text-xs text-dl-text truncate">{m.name}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <code className="text-[10px] font-mono text-dl-orange bg-dl-orange/10 px-1.5 py-0.5 rounded">
-                                {m.mlMaterialId}
-                              </code>
-                              {m.species && (
-                                <span className="text-[10px] text-dl-muted">{m.species}</span>
-                              )}
+                {/* ── Deconstruction Tab ── */}
+                {activeTab === "decon" && (
+                  <div className="space-y-4">
+                    {/* Materials */}
+                    <div>
+                      <h4 className="mb-2 text-sm font-medium text-dl-muted">
+                        Recovered Materials
+                        {result.materialsWithProvenance && (
+                          <span className="ml-2 text-xs text-dl-orange font-normal">
+                            {result.materialsWithProvenance.length} items tracked
+                          </span>
+                        )}
+                      </h4>
+                      {result.materialsWithProvenance ? (
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                          {result.materialsWithProvenance.map((m, i) => (
+                            <div
+                              key={i}
+                              className="rounded-lg bg-dl-black/50 border border-dl-border px-3 py-2 flex items-start justify-between gap-2"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-xs text-dl-text truncate">{m.name}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <code className="text-[10px] font-mono text-dl-orange bg-dl-orange/10 px-1.5 py-0.5 rounded">
+                                    {m.mlMaterialId}
+                                  </code>
+                                  {m.species && (
+                                    <span className="text-[10px] text-dl-muted">{m.species}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                  m.suggestedGrade === "A" ? "bg-green-500/15 text-green-400" :
+                                  m.suggestedGrade === "B" ? "bg-blue-500/15 text-blue-400" :
+                                  m.suggestedGrade === "C" ? "bg-yellow-500/15 text-yellow-400" :
+                                  m.suggestedGrade === "D" ? "bg-red-500/15 text-red-400" :
+                                  "bg-gray-500/15 text-gray-400"
+                                }`}>
+                                  {m.suggestedGrade}
+                                </span>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                  m.contaminationStatus === "clean" ? "bg-green-500/10 text-green-400" :
+                                  m.contaminationStatus === "untested" ? "bg-gray-500/10 text-gray-400" :
+                                  "bg-red-500/10 text-red-400"
+                                }`}>
+                                  {m.contaminationStatus}
+                                </span>
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {result.materials.map((m, i) => (
+                            <span key={i} className="rounded-full bg-dl-orange/10 px-3 py-1 text-xs text-dl-orange">
+                              {m}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Separation Notes */}
+                    <div>
+                      <h4 className="mb-2 text-sm font-medium text-dl-muted">Separation Analysis</h4>
+                      <p className="text-sm text-dl-text/80">{result.separationNotes}</p>
+                    </div>
+
+                    {/* Decon Sequence */}
+                    <div>
+                      <h4 className="mb-2 text-sm font-medium text-dl-muted">Deconstruction Sequence</h4>
+                      <ol className="space-y-1">
+                        {result.sequence.map((step, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-dl-orange/20 text-xs font-bold text-dl-orange">
+                              {i + 1}
+                            </span>
+                            <span className="text-dl-text/80">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Construction Tab ── */}
+                {activeTab === "construction" && (
+                  <div className="space-y-4">
+                    {result.construction ? (
+                      <>
+                        {/* Difficulty Score */}
+                        <div className="rounded-lg bg-dl-elevated p-4">
+                          <div className="mb-1 flex items-center justify-between">
+                            <span className="text-sm text-dl-muted">Build Difficulty</span>
+                            <span className="text-2xl font-bold text-[#60A5FA]">{result.construction.difficultyScore}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                              m.suggestedGrade === "A" ? "bg-green-500/15 text-green-400" :
-                              m.suggestedGrade === "B" ? "bg-blue-500/15 text-blue-400" :
-                              m.suggestedGrade === "C" ? "bg-yellow-500/15 text-yellow-400" :
-                              m.suggestedGrade === "D" ? "bg-red-500/15 text-red-400" :
-                              "bg-gray-500/15 text-gray-400"
-                            }`}>
-                              {m.suggestedGrade}
-                            </span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                              m.contaminationStatus === "clean" ? "bg-green-500/10 text-green-400" :
-                              m.contaminationStatus === "untested" ? "bg-gray-500/10 text-gray-400" :
-                              "bg-red-500/10 text-red-400"
-                            }`}>
-                              {m.contaminationStatus}
-                            </span>
+                          <div className="h-2 rounded-full bg-dl-black">
+                            <div className="h-2 rounded-full bg-[#60A5FA] transition-all" style={{ width: `${result.construction.difficultyScore}%` }} />
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {result.materials.map((m, i) => (
-                        <span
-                          key={i}
-                          className="rounded-full bg-dl-orange/10 px-3 py-1 text-xs text-dl-orange"
+
+                        {/* Materials to Build */}
+                        <div>
+                          <h4 className="mb-2 text-sm font-medium text-dl-muted">Materials Required</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {result.construction.materials.map((m, i) => (
+                              <span key={i} className="rounded-full bg-[#60A5FA]/10 px-3 py-1 text-xs text-[#60A5FA]">{m}</span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Tools */}
+                        <div>
+                          <h4 className="mb-2 text-sm font-medium text-dl-muted">Tools Required</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {result.construction.tools.map((t, i) => (
+                              <span key={i} className="rounded-full bg-dl-elevated border border-dl-border px-3 py-1 text-xs text-dl-text">{t}</span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Build Sequence */}
+                        <div>
+                          <h4 className="mb-2 text-sm font-medium text-dl-muted">Construction Sequence</h4>
+                          <ol className="space-y-1">
+                            {result.construction.sequence.map((step, i) => (
+                              <li key={i} className="flex items-start gap-2 text-sm">
+                                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#60A5FA]/20 text-xs font-bold text-[#60A5FA]">
+                                  {i + 1}
+                                </span>
+                                <span className="text-dl-text/80">{step}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+
+                        {/* Labor */}
+                        <div className="rounded-lg bg-dl-elevated p-3">
+                          <h4 className="text-xs font-medium text-dl-muted mb-1">Labor Estimate</h4>
+                          <p className="text-sm text-dl-text">{result.construction.laborEstimate}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex h-32 items-center justify-center text-dl-muted">
+                        <p className="text-center text-sm">Construction data not available for this analysis.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Quote Tab ── */}
+                {activeTab === "quote" && (
+                  <div className="space-y-4">
+                    {result.quote ? (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          {/* Decon Quote */}
+                          <div className="rounded-lg border border-dl-orange/20 bg-dl-elevated p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-dl-orange mb-2">Deconstruction</p>
+                            <p className="text-lg font-bold text-dl-text">
+                              ${result.quote.deconEstimateLow.toLocaleString()} – ${result.quote.deconEstimateHigh.toLocaleString()}
+                            </p>
+                            <p className="text-[10px] text-dl-muted mt-1">ML Systems performs the deconstruction</p>
+                          </div>
+
+                          {/* Construction Quote */}
+                          <div className="rounded-lg border border-[#60A5FA]/20 bg-dl-elevated p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#60A5FA] mb-2">Construction</p>
+                            <p className="text-lg font-bold text-dl-text">
+                              ${result.quote.constructionEstimateLow.toLocaleString()} – ${result.quote.constructionEstimateHigh.toLocaleString()}
+                            </p>
+                            <p className="text-[10px] text-dl-muted mt-1">ML Systems builds the assembly</p>
+                          </div>
+                        </div>
+
+                        {/* Quote Notes */}
+                        <div className="rounded-lg bg-dl-elevated p-3">
+                          <h4 className="text-xs font-medium text-dl-muted mb-1">Assumptions</h4>
+                          <p className="text-sm text-dl-text/80">{result.quote.notes}</p>
+                        </div>
+
+                        {/* CTA */}
+                        <a
+                          href="https://mlsystemsri.com/contact"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full rounded-lg bg-[#22C55E] px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-[#22C55E]/90"
                         >
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                          Get a Detailed Quote from ML Systems
+                        </a>
+                        <p className="text-center text-[10px] text-dl-muted">
+                          Free estimate — no obligation. We&apos;ll review your building profile and provide a detailed scope.
+                        </p>
 
-                {/* Separation Notes */}
-                <div>
-                  <h4 className="mb-2 text-sm font-medium text-dl-muted">
-                    Separation Analysis
-                  </h4>
-                  <p className="text-sm text-dl-text/80">
-                    {result.separationNotes}
-                  </p>
-                </div>
-
-                {/* Deconstruction Sequence */}
-                <div>
-                  <h4 className="mb-2 text-sm font-medium text-dl-muted">
-                    Deconstruction Sequence
-                  </h4>
-                  <ol className="space-y-1">
-                    {result.sequence.map((step, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-dl-orange/20 text-xs font-bold text-dl-orange">
-                          {i + 1}
-                        </span>
-                        <span className="text-dl-text/80">{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                        {/* Upgrade hint for scout users */}
+                        {result.tier === "scout" && (
+                          <div className="rounded-lg border border-dl-orange/15 bg-dl-orange/5 p-3 mt-2">
+                            <p className="text-[11px] text-dl-muted">
+                              Want ML Material IDs, detailed separation plans, and DEM export?{" "}
+                              <button onClick={() => setTier("analysis")} className="text-dl-orange font-semibold hover:underline">
+                                Upgrade to Analysis ($25)
+                              </button>
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex h-32 items-center justify-center text-dl-muted">
+                        <p className="text-center text-sm">Quote data not available for this analysis.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

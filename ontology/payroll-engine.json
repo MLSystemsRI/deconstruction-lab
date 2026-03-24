@@ -1,0 +1,351 @@
+{
+  "description": "Payroll engine configuration for ML Systems. Handles gross-up from Day N net pay, all federal/RI tax calculations, employer costs, compliance calendar, and deposit schedules. Designed to replicate Gusto-level payroll functionality.",
+  "taxYear": 2026,
+  "jurisdiction": {
+    "state": "RI",
+    "entity": "ML Systems LLC",
+    "ein": "PENDING",
+    "riWithholdingId": "PENDING",
+    "riUiAccountNumber": "PENDING"
+  },
+
+  "federalIncomeTax": {
+    "standardDeduction": {
+      "single": 15000,
+      "marriedFilingJointly": 30000,
+      "headOfHousehold": 22500
+    },
+    "brackets2026": {
+      "single": [
+        { "min": 0,      "max": 11925,  "rate": 0.10 },
+        { "min": 11925,  "max": 48475,  "rate": 0.12 },
+        { "min": 48475,  "max": 103350, "rate": 0.22 },
+        { "min": 103350, "max": 197300, "rate": 0.24 },
+        { "min": 197300, "max": 250525, "rate": 0.32 },
+        { "min": 250525, "max": 626350, "rate": 0.35 },
+        { "min": 626350, "max": null,   "rate": 0.37 }
+      ],
+      "note": "2025 brackets used as proxy for 2026. Verify when IRS publishes Rev. Proc. for 2026."
+    },
+    "withholdingMethod": "percentage",
+    "w4Default": {
+      "filingStatus": "single",
+      "allowances": 0,
+      "additionalWithholding": 0,
+      "note": "Each employee submits W-4. Default assumes single/0 for maximum withholding safety."
+    }
+  },
+
+  "riIncomeTax": {
+    "standardDeduction": 10000,
+    "personalExemption": 4700,
+    "brackets2026": [
+      { "min": 0,      "max": 73450,  "rate": 0.0375 },
+      { "min": 73450,  "max": 166950, "rate": 0.0475 },
+      { "min": 166950, "max": null,   "rate": 0.0599 }
+    ],
+    "note": "RI uses flat brackets with standard deduction + personal exemption. Verify against RI Division of Taxation 2026 tables."
+  },
+
+  "fica": {
+    "socialSecurity": {
+      "employeeRate": 0.062,
+      "employerRate": 0.062,
+      "wageBase2026": 168600,
+      "note": "Wage base increases annually. 2025 = $168,600. 2026 TBD — using 2025 as proxy."
+    },
+    "medicare": {
+      "employeeRate": 0.0145,
+      "employerRate": 0.0145,
+      "wageBase": null,
+      "additionalMedicareRate": 0.009,
+      "additionalMedicareThreshold": 200000,
+      "note": "No wage cap. Additional 0.9% employee-only above $200K."
+    }
+  },
+
+  "riTdi": {
+    "name": "Rhode Island Temporary Disability Insurance",
+    "rate": 0.011,
+    "wageBase2026": 84000,
+    "paidBy": "employee",
+    "note": "Employee-only tax. Includes Job Development Fund (JDF). Deducted from wages. Wage base increases annually."
+  },
+
+  "employerTaxes": {
+    "futa": {
+      "name": "Federal Unemployment Tax Act",
+      "grossRate": 0.060,
+      "creditRate": 0.054,
+      "effectiveRate": 0.006,
+      "wageBase": 7000,
+      "annualMaxPerEmployee": 42,
+      "note": "0.6% effective after state credit. Only on first $7,000 of wages per employee."
+    },
+    "riSuta": {
+      "name": "Rhode Island State Unemployment Insurance",
+      "newEmployerRate": 0.0242,
+      "wageBase2026": 28800,
+      "annualMaxPerEmployee": 697,
+      "experienceRating": "Rate adjusts after 3 years based on claim history. New employer rate = 2.42%.",
+      "note": "Verify wage base and new employer rate with RI DLT for 2026."
+    },
+    "workersCompensation": {
+      "classCode": "5403",
+      "classDescription": "Carpentry — Residential (closest to deconstruction)",
+      "estimatedRate": 0.09,
+      "basis": "per $100 of payroll, varies by class code and experience mod",
+      "annualEstimatePerEmployee": 7974,
+      "salQuote": "~$8K workers comp quoted Jan 2026",
+      "note": "Actual rate depends on carrier, class code assignment, experience mod. Deconstruction may require higher-risk class code."
+    }
+  },
+
+  "grossUpCalculation": {
+    "method": "YTD cumulative",
+    "description": "Since Day N net pay changes daily, standard annualized withholding creates over/under-withholding. The YTD cumulative method recalculates total tax liability through day N, subtracts prior withholdings, and the difference is today's withholding.",
+    "steps": [
+      "1. Determine desired net for Day N = $N",
+      "2. Estimate Day N gross using prior day's marginal rate as starting point",
+      "3. Add Day N gross estimate to YTD gross",
+      "4. Calculate total YTD federal tax on (YTD gross - standard deduction)",
+      "5. Calculate total YTD RI tax on (YTD gross - RI standard deduction - personal exemption)",
+      "6. Calculate YTD FICA (SS if under wage base + Medicare)",
+      "7. Calculate YTD TDI (if under wage base)",
+      "8. Total YTD employee deductions = sum of steps 4-7",
+      "9. YTD net = YTD gross - YTD total deductions",
+      "10. If YTD net ≠ target YTD net (sum 1..N), adjust Day N gross and repeat",
+      "11. Converge via Newton's method or binary search (2-3 iterations)"
+    ],
+    "marginalRates": {
+      "description": "Combined marginal rate at different income levels determines gross-up factor",
+      "examples": [
+        { "ytdGross": 0,       "federalMarginal": 0.00,  "riMarginal": 0.00,   "fica": 0.0765, "tdi": 0.011, "combined": 0.0875,  "grossUpFactor": 1.096 },
+        { "ytdGross": 15000,   "federalMarginal": 0.10,  "riMarginal": 0.0375, "fica": 0.0765, "tdi": 0.011, "combined": 0.2250,  "grossUpFactor": 1.290 },
+        { "ytdGross": 40000,   "federalMarginal": 0.12,  "riMarginal": 0.0375, "fica": 0.0765, "tdi": 0.011, "combined": 0.2450,  "grossUpFactor": 1.325 },
+        { "ytdGross": 65000,   "federalMarginal": 0.22,  "riMarginal": 0.0375, "fica": 0.0765, "tdi": 0.011, "combined": 0.3450,  "grossUpFactor": 1.527 },
+        { "ytdGross": 84000,   "federalMarginal": 0.22,  "riMarginal": 0.0375, "fica": 0.0765, "tdi": 0.000, "combined": 0.3340,  "grossUpFactor": 1.501, "note": "TDI wage base exceeded" },
+        { "ytdGross": 168600,  "federalMarginal": 0.24,  "riMarginal": 0.0475, "fica": 0.0145, "tdi": 0.000, "combined": 0.2820,  "grossUpFactor": 1.393, "note": "SS wage base exceeded, Medicare only" }
+      ]
+    },
+    "yearlyEstimate": {
+      "year1": {
+        "targetNet": 66795,
+        "estimatedGross": 88602,
+        "federalIncomeTax": 11106,
+        "riIncomeTax": 2999,
+        "socialSecurity": 5493,
+        "medicare": 1285,
+        "riTdi": 924,
+        "totalEmployeeDeductions": 21807,
+        "verifyNet": 66795,
+        "employerFicaMatch": 6778,
+        "employerFuta": 42,
+        "employerSuta": 697,
+        "employerWorkersComp": 7974,
+        "totalEmployerCost": 104093,
+        "effectiveTaxBurden": "Sal pays $37,298 in taxes/insurance per employee above the $66,795 net. That's 55.8% overhead on net pay."
+      }
+    }
+  },
+
+  "dailyPayrollProcess": {
+    "description": "Step-by-step daily payroll processing — what happens every single day",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Determine Day N for each employee",
+        "detail": "Each employee may have a different start date → different Day N. Employee hired Jan 1 = Day N on calendar. Employee hired Mar 15 = Day 1 on Mar 15, Day 2 on Mar 16, etc."
+      },
+      {
+        "step": 2,
+        "action": "Calculate gross pay",
+        "detail": "Use YTD cumulative method to determine gross that yields $N net after all deductions."
+      },
+      {
+        "step": 3,
+        "action": "Apply minimum wage floor (if applicable)",
+        "detail": "If employee worked project hours today and Day N gross / hours worked < $15/hr, increase gross to $15/hr × hours. Recalculate net (will exceed $N). Track the supplement separately."
+      },
+      {
+        "step": 4,
+        "action": "Calculate withholdings",
+        "detail": "Federal income tax, RI income tax, Social Security, Medicare, RI TDI. Use YTD method for accuracy."
+      },
+      {
+        "step": 5,
+        "action": "Generate pay stub",
+        "detail": "Day #, hours worked (if project day), gross, each deduction line, net, YTD totals for all categories."
+      },
+      {
+        "step": 6,
+        "action": "Deposit net pay",
+        "detail": "ACH to employee bank account. Same-day or next business morning."
+      },
+      {
+        "step": 7,
+        "action": "Accrue employer taxes",
+        "detail": "FICA match, FUTA, SUTA, WC — added to weekly/monthly accrual register."
+      }
+    ]
+  },
+
+  "weeklyAggregation": {
+    "description": "Every Sunday (or Monday morning), aggregate the week's payroll data",
+    "produces": [
+      "Weekly withholding summary per employee",
+      "Weekly employer tax accrual",
+      "Running deposit liability (federal, RI, FICA)",
+      "Hours log for minimum wage compliance verification"
+    ]
+  },
+
+  "complianceCalendar": {
+    "daily": [
+      "Process Day N payroll for each employee",
+      "Deposit net pay via ACH",
+      "Record gross, deductions, net in payroll ledger"
+    ],
+    "weekly": [
+      "Aggregate withholdings (Mon–Sun)",
+      "Verify minimum wage compliance for any project days",
+      "Verify overtime compliance (<40 hrs/week)",
+      "Update employer tax accruals"
+    ],
+    "monthly": [
+      "Federal tax deposit by 15th of following month (Form 941 liability)",
+      "RI withholding tax deposit by 15th of following month",
+      "Reconcile payroll ledger to bank statements"
+    ],
+    "quarterly": [
+      "File Form 941 (federal quarterly employment tax return) — due April 30, July 31, Oct 31, Jan 31",
+      "File RI-941 (RI quarterly withholding reconciliation)",
+      "File RI UI quarterly wage report + pay UI contributions",
+      "Deposit FUTA if liability > $500 (otherwise annual)",
+      "Review workers comp payroll audit data"
+    ],
+    "annually": [
+      "Issue W-2 to each employee by January 31",
+      "File W-3 transmittal with SSA by January 31",
+      "File RI-W3 with RI Division of Taxation",
+      "File Form 940 (annual FUTA return) by January 31",
+      "Workers compensation annual audit / renewal",
+      "Review RI UI experience rating for rate adjustment (after year 3)",
+      "1-YEAR REVIEW GATE for each employee on their anniversary"
+    ]
+  },
+
+  "filingRequirements": {
+    "federal": {
+      "ein": "Apply via IRS Form SS-4 (online at irs.gov) — required before first payroll",
+      "form941": "Quarterly employment tax return. Reports federal income tax withheld + employee/employer FICA.",
+      "form940": "Annual FUTA return. Due Jan 31.",
+      "formW2": "Annual wage/tax statement per employee. Due Jan 31 to employee + SSA.",
+      "formW4": "Employee fills out at hire. Determines federal withholding."
+    },
+    "rhodeIsland": {
+      "riWithholding": "Register with RI Division of Taxation for withholding account",
+      "ri941": "Quarterly withholding reconciliation",
+      "riW3": "Annual reconciliation of RI withholding",
+      "riUi": "Register with RI DLT for UI account. Quarterly wage reports + contributions.",
+      "riTdi": "Employee TDI deduction reported on quarterly UI filings",
+      "riNewHire": "Report new hires within 14 days to RI New Hire Directory (riNewhire.com)"
+    }
+  },
+
+  "bankingSetup": {
+    "requirements": [
+      "Business bank account (ML Systems LLC)",
+      "ACH origination capability (for daily employee deposits)",
+      "Separate payroll tax escrow account (recommended — holds withholdings until deposit dates)",
+      "Estimated monthly cash flow: see cashFlowModel"
+    ],
+    "cashFlowModel": {
+      "year1with4crew": {
+        "month1": {
+          "netPayTotal": 1860,
+          "grossPayTotal": 2039,
+          "employerTaxes": 508,
+          "totalOutflow": 2547,
+          "note": "Days 1–30 for 4 employees. Very light cash demand."
+        },
+        "month6": {
+          "netPayTotal": 19980,
+          "grossPayTotal": 25574,
+          "employerTaxes": 4890,
+          "totalOutflow": 30464,
+          "note": "Days 152–181. Cash demand ramping. ~$30K/month."
+        },
+        "month12": {
+          "netPayTotal": 43400,
+          "grossPayTotal": 63710,
+          "employerTaxes": 10170,
+          "totalOutflow": 73880,
+          "note": "Days 335–365. Peak Year 1 cash demand. ~$74K/month for 4 crew."
+        },
+        "year1Total": {
+          "netPayTotal": 267180,
+          "grossPayTotal": 354408,
+          "employerTaxes": 61956,
+          "totalOutflow": 416364,
+          "note": "Full Year 1 employer outflow for 4 crew."
+        }
+      }
+    }
+  },
+
+  "achDetails": {
+    "costPerTransaction": {
+      "low": 0.25,
+      "typical": 0.50,
+      "high": 1.50
+    },
+    "dailyDepositsPerYear": {
+      "4crew": { "transactions": 1460, "costRange": "$365–$2,190" },
+      "5crew": { "transactions": 1825, "costRange": "$456–$2,738" },
+      "6crew": { "transactions": 2190, "costRange": "$548–$3,285" }
+    },
+    "alternative": "Batch daily amounts, deposit weekly. Workers see daily stubs but receive 1 weekly ACH. Reduces transactions 7×. Trade-off: workers wait up to 6 days for earliest daily amount in batch.",
+    "recommendation": "Daily deposits align with Day N philosophy — the worker sees $N hit their account every day. The cost ($365–$2,190/year) is worth the psychological impact."
+  },
+
+  "gustoEquivalentFeatures": {
+    "implemented": [
+      "Gross-up calculation (net → gross)",
+      "Federal income tax withholding (percentage method)",
+      "RI state income tax withholding",
+      "FICA calculation (SS + Medicare, employee + employer)",
+      "RI TDI calculation",
+      "Employer tax calculations (FUTA, SUTA, WC)",
+      "Pay stub generation data",
+      "Compliance calendar",
+      "Tax deposit scheduling",
+      "W-2 data preparation",
+      "New hire reporting requirements",
+      "Cash flow forecasting"
+    ],
+    "needsExternalService": [
+      "Actual ACH processing (bank or payment processor)",
+      "E-filing of 941/940/W-2 (can use IRS e-file or SSA BSO)",
+      "RI e-filing (RI Division of Taxation portal)",
+      "Direct deposit enrollment (bank forms)",
+      "Workers comp policy management (insurance carrier)"
+    ],
+    "gustoComparison": {
+      "gustoCorePlan": "$40/month + $6/person/month",
+      "annualCostGusto4crew": 768,
+      "annualCostGusto6crew": 912,
+      "whatGustoDoes": "Runs payroll, files taxes, handles deposits, manages compliance, generates pay stubs, handles W-2s",
+      "recommendation": "For Year 1, Gusto or similar payroll provider ($768–$912/year) handles ALL tax filing, deposit, and compliance. The Day N model is unusual but Gusto supports custom pay rates. Set each employee's daily rate to their Day N amount. The payroll-engine.json gives you full visibility into what Gusto is doing so you're never blind to your own numbers."
+    }
+  },
+
+  "integrationPoints": {
+    "crewModel": "ontology/crew-model.json — role definitions, shift structure",
+    "payStructure": "ontology/pay-structure.json — Day N formula, review gate, role assignments",
+    "financialArchitect": "Pro forma integration — crew cost per home, per project, per year",
+    "housing2030": "Grant scoring — labor costs affect TDC, which affects scoring",
+    "deconSessions": "src/lib/schema.ts — link payroll to project sessions for cost-per-home tracking",
+    "bohListings": "The 45 contribution tracking — listings created during solve time tied to employee"
+  }
+}

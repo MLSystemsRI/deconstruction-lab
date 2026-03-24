@@ -31,7 +31,8 @@
     "taskPrimitives": 45,
     "materialCategories": 8,
     "equipmentItems": 18,
-    "crewRoles": 7
+    "crewRoles": 7,
+    "payStructure": "Day N = $N (net), 1-year review gate, payroll engine with RI/federal tax tables"
   },
   "shiftModel": {
     "integrated": true,
@@ -41,6 +42,13 @@
     "siteDay": "5:30 AM – 7:00 PM (13.5 hrs)",
     "philosophy": "The 45 is not a break — it's the other half of the job. Labor is the body, the 45 is the brain. Both compensated.",
     "phaseMapping": "12 shifts mapped to PRE → Soft Strip → ROOF → WALLS → FLOORS → FOUNDATION → POST across 2 days"
+  },
+  "payroll": {
+    "payStructure": "ontology/pay-structure.json",
+    "payrollEngine": "ontology/payroll-engine.json",
+    "model": "Day N = $N take-home. Employer absorbs all taxes. Daily deposits to workers, weekly/monthly tax remittance per RI/federal compliance.",
+    "year1PerEmployee": { "net": 66795, "gross": 88602, "employerTotal": 104093 },
+    "reviewGate": "Day 365 performance review gates continuation to Year 2 (Day 366+)"
   },
   "futureMerge": {
     "shiftFit": "Each task code has estimatedMinutes — shiftFit (how many repetitions fit in one 90-min labor block) will be calculated from field data.",

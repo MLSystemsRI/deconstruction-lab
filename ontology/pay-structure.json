@@ -1,0 +1,328 @@
+{
+  "description": "Day N = $N pay structure for ML Systems deconstruction crew. Every crew member except the site lead (Sal) receives Day N = $N as take-home pay. Year 1 sum = $66,795. 1-year review gates continuation into Year 2+ sequence.",
+  "philosophy": {
+    "model": "Day N = $N",
+    "principle": "Your value increases every single day. Day 1 you earn $1. Day 365 you earn $365. The sequence rewards loyalty, consistency, and growth — the longer you stay, the more you make. This is not a wage. It's a commitment contract between ML Systems and the person.",
+    "lucentLens": "Utilize the person, not the process. The Day N model invests in the human trajectory. Early days are low because the person is learning. Late days are high because the person is producing. The curve matches the reality of human capability growth.",
+    "bothCompensated": "The 90/45 model means you're paid for labor (body) AND problem-solving (brain). Day N covers the full day — not just hours on the tool.",
+    "takeHome": "Day N = $N is NET pay. What hits the worker's account. ML Systems absorbs all tax burden on top. Workers never see a deduction."
+  },
+  "formula": {
+    "dailyNet": "N (where N = calendar day of employment, starting at 1)",
+    "yearlyNetSum": "N(N+1)/2 where N = sequence days in year",
+    "signingBonus": {
+      "amount": 5019,
+      "timing": "Day 1 — paid on hire alongside first daily pay",
+      "purpose": "Commitment signal. ML Systems invests in you before you've done a single shift. Covers immediate onboarding costs (boots, tools, transport).",
+      "note": "Exactly $5,019 so that bonus + sequence = $66,795 clean."
+    },
+    "year1": {
+      "days": "1–351 (sequence) + 14 days earned vacation",
+      "sequenceDays": 351,
+      "sequenceNet": 61776,
+      "signingBonus": 5019,
+      "totalNet": 66795,
+      "avgDailyNet": 182.88,
+      "minDaily": 1,
+      "maxDaily": 351,
+      "vacationWindow": {
+        "days": "352–365",
+        "duration": 14,
+        "paid": true,
+        "source": "Earned through completing the 351-day sequence. Not separate PTO — it IS the structure.",
+        "purpose": "Reflection. The worker steps back from the job and asks the same question the 45 asks every shift: What did I learn? What's the better way? Except now it's about the whole year.",
+        "reviewTiming": "Annual review conducted during vacation window. Worker and Sal meet. Review the 4 criteria. Decide together: does the sequence continue?",
+        "payDuringVacation": "No additional pay — the 14 days are the gap between sequence end ($351) and year end. Total comp ($66,795) already accounts for 365 days. The vacation is built into the math, not added on top."
+      },
+      "monthlyProgression": [
+        { "month": 1,  "days": "1–30",    "monthNet": 465,    "avgDaily": 15.50,  "note": "Learning / onboarding. Signing bonus ($5,019) covers this month's low sequence pay." },
+        { "month": 2,  "days": "31–59",    "monthNet": 1305,   "avgDaily": 45.00,  "note": "Still ramping" },
+        { "month": 3,  "days": "60–90",    "monthNet": 2325,   "avgDaily": 75.00,  "note": "First full project cycles" },
+        { "month": 4,  "days": "91–120",   "monthNet": 3165,   "avgDaily": 105.50, "note": "Competence building" },
+        { "month": 5,  "days": "121–151",  "monthNet": 4216,   "avgDaily": 136.00, "note": "Independent task execution" },
+        { "month": 6,  "days": "152–181",  "monthNet": 4995,   "avgDaily": 166.50, "note": "Midpoint — meaningful daily pay" },
+        { "month": 7,  "days": "182–212",  "monthNet": 6107,   "avgDaily": 197.00, "note": "Skilled contributor" },
+        { "month": 8,  "days": "213–243",  "monthNet": 7068,   "avgDaily": 228.00, "note": "Leading tasks" },
+        { "month": 9,  "days": "244–273",  "monthNet": 7755,   "avgDaily": 258.50, "note": "Cross-training complete" },
+        { "month": 10, "days": "274–304",  "monthNet": 8959,   "avgDaily": 289.00, "note": "Full operational value" },
+        { "month": 11, "days": "305–334",  "monthNet": 9585,   "avgDaily": 319.50, "note": "Approaching sequence end" },
+        { "month": 12, "days": "335–351 + vacation 352–365", "monthNet": 5951, "avgDaily": 343.00, "note": "Sequence ends Day 351. Vacation begins. Review happens. Year 2 decision made." }
+      ]
+    },
+    "year2": {
+      "days": "366–716 (sequence) + 14 days earned vacation (717–730)",
+      "sequenceDays": 351,
+      "sequenceStart": 352,
+      "sequenceEnd": 702,
+      "sequenceNet": 185027,
+      "signingBonus": 0,
+      "totalNet": 185027,
+      "avgDailyNet": 527.00,
+      "minDaily": 352,
+      "maxDaily": 702,
+      "vacationWindow": {
+        "days": "703–716 (14 days)",
+        "reviewTiming": "Year 2 review during vacation. Same 4 criteria. Gate to Year 3."
+      },
+      "gate": "1-year performance review passed. Sequence continues from Day 352. No gap, no reset.",
+      "note": "Year 2 take-home is 2.77× Year 1. The reward for surviving the ramp and passing the gate."
+    },
+    "year3": {
+      "days": "717–1067 (sequence) + 14 days vacation (1068–1081)",
+      "sequenceDays": 351,
+      "sequenceStart": 703,
+      "sequenceEnd": 1053,
+      "sequenceNet": 308027,
+      "totalNet": 308027,
+      "minDaily": 703,
+      "maxDaily": 1053,
+      "note": "Day 1053 = $1,053/day. Veteran operator earning $308K/year take-home."
+    },
+    "yearSummary": [
+      { "year": 1, "netPay": 66795,  "grossPay": 88602,  "employerTotalCost": 104093, "signingBonus": 5019, "vacationDays": 14 },
+      { "year": 2, "netPay": 185027, "grossPay": 253470, "employerTotalCost": 286420, "signingBonus": 0, "vacationDays": 14 },
+      { "year": 3, "netPay": 308027, "grossPay": 444390, "employerTotalCost": 498520, "signingBonus": 0, "vacationDays": 14 }
+    ]
+  },
+  "reviewGate": {
+    "trigger": "During vacation window (Days 352–365). Review meeting before Day 366. Decision made before Year 2 starts.",
+    "evaluator": "Sal (Site Lead / Supervisor)",
+    "criteria": [
+      {
+        "category": "Safety",
+        "weight": 30,
+        "measures": [
+          "Zero at-fault safety incidents",
+          "Consistent PPE compliance",
+          "Proactive hazard identification",
+          "Proper lockout/tagout adherence"
+        ]
+      },
+      {
+        "category": "Skill Progression",
+        "weight": 25,
+        "measures": [
+          "Can execute all task codes for assigned role",
+          "Cross-trained in at least 1 adjacent role",
+          "Recovery rate improvement trend",
+          "Material grading accuracy"
+        ]
+      },
+      {
+        "category": "The 45 Contribution",
+        "weight": 25,
+        "measures": [
+          "Quality of BOH listings created during solve time",
+          "Data logging completeness (materials, times, conditions)",
+          "Process improvement suggestions implemented",
+          "Knowledge transfer to newer crew"
+        ]
+      },
+      {
+        "category": "Reliability",
+        "weight": 20,
+        "measures": [
+          "Shift attendance rate",
+          "On-time record",
+          "Willingness to flex between roles when needed",
+          "Communication quality with constants and crew"
+        ]
+      }
+    ],
+    "outcomes": {
+      "pass": "Sequence continues: Day 366 = $366. No gap, no reset. The investment in you pays forward.",
+      "conditional": "Sequence pauses. Specific improvement plan with 90-day checkpoint. If met, sequence resumes from pause point (not reset).",
+      "fail": "Sequence terminates. Final pay through last working day. No penalty, no clawback. Clean exit."
+    }
+  },
+  "roleAssignments": {
+    "excluded": {
+      "role": "supervisor",
+      "name": "Sal",
+      "reason": "Owner/operator. Compensated through equity and business returns, not Day N sequence."
+    },
+    "dayNEmployees": [
+      {
+        "role": "crane_operator",
+        "crewModelId": "crane_operator",
+        "classification": "W-2 Full-Time",
+        "dayNSequence": true,
+        "notes": "NCCCO certified. Market rate in RI is $35–55/hr. Day N covers year-round retention, not just project days. Between projects: equipment maintenance, safety training, crane inspection."
+      },
+      {
+        "role": "brokk_operator",
+        "crewModelId": "brokk_operator",
+        "classification": "W-2 Full-Time",
+        "dayNSequence": true,
+        "notes": "Specialized equipment operator. Between projects: Brokk maintenance, Track Breaker R&D, foundation research."
+      },
+      {
+        "role": "rigger",
+        "crewModelId": "rigger",
+        "classification": "W-2 Full-Time",
+        "dayNSequence": true,
+        "notes": "Qualified rigger + signal person. Between projects: rigging gear inspection, load calculation practice, safety cert maintenance."
+      },
+      {
+        "role": "ground_lead",
+        "crewModelId": "ground_lead",
+        "classification": "W-2 Full-Time",
+        "dayNSequence": true,
+        "notes": "Promoted from ground support or hired with experience. Material grading authority. Between projects: BOH inventory management, material quality documentation."
+      },
+      {
+        "role": "ground_support_1",
+        "crewModelId": "ground_support",
+        "classification": "W-2 Full-Time",
+        "dayNSequence": true,
+        "wipEligible": true,
+        "notes": "Entry-level. If WIP intern: 75% wage reimbursement from RI ($20/hr min, 400 hrs max). Day N sequence starts Day 1 regardless of WIP status."
+      },
+      {
+        "role": "ground_support_2",
+        "crewModelId": "ground_support",
+        "classification": "W-2 Full-Time (if optimal crew)",
+        "dayNSequence": true,
+        "wipEligible": true,
+        "notes": "Second ground support for optimal 7-person crew. Also WIP eligible. Hired when project volume justifies."
+      }
+    ],
+    "crewCostSummary": {
+      "minimum4crew": {
+        "employees": ["crane_operator", "brokk_operator", "rigger", "ground_lead"],
+        "year1NetPayroll": 267180,
+        "year1GrossPayroll": 354408,
+        "year1EmployerTotal": 416364,
+        "note": "4 × $66,795 net = $267,180 take-home. 4 × $104,091 employer cost = $416,364 total."
+      },
+      "optimal5crew": {
+        "employees": ["crane_operator", "brokk_operator", "rigger", "ground_lead", "ground_support_1"],
+        "year1NetPayroll": 333975,
+        "year1GrossPayroll": 443010,
+        "year1EmployerTotal": 520455,
+        "note": "5 × $66,795 net. If 1 ground support is WIP intern: ~$66K reimbursed → net ~$454K."
+      },
+      "optimal6crew": {
+        "employees": ["crane_operator", "brokk_operator", "rigger", "ground_lead", "ground_support_1", "ground_support_2"],
+        "year1NetPayroll": 400770,
+        "year1GrossPayroll": 531612,
+        "year1EmployerTotal": 624546,
+        "note": "6 × $66,795 net. If 2 ground supports are WIP: ~$132K reimbursed → net ~$492K."
+      },
+      "wipImpact": {
+        "perIntern": {
+          "maxHours": 400,
+          "hourlyRate": 20,
+          "grossWages": 8000,
+          "stateReimbursement": 6000,
+          "netEmployerCost": 2000,
+          "note": "75% of $20/hr × 400 hrs. But WIP only covers 400 hrs — Day N sequence runs all year. WIP subsidizes early low-pay days, employer covers the rest."
+        },
+        "maxInterns": 4,
+        "annualSavings": 24000
+      }
+    }
+  },
+  "complianceConsiderations": {
+    "minimumWage": {
+      "riMinWage2026": 15.00,
+      "issue": "Day 1 = $1 net. Even annualized, early days fall below minimum wage for hours worked. Construction workers are generally FLSA non-exempt.",
+      "resolution": {
+        "approach": "Minimum wage floor + Day N escalator",
+        "mechanism": "Each project work day, worker earns at least RI minimum wage × hours worked. Day N amount is the TARGET — if it exceeds minimum wage for hours worked, Day N applies. If Day N is below minimum wage floor, minimum wage applies instead.",
+        "breakeven": "At $15/hr × 8 hrs = $120/day minimum. Day N exceeds this at Day 120 (month 4). First 119 days, minimum wage floor governs on project days.",
+        "nonProjectDays": "Days without scheduled project work: Day N is a retainer/stipend. No hours worked = no minimum wage obligation. Worker is available but not clocked in.",
+        "earlyDaysEconomics": "Days 1–119 minimum wage floor adds ~$7,140 per worker above pure Day N model (avg $60 supplement × ~119 project days). Total Year 1 net rises to ~$73,935 per worker.",
+        "alternative": "Classify early period as paid training/onboarding at $20/hr (WIP rate). After Day 120, pure Day N takes over."
+      }
+    },
+    "overtime": {
+      "rule": "FLSA requires 1.5× for hours over 40/week. RI follows federal.",
+      "mitigation": "The 90/45 model naturally limits labor to 9 hrs/day (6 shifts × 90 min). Solve time (45 min/shift = 4.5 hrs) is compensable but the total 13.5 hrs/day × 2 project days = 27 hrs/week, well under 40.",
+      "riskScenario": "If project runs 3+ consecutive days or crew works on BOH/training between projects, track weekly hours carefully."
+    },
+    "dailyPay": {
+      "riLaw": "RI Gen. Laws §28-14-2 requires weekly pay minimum. Daily pay is MORE frequent = compliant.",
+      "mechanism": "Workers receive daily net deposit. Employer aggregates withholdings weekly for tax remittance."
+    }
+  },
+  "betweenProjectWork": {
+    "description": "Day N pays every calendar day, not just project days. Between decon projects, crew performs value-generating work that justifies continuous pay.",
+    "activities": [
+      {
+        "activity": "BOH inventory management",
+        "who": ["ground_lead", "ground_support"],
+        "value": "Recovered materials need ongoing sorting, pricing, photography, listing updates"
+      },
+      {
+        "activity": "Equipment maintenance",
+        "who": ["crane_operator", "brokk_operator"],
+        "value": "Crane inspection, Brokk servicing, tool sharpening, rigging gear certification"
+      },
+      {
+        "activity": "Pre-project site assessment",
+        "who": ["rigger", "ground_lead"],
+        "value": "Next project walkthrough, material inventory estimation, rigging plan"
+      },
+      {
+        "activity": "Training and cross-training",
+        "who": ["all"],
+        "value": "Safety refreshers, new technique practice, role cross-training per review gate criteria"
+      },
+      {
+        "activity": "Track Breaker R&D",
+        "who": ["brokk_operator", "ground_lead"],
+        "value": "Foundation scoring R&D, prototype testing"
+      },
+      {
+        "activity": "Data capture and ontology",
+        "who": ["all"],
+        "value": "Reviewing project data, improving task time estimates, material recovery predictions"
+      },
+      {
+        "activity": "Community outreach",
+        "who": ["ground_support"],
+        "value": "Door-to-door in target neighborhoods, relationship building per Lucent Lens"
+      }
+    ]
+  },
+  "paySchedule": {
+    "workerPay": {
+      "frequency": "daily",
+      "method": "ACH direct deposit",
+      "timing": "End of each calendar day or next business morning for weekends/holidays",
+      "stub": "Daily pay stub showing: Day #, gross, each withholding line, net deposited, YTD totals"
+    },
+    "taxRemittance": {
+      "frequency": "weekly",
+      "aggregation": "Monday–Sunday withholdings aggregated, remitted following week",
+      "federalDeposit": "Monthly for new/small employers (by 15th of following month). Upgrades to semi-weekly if liability exceeds $50K in lookback period.",
+      "riStateDeposit": "Monthly for small employers. Same 15th-of-following-month schedule.",
+      "ficaDeposit": "Same schedule as federal income tax deposit."
+    },
+    "employerExpenses": {
+      "frequency": "weekly aggregation, monthly/quarterly remittance per schedule",
+      "items": [
+        "Employer FICA match (weekly accrual)",
+        "FUTA (quarterly deposit — Form 940)",
+        "RI SUTA/UI (quarterly — RI UI filing)",
+        "Workers compensation premium (per policy terms — monthly or quarterly)"
+      ]
+    }
+  },
+  "keyMilestones": [
+    { "day": 1,   "net": 1,   "ytdNet": 5020,    "significance": "First day. $5,019 signing bonus + $1 sequence. Worker starts with money in pocket." },
+    { "day": 30,  "net": 30,  "ytdNet": 5484,    "significance": "Month 1 complete. $5,019 bonus + $465 sequence = $5,484 cumulative." },
+    { "day": 90,  "net": 90,  "ytdNet": 9114,    "significance": "Quarter 1. First full project cycles. $9,114 YTD." },
+    { "day": 120, "net": 120, "ytdNet": 12279,   "significance": "Day N exceeds $15/hr × 8hr minimum wage floor. Pure Day N takes over." },
+    { "day": 180, "net": 180, "ytdNet": 21309,   "significance": "Midpoint. $180/day = ~$22.50/hr for 8 hrs. Solid daily wage." },
+    { "day": 200, "net": 200, "ytdNet": 25119,   "significance": "$200/day. Skilled contributor. $25K banked." },
+    { "day": 260, "net": 260, "ytdNet": 38949,   "significance": "$260/day. $39K banked. Trajectory is undeniable." },
+    { "day": 300, "net": 300, "ytdNet": 50169,   "significance": "$300/day. Experienced tradesperson rate. $50K banked." },
+    { "day": 351, "net": 351, "ytdNet": 66795,   "significance": "SEQUENCE COMPLETE. $66,795 total take-home. Vacation begins." },
+    { "day": "352–365", "net": 0, "ytdNet": 66795, "significance": "VACATION + REVIEW. 14 days off. Reflect. Meet with Sal. Decide together: Year 2?" },
+    { "day": 366, "net": 352, "ytdNet": 67147,   "significance": "Year 2 begins. Sequence picks up at $352/day. No reset." },
+    { "day": 702, "net": 702, "ytdNet": 251822,  "significance": "Year 2 sequence complete. $185,027 Year 2 take-home. Vacation + review." },
+    { "day": 1053, "net": 1053, "ytdNet": 559849, "significance": "Year 3 sequence complete. $308,027 Year 3 take-home. $1,053/day." }
+  ]
+}

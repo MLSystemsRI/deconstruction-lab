@@ -186,6 +186,16 @@
       "note": "Shifts 3–5 (Day 1) and 7–8 (Day 2) are peak — crane active, full ground crew needed"
     }
   },
+  "payStructure": {
+    "ref": "ontology/pay-structure.json",
+    "model": "Day N = $N net (take-home). All crew except Sal.",
+    "year1Net": 66795,
+    "year1Gross": 88602,
+    "year1EmployerCost": 104093,
+    "reviewGate": "Day 365 — 4 criteria (Safety 30%, Skill 25%, The 45 Contribution 25%, Reliability 20%)",
+    "year2StartsAt": "Day 366 = $366/day. Sequence continues without reset.",
+    "payrollEngine": "ontology/payroll-engine.json — full tax tables, compliance calendar, gross-up methodology"
+  },
   "humanoidBridge": {
     "note": "Every crew role maps to humanoid-ontology task primitives. Ground support = Tier 1 robot deployment (sweep, carry, sort). Ground lead = Tier 2–3 (structured, force-adaptive). Rigger + crane = Tier 4+ (complex spatial, safety-critical).",
     "robotDisplacement": {
