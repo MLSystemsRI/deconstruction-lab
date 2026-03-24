@@ -113,9 +113,16 @@ export function DeconLab() {
               </p>
             </div>
             <span className="hidden sm:block text-dl-muted/20 ml-1">|</span>
-            <a href="https://mlsystemsri.com" target="_blank" rel="noopener noreferrer" className="hidden sm:block text-[11px] text-dl-muted/40 hover:text-dl-orange transition-colors ml-1">
-              ML Systems ↗
-            </a>
+            <div className="hidden sm:flex items-center gap-1.5 ml-1">
+              <a href="https://mlsystemsri.com" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#22C55E]/50 hover:text-[#22C55E] border border-[#22C55E]/15 hover:border-[#22C55E]/30 rounded px-1.5 py-0.5 transition-colors">.com</a>
+              <a href="https://mlsystemsri.info" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#94A3B8]/50 hover:text-[#94A3B8] border border-[#94A3B8]/15 hover:border-[#94A3B8]/30 rounded px-1.5 py-0.5 transition-colors">.info</a>
+              <a href="https://mlsystemsri.store" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#14B8A6]/50 hover:text-[#14B8A6] border border-[#14B8A6]/15 hover:border-[#14B8A6]/30 rounded px-1.5 py-0.5 transition-colors">.store</a>
+              <a href="https://mlsystemsri.net" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#F59E0B]/50 hover:text-[#F59E0B] border border-[#F59E0B]/15 hover:border-[#F59E0B]/30 rounded px-1.5 py-0.5 transition-colors">.net</a>
+              <a href="https://mlsystemsri.xyz" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#8B5CF6]/50 hover:text-[#8B5CF6] border border-[#8B5CF6]/15 hover:border-[#8B5CF6]/30 rounded px-1.5 py-0.5 transition-colors">.xyz</a>
+              <a href="https://fa.mlsystemsri.com" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#22C55E]/50 hover:text-[#22C55E] border border-[#22C55E]/15 hover:border-[#22C55E]/30 rounded px-1.5 py-0.5 transition-colors">FA</a>
+              <a href="https://pit.mlsystemsri.com" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#EF4444]/50 hover:text-[#EF4444] border border-[#EF4444]/15 hover:border-[#EF4444]/30 rounded px-1.5 py-0.5 transition-colors">Pit</a>
+              <a href="https://collective.mlsystemsri.com" target="_blank" rel="noopener" className="text-[10px] font-bold text-[#D4AF37]/50 hover:text-[#D4AF37] border border-[#D4AF37]/15 hover:border-[#D4AF37]/30 rounded px-1.5 py-0.5 transition-colors">BC</a>
+            </div>
           </div>
           <nav className="flex items-center gap-1">
             {[
