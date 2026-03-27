@@ -6,7 +6,11 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Deconstruction Lab | ML Systems",
+  metadataBase: new URL("https://decon.mlsystemsri.com"),
+  title: {
+    default: "Deconstruction Lab | Material Recovery & Separation Science — ML Systems",
+    template: "%s | Deconstruction Lab — ML Systems",
+  },
   description:
     "There is no secondary lumber market — yet. 80–90% of building materials are recoverable. " +
     "51% can be resold. Decon Lab is the AI-powered R&D platform making people aware of the " +
@@ -38,16 +42,24 @@ export const metadata: Metadata = {
       "of residential building assemblies.",
     siteName: "ML Systems",
     type: "website",
+    url: "https://decon.mlsystemsri.com",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "Decon Lab — 80–90% Recovery. 51% Resale.",
     description: "AI-powered R&D for reverse engineering residential building assemblies. By ML Systems.",
   },
+  alternates: {
+    canonical: "https://decon.mlsystemsri.com",
+  },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large" as const },
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  other: {
+    "theme-color": "#F97316",
   },
 };
 
@@ -58,6 +70,40 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "@id": "https://decon.mlsystemsri.com/#website",
+                name: "Deconstruction Lab",
+                url: "https://decon.mlsystemsri.com",
+                description:
+                  "AI-powered R&D platform for reverse engineering residential building assemblies. Material recovery and separation science by ML Systems.",
+                publisher: { "@id": "https://mlsystemsri.com/#organization" },
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "@id": "https://mlsystemsri.com/#organization",
+                name: "ML Systems LLC",
+                url: "https://mlsystemsri.com",
+                sameAs: [
+                  "https://mlsystemsri.info",
+                  "https://mlsystemsri.store",
+                  "https://mlsystemsri.net",
+                  "https://mlsystemsri.xyz",
+                ],
+                description:
+                  "Rhode Island construction technology company — loan origination, deconstruction, and construction with near-zero waste.",
+              },
+            ]),
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-dl-black text-dl-text antialiased">
         <GoogleAnalytics />
         {children}
