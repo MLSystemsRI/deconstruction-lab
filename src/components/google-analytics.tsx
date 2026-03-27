@@ -17,6 +17,7 @@ const CROSS_DOMAINS = [
   'pit.mlsystemsri.com',
   'collective.mlsystemsri.com',
   'fa.mlsystemsri.com',
+  'boh.mlsystemsri.com',
 ];
 
 const LINKER_CONFIG = JSON.stringify({
