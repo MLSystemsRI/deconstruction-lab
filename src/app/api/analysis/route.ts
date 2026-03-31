@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUser, isDemoMode } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
+import { getModelForTier } from "@/lib/ai-config";
 
 // ── ML Material ID generation (inline for standalone) ──────────────
 const ZONE_MAP: Record<string, string> = {
@@ -66,8 +67,8 @@ export async function POST(req: NextRequest) {
 
   const { buildingType, yearBuilt, description, tier } = body as Record<string, unknown>;
 
-  // Tier validation: scout (free), analysis ($25), full ($200), dem ($350)
-  const validTiers = ["scout", "analysis", "full", "dem"];
+  // Tier validation: scout (free), analysis ($25), full ($200), dem ($350), custodian (licensed)
+  const validTiers = ["scout", "analysis", "full", "dem", "custodian"];
   const requestTier = typeof tier === "string" && validTiers.includes(tier) ? tier : "scout";
 
   if (typeof buildingType !== "string" || buildingType.length === 0 || buildingType.length > 200) {
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
     // Scout (free): bidirectional analysis + free quote. Haiku for cost. ~$0.01-0.03/scan.
     // The decon extraction IS the construction data — materials identified during teardown
     // are the same materials needed for rebuild. One extraction, flipped.
-    model = "claude-haiku-4-5-20251001";
+    model = getModelForTier("scout");
     maxTokens = 1024;
     prompt = `You are a building science expert. Analyze this building and provide BOTH deconstruction and construction data from a single material extraction.
 
@@ -131,7 +132,7 @@ Respond ONLY with valid JSON:
 }`;
   } else {
     // Paid tiers (analysis/full/dem): Sonnet for depth + materialDetails for ML IDs
-    model = "claude-sonnet-4-20250514";
+    model = getModelForTier(requestTier);
     maxTokens = requestTier === "analysis" ? 1536 : 2048;
     prompt = `You are an expert in building science and deconstruction engineering.
 You reverse engineer residential building assemblies to determine optimal deconstruction sequences.
