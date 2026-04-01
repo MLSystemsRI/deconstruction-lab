@@ -74,7 +74,8 @@ function addTTPHeaders(response: NextResponse): void {
   response.headers.set("X-TT-Band", authMode === "production" ? "ml_verified" : "public_record");
 }
 
-let _middleware: ((req: NextRequest) => Promise<NextResponse> | NextResponse) | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _middleware: ((req: NextRequest, ...args: any[]) => any) | null = null;
 
 async function getMiddleware() {
   if (_middleware) return _middleware;
@@ -100,9 +101,9 @@ async function getMiddleware() {
   return _middleware;
 }
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest, ...args: unknown[]) {
   const handler = await getMiddleware();
-  return handler(request);
+  return handler(request, ...args);
 }
 
 export const config = {
