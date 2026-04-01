@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * Deconstruction Lab — Security + TTP Middleware
- * Defense-in-depth: rate limiting, AI crawler blocking, TTP headers
+ * Demo mode: rate limiting, AI crawler blocking, TTP headers
+ * Production mode: Clerk auth context + all of the above
  */
 
 const windows = new Map<string, number[]>();
@@ -21,7 +22,7 @@ function checkRate(id: string, limit: number): { allowed: boolean; remaining: nu
 
 const AI_CRAWLERS = /gptbot|chatgpt|openai|claudebot|anthropic|google-extended|cohere|perplexity|amazonbot|meta-externalagent|bytespider|ccbot/i;
 
-export function middleware(request: NextRequest) {
+function applySecurityHeaders(request: NextRequest): NextResponse | null {
   const { pathname } = request.nextUrl;
   const origin = request.headers.get("origin");
 
@@ -38,41 +39,70 @@ export function middleware(request: NextRequest) {
   }
 
   const isApiRoute = pathname.startsWith("/api/");
-  const response = NextResponse.next();
+  if (!isApiRoute) return null;
 
-  response.headers.set("X-TT-Protocol", "Transparency Trust Protocol v2");
-  response.headers.set("X-TT-Agent", "DRA");
-
-  if (isApiRoute) {
-    const ua = request.headers.get("user-agent") || "";
-    if (AI_CRAWLERS.test(ua)) {
-      const hasAuth = request.headers.get("authorization")?.startsWith("Bearer ");
-      if (!hasAuth) {
-        return NextResponse.json(
-          { error: "AI crawler detected. API key required.", docs: "https://mlsystemsri.info/api-docs" },
-          { status: 402, headers: { "X-TT-Protocol": "Transparency Trust Protocol v2", "X-TT-Score": "0", "X-TT-Band": "public_record" } }
-        );
-      }
-    }
-
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const isAiRoute = pathname.startsWith("/api/analysis");
-    const result = checkRate(`ip:${ip}`, isAiRoute ? AI_RATE_LIMIT : RATE_LIMIT);
-
-    if (!result.allowed) {
+  const ua = request.headers.get("user-agent") || "";
+  if (AI_CRAWLERS.test(ua)) {
+    const hasAuth = request.headers.get("authorization")?.startsWith("Bearer ");
+    if (!hasAuth) {
       return NextResponse.json(
-        { error: "Too many requests" },
-        { status: 429, headers: { "Retry-After": "60", "X-RateLimit-Remaining": "0" } }
+        { error: "AI crawler detected. API key required.", docs: "https://mlsystemsri.info/api-docs" },
+        { status: 402, headers: { "X-TT-Protocol": "Transparency Trust Protocol v2", "X-TT-Score": "0", "X-TT-Band": "public_record" } }
       );
     }
-
-    response.headers.set("X-RateLimit-Remaining", String(result.remaining));
-    const authMode = process.env.AUTH_MODE;
-    response.headers.set("X-TT-Score", authMode === "production" ? "15" : "5");
-    response.headers.set("X-TT-Band", authMode === "production" ? "ml_verified" : "public_record");
   }
 
-  return response;
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const isAiRoute = pathname.startsWith("/api/analysis");
+  const result = checkRate(`ip:${ip}`, isAiRoute ? AI_RATE_LIMIT : RATE_LIMIT);
+
+  if (!result.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60", "X-RateLimit-Remaining": "0" } }
+    );
+  }
+
+  return null;
+}
+
+function addTTPHeaders(response: NextResponse): void {
+  response.headers.set("X-TT-Protocol", "Transparency Trust Protocol v2");
+  response.headers.set("X-TT-Agent", "DRA");
+  const authMode = process.env.AUTH_MODE;
+  response.headers.set("X-TT-Score", authMode === "production" ? "15" : "5");
+  response.headers.set("X-TT-Band", authMode === "production" ? "ml_verified" : "public_record");
+}
+
+let _middleware: ((req: NextRequest) => Promise<NextResponse> | NextResponse) | null = null;
+
+async function getMiddleware() {
+  if (_middleware) return _middleware;
+
+  if (process.env.AUTH_MODE === "production") {
+    const { clerkMiddleware } = await import("@clerk/nextjs/server");
+    _middleware = clerkMiddleware((_auth, req) => {
+      const blocked = applySecurityHeaders(req);
+      if (blocked) return blocked;
+      const response = NextResponse.next();
+      addTTPHeaders(response);
+      return response;
+    });
+  } else {
+    _middleware = (req: NextRequest) => {
+      const blocked = applySecurityHeaders(req);
+      if (blocked) return blocked;
+      const response = NextResponse.next();
+      addTTPHeaders(response);
+      return response;
+    };
+  }
+  return _middleware;
+}
+
+export async function middleware(request: NextRequest) {
+  const handler = await getMiddleware();
+  return handler(request);
 }
 
 export const config = {
