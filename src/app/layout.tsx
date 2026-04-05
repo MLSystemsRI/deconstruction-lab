@@ -18,6 +18,13 @@ export const metadata: Metadata = {
     "to capture it. Reverse engineering residential building assemblies, from dried adhesives " +
     "to composite fasteners. The science of taking buildings apart — so the next one costs less to build.",
   keywords: [
+    "deconstruction services",
+    "building material recovery",
+    "construction waste reduction",
+    "material separation",
+    "building disassembly",
+    "AI construction analysis",
+    "shingle recycling Rhode Island",
     "lucent lens",
     "secondary lumber market",
     "material recovery 80-90 percent",
@@ -32,6 +39,9 @@ export const metadata: Metadata = {
     "AI R&D",
     "urban mining",
     "circular construction",
+    "deconstruction Rhode Island",
+    "material provenance",
+    "construction demolition alternative",
   ],
   openGraph: {
     title: "Decon Lab — 80–90% Recovery. 51% Resale. No Market Exists Yet.",
@@ -82,8 +92,30 @@ export default function RootLayout({
                 name: "Deconstruction Lab",
                 url: "https://decon.mlsystemsri.com",
                 description:
-                  "AI-powered R&D platform for reverse engineering residential building assemblies. Material recovery and separation science by ML Systems.",
+                  "AI-powered R&D platform for reverse engineering residential building assemblies. 80-90% material recovery rate, 51% resale value. Material separation science by ML Systems.",
                 publisher: { "@id": "https://mlsystemsri.com/#organization" },
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "ResearchOrganization",
+                "@id": "https://decon.mlsystemsri.com/#research",
+                name: "Deconstruction Lab — ML Systems",
+                url: "https://decon.mlsystemsri.com",
+                description:
+                  "R&D division of ML Systems focused on building material recovery science — dried adhesives, polyurethane, composite fasteners, material separation. Achieving 80-90% material recovery with 51% resale value.",
+                parentOrganization: { "@id": "https://mlsystemsri.com/#organization" },
+                areaServed: {
+                  "@type": "State",
+                  name: "Rhode Island",
+                },
+                knowsAbout: [
+                  "Material Separation Science",
+                  "Building Disassembly",
+                  "Construction Waste Reduction",
+                  "Shingle Recycling",
+                  "Adhesive Separation",
+                  "Material Recovery",
+                ],
               },
               {
                 "@context": "https://schema.org",
@@ -96,9 +128,28 @@ export default function RootLayout({
                   "https://mlsystemsri.store",
                   "https://mlsystemsri.net",
                   "https://mlsystemsri.xyz",
+                  "https://app.mlsystemsri.com",
+                  "https://fa.mlsystemsri.com",
+                  "https://pit.mlsystemsri.com",
+                  "https://collective.mlsystemsri.com",
+                  "https://ae.mlsystemsri.com",
+                  "https://lm.mlsystemsri.com",
+                  "https://design.mlsystemsri.com",
+                  "https://decon.mlsystemsri.com",
                 ],
                 description:
-                  "Rhode Island construction technology company — loan origination, deconstruction, and construction with near-zero waste.",
+                  "Rhode Island construction proptech — closed-loop system that finances, deconstructs, designs, and builds with near-zero waste.",
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebAPI",
+                name: "Transparency Trust Protocol",
+                documentation: "https://mlsystemsri.info/api-docs",
+                termsOfService: "https://mlsystemsri.com/transparency-trust-protocol",
+                provider: {
+                  "@type": "Organization",
+                  name: "ML Systems",
+                },
               },
             ]),
           }}
