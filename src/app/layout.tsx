@@ -42,6 +42,14 @@ export const metadata: Metadata = {
     "deconstruction Rhode Island",
     "material provenance",
     "construction demolition alternative",
+    "REAPER deconstruction agent",
+    "AI agent deconstruction recovery",
+    "autonomous material recovery AI",
+    "agent-orchestrated deconstruction",
+    "agentic AI material separation",
+    "multi-agent deconstruction system",
+    "AI recovery agent construction",
+    "Deconstruction Recovery Agent",
   ],
   openGraph: {
     title: "Decon Lab — 80–90% Recovery. 51% Resale. No Market Exists Yet.",
@@ -92,7 +100,7 @@ export default function RootLayout({
                 name: "Deconstruction Lab",
                 url: "https://decon.mlsystemsri.com",
                 description:
-                  "AI-powered R&D platform for reverse engineering residential building assemblies. 80-90% material recovery rate, 51% resale value. Material separation science by ML Systems.",
+                  "AI agent-powered R&D platform for reverse engineering residential building assemblies. REAPER (Deconstruction Recovery Agent) achieves 80-90% material recovery, 51% resale value. Part of ML Systems' 7-agent AI orchestration platform.",
                 publisher: { "@id": "https://mlsystemsri.com/#organization" },
               },
               {
@@ -115,6 +123,11 @@ export default function RootLayout({
                   "Shingle Recycling",
                   "Adhesive Separation",
                   "Material Recovery",
+                  "AI Agent Orchestration",
+                  "REAPER Deconstruction Recovery Agent",
+                  "Autonomous Material Recovery AI",
+                  "Agent-Orchestrated Deconstruction",
+                  "Multi-Agent Construction AI",
                 ],
               },
               {
